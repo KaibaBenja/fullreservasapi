@@ -32,9 +32,3 @@ export const userSchema = z.object({
     .max(255, { message: "El campo 'email' no puede tener más de 255 caracteres." })
 }).strict();
 
-
-export const updateUserSchema = userSchema.partial({
-  full_name: true,
-  email: true,
-  password: true,
-}).strict();

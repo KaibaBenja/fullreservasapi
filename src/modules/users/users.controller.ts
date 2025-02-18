@@ -87,8 +87,7 @@ const editById = async (req: Request, res: Response): Promise<void> => {
   const { full_name, password, email } = req.body;
 
   try {
-
-    if (!isValidUUID(id)) {
+    if (!id || !isValidUUID(id)) {
       res.status(400).json({ message: `ID inválido, no tiene formato UUID` });
       return
     }
@@ -100,12 +99,14 @@ const editById = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    const emailExists = await usersServices.getByEmail(email);
+    if (email) {
+      const emailExists = await usersServices.getByEmail(email);
 
-    if (emailExists) {
-      res.status(409).json({ message: `El usuario con el email: ${email} ya existe.` });
-      return
-    }    
+      if (emailExists) {
+        res.status(409).json({ message: `El usuario con el email: ${email} ya existe.` });
+        return
+      }
+    }
 
     const result = await usersServices.editById({ id, full_name, password, email });
 
@@ -114,7 +115,7 @@ const editById = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    if (result.hasNoFieldsToUpdate ) {
+    if (result.hasNoFieldsToUpdate) {
       res.status(400).json({ message: `No hay datos para actualizar.` });
       return
     }
@@ -127,7 +128,7 @@ const editById = async (req: Request, res: Response): Promise<void> => {
     }
 
     res.status(200).json({
-      message: "Usuario encontrado exitosamente",
+      message: "Usuario editado exitosamente",
       user: userUpdated,
     });
   } catch (error) {
@@ -140,7 +141,7 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
 
   try {
-    if (!isValidUUID(id)) {
+    if (!id || !isValidUUID(id)) {
       res.status(400).json({ message: `ID inválido, no tiene formato UUID` });
       return
     }
@@ -168,7 +169,6 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
     return
   }
 };
-
 
 
 const usersController = {

@@ -1,13 +1,12 @@
-import { MYSQL_PASSWORD } from "../config/dotenv.config";
+import { MYSQL } from "../config/dotenv.config";
 import mysql from 'mysql2';
 
-
 const connection = mysql.createPool({
-  host: 'localhost',
-  port: 3306,
-  user: 'root',
-  password: MYSQL_PASSWORD,
-  database: 'fullreservas',
+  host: MYSQL.HOST,
+  port: MYSQL.PORT,
+  user: MYSQL.USER,
+  password: MYSQL.PASSWORD,
+  database: MYSQL.DATABASE,
   charset: 'utf8mb4'
 }).promise();
 
