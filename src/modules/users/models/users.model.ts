@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../../config/sequalize.config'; // Ajustá la ruta según tu estructura de proyecto
+import { sequelize } from '../../../config/sequalize.config'; // Ajustá la ruta según tu estructura de proyecto
 
 interface UserAttributes {
   id: Buffer;

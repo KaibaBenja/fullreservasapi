@@ -1,6 +1,9 @@
-import { IUser } from "./users.types";
+import { IUser } from "./types/users.types";
+import { IuserRoles } from "./types/userroles.types";
 import bcrypt from 'bcrypt';
-import User from "./users.model";
+import User from "./models/users.model";
+import Role from "./models/roles.model";
+import UserRole from "./models/userroles.model";
 import { sequelize } from "../../config/sequalize.config";
 
 const newUser = async ({ full_name, password, email }: IUser) => {
@@ -145,13 +148,86 @@ const deleteById = async (id: string) => {
   }
 };
 
+const getRoleById = async (id: string) => {
+  try {
+    const role = await Role.findOne({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+        'name',
+        'description',
+      ],
+      where: sequelize.literal(`id = UUID_TO_BIN(?)`),
+      replacements: [id],
+    });
+
+    if (!role) {
+      return null;
+    }
+
+    return role.toJSON();
+  } catch (error) {
+    throw new Error("Error al obtener el rol");
+  }
+};
+
+const checkUserRoleExistence = async ({ user_id, role_id }: IuserRoles) => {
+  try {
+    const role = await UserRole.findOne({
+      attributes: [
+        [sequelize.literal("BIN_TO_UUID(id)"), "id"],
+        "user_id",
+        "role_id",
+      ],
+      where: {
+        user_id: sequelize.fn("UUID_TO_BIN", user_id),
+        role_id: sequelize.fn("UUID_TO_BIN", role_id),
+      },
+    });
+
+    if (!role) {
+      return null;
+    }
+
+    return role.toJSON();
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error al obtener el rol del usuario.");
+  }
+};
+
+
+const assignRole = async ({ user_id, role_id }: IuserRoles) => {
+  try {
+    const userIdBuffer = Buffer.from(user_id.replace(/-/g, ""), "hex");
+    const roleIdBuffer = Buffer.from(role_id.replace(/-/g, ""), "hex");
+
+    const newUserRole = await UserRole.create({
+      user_id: userIdBuffer,
+      role_id: roleIdBuffer
+    });
+
+    if (!newUserRole) {
+      return null;
+    }
+
+    return newUserRole.toJSON();
+  } catch (error) {
+    throw new Error("Error al asignar el rol del usuario.");
+  }
+};
+
+
+
 const usersService = {
   newUser,
   getByEmail,
   getAll,
   getById,
   editById,
-  deleteById
+  deleteById,
+  getRoleById,
+  checkUserRoleExistence,
+  assignRole
 };
 
 export default usersService;

@@ -14,3 +14,5 @@ usersRoutes.get("/:id", usersController.getById);
 usersRoutes.patch("/:id", validateSchemaPartial(userSchema), usersController.editById);
 
 usersRoutes.delete("/:id", usersController.deleteById);
+
+usersRoutes.post("/:id/assignRole/:roleId", usersController.assignRole);
