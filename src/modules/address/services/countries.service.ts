@@ -1,26 +1,22 @@
 import { ICountries } from "../types/countries.types";
 import Country from "../models/countries.model";
 import { formatName } from "../utils/formatName";
-
 import { sequelize } from "../../../config/sequalize.config";
 
 const add = async ({ name }: ICountries) => {
-  const formatedName = formatName(name);
-
   try {
     const newCountry = await Country.create({
-      name: formatedName,
+      name: formatName(name),
     });
 
     if (!newCountry) {
       return null;
-    }
+    };
 
     return { name: newCountry.name };
   } catch (error) {
-    console.log(error);
     throw new Error("Error al agregar el nuevo país");
-  }
+  };
 };
 
 const getAll = async () => {
@@ -34,12 +30,12 @@ const getAll = async () => {
 
     if (!countries || countries.length === 0) {
       return null;
-    }
+    };
 
     return countries.map(country => country.toJSON());
   } catch (error) {
     throw new Error("Error al obtener los países");
-  }
+  };
 };
 
 const getById = async (id: string) => {
@@ -55,12 +51,12 @@ const getById = async (id: string) => {
 
     if (!country) {
       return null;
-    }
+    };
 
     return country.toJSON();
   } catch (error) {
     throw new Error('Error al obtener el país por id');
-  }
+  };
 };
 
 const getByName = async (name: string) => {
@@ -87,7 +83,7 @@ const getByName = async (name: string) => {
 const editById = async ({ id, name }: ICountries) => {
   try {
     const [updatedRowsCount] = await Country.update(
-      { name: name }, 
+      { name: formatName(name) }, 
       {
         where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
       }
@@ -95,13 +91,12 @@ const editById = async ({ id, name }: ICountries) => {
 
     if (updatedRowsCount === 0) {
       return null;
-    }
+    };
 
     return { success: true };
   } catch (error) {
-    console.log(error);
     throw new Error('Error al editar el país');
-  }
+  };
 };
 
 const deleteById = async (id: string) => {
@@ -112,16 +107,16 @@ const deleteById = async (id: string) => {
 
     if (!result) {
       return null;
-    }
+    };
 
     return { success: true };
   } catch (error) {
     throw new Error("Error al eliminar el país");
-  }
+  };
 };
 
 
-const countriesServices = {
+export default {
   add,
   getAll,
   getById,
@@ -129,5 +124,3 @@ const countriesServices = {
   editById,
   deleteById
 };
-
-export default countriesServices;

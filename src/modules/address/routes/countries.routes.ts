@@ -1,14 +1,14 @@
 import express from "express";
-import addressController from "../controllers/address.controller";
+import countriesController from "../controllers/countries.controller";
 import { validateSchema } from "../../../middlewares/validateSchema";
 import { countrySchema } from "../schemas/countries.schema";
 
 export const countriesRoutes = express.Router();
 
-countriesRoutes.post("/", validateSchema(countrySchema), addressController.countries.create);
-countriesRoutes.get("/", addressController.countries.getAll);
-countriesRoutes.get("/:id", addressController.countries.getById);
-countriesRoutes.patch("/:id", validateSchema(countrySchema), addressController.countries.editById);
-countriesRoutes.delete("/:id", addressController.countries.deleteById);
+countriesRoutes.post("/", validateSchema(countrySchema), countriesController.create);
+countriesRoutes.get("/", countriesController.getAll);
+countriesRoutes.get("/:id", countriesController.getById);
+countriesRoutes.patch("/:id", validateSchema(countrySchema), countriesController.editById);
+countriesRoutes.delete("/:id", countriesController.deleteById);
 
 

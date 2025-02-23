@@ -1,28 +1,24 @@
 import { IProvinces } from "../types/provinces.types";
 import Province from "../models/provinces.model";
 import { formatName } from "../utils/formatName";
-
+import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { sequelize } from "../../../config/sequalize.config";
 
 const add = async ({ name, country_id }: IProvinces) => {
-  const formatedName = formatName(name);
-  const countryIdBuffer = Buffer.from(country_id.replace(/-/g, ""), "hex");
-
   try {
     const newProvince = await Province.create({
-      name: formatedName,
-      country_id: countryIdBuffer
+      name: formatName(name),
+      country_id: uuidToBuffer(country_id)
     });
 
     if (!newProvince) {
       return null;
-    }
+    };
 
     return { name: newProvince.name };
   } catch (error) {
-    console.log(error);
     throw new Error("Error al agregar la nueva provincia");
-  }
+  };
 };
 
 const getAll = async () => {
@@ -37,12 +33,12 @@ const getAll = async () => {
 
     if (!provinces || provinces.length === 0) {
       return null;
-    }
+    };
 
     return provinces.map(province => province.toJSON());
   } catch (error) {
     throw new Error("Error al obtener las provincias");
-  }
+  };
 };
 
 const getById = async (id: string) => {
@@ -59,12 +55,12 @@ const getById = async (id: string) => {
 
     if (!province) {
       return null;
-    }
+    };
 
     return province.toJSON();
   } catch (error) {
     throw new Error('Error al obtener la provincia por id');
-  }
+  };
 };
 
 const getByName = async (name: string) => {
@@ -84,26 +80,20 @@ const getByName = async (name: string) => {
 
     if (!province) {
       return null;
-    }
+    };
 
     return province.toJSON();
   } catch (error) {
     throw new Error('Error al obtener la provincia por el nombre');
-  }
+  };
 };
 
 const editById = async ({ id, name, country_id }: IProvinces) => {
   try {
     const updateData: any = {};
 
-    if (name) {
-      const formatedName = formatName(name);
-      updateData.name = formatedName;
-    }
-
-    if (country_id) {
-      updateData.country_id = sequelize.literal(`UUID_TO_BIN(${sequelize.escape(country_id)})`);
-    }
+    if (name) updateData.name = formatName(name);
+    if (country_id) updateData.country_id = sequelize.literal(`UUID_TO_BIN(${sequelize.escape(country_id)})`);
 
     const [updatedRowsCount] = await Province.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
@@ -111,13 +101,12 @@ const editById = async ({ id, name, country_id }: IProvinces) => {
 
     if (updatedRowsCount === 0) {
       return null;
-    }
+    };
 
     return { success: true };
   } catch (error) {
-    console.log(error);
     throw new Error('Error al editar la provincia');
-  }
+  };
 };
 
 const deleteById = async (id: string) => {
@@ -128,16 +117,16 @@ const deleteById = async (id: string) => {
 
     if (!result) {
       return null;
-    }
+    };
 
     return { success: true };
   } catch (error) {
     throw new Error("Error al eliminar la provincia");
-  }
+  };
 };
 
 
-const provincesServices = {
+export default {
   add,
   getAll,
   getById,
@@ -145,5 +134,3 @@ const provincesServices = {
   editById,
   deleteById
 };
-
-export default provincesServices;
