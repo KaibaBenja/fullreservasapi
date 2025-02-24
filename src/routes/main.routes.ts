@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { usersRoutes } from "../modules/users/users.routes";
-import { addressRoutes } from "../modules/address/routes";
+import { usersRoutes } from "@/modules/users/users.routes";
+import { addressRoutes } from "@/modules/address/routes";
 
 export const mainRoutes = Router();
 
