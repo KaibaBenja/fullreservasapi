@@ -1,5 +1,5 @@
 import { ISubcategories } from "../types/subcategories.types";
-import Subcategories from "../models/countries.model";
+import Subcategories from "../models/subcategories.model";
 import { formatName } from "../../..//utils/formatName";
 import { sequelize } from "../../../config/sequalize.config";
 

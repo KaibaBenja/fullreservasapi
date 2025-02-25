@@ -27,7 +27,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       message: "Subcategoria agregada exitosamente",
-      address: subcategoryExists,
+      subcategory: subcategoryExists,
     });
   } catch (error) {
     res.status(500).json({ message: "Error interno del servidor." });
@@ -53,7 +53,7 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
 
       res.status(201).json({
         message: `Subcategorias: ${main_category} obtenidas exitosamente`,
-        addresses: result,
+        subcategories: result,
       });
     } else {
       const result = await shopsServices.subcategories.getAll();
@@ -64,7 +64,7 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
 
       res.status(201).json({
         message: "Subcategorias obtenidas exitosamente",
-        addresses: result,
+        subcategories: result,
       });
     }
   } catch (error) {
@@ -90,7 +90,7 @@ const getById = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({
       message: "Subcategoria encontrada exitosamente",
-      address: subcategoryFound,
+      subcategory: subcategoryFound,
     });
   } catch (error) {
     res.status(500).json({ message: "Error interno del servidor." });
@@ -136,7 +136,7 @@ const editById = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json({
       message: "Subcategoria editada exitosamente",
-      country: addressUpdated,
+      subcategory: addressUpdated,
     });
   } catch (error) {
     res.status(500).json({ message: "Error interno del servidor." });
@@ -167,7 +167,7 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json({
       message: "Subcategoria eliminada exitosamente",
-      city: subcategoryFound,
+      subcategory: subcategoryFound,
     });
   } catch (error) {
     res.status(500).json({ message: "Error interno del servidor." });
