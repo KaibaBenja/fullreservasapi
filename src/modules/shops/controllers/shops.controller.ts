@@ -206,7 +206,6 @@ const getById = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-
 const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
