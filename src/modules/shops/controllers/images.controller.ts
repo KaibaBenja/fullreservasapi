@@ -1,31 +1,21 @@
 import { Request, Response } from "express";
 import * as shopsServices from "../services";
 import { isValidUUID } from "../../../utils/uuidValidator";
-
-const upload = async (req: Request, res: Response): Promise<void> => {
-  if (!req.file) {
-    res.status(400).json({ error: "No se pudo subir la imagen." });
-    return;
-  }
-
-  const file = req.file as Express.MulterS3.File;
-
-  res.status(201).json({
-    message: "Imagen subida exitosamente",
-    imageUrl: file.location,
-  });
-};
+import { uploadFileToS3 } from "../../../middlewares/upload";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { shop_id } = req.body;
-    const { image_url } = (req.file as any).location;
 
-    const imageFound = await shopsServices.images.getByImageUrl(image_url);
-    if (imageFound) {
-      res.status(409).json({ message: `La imagen ya existe.` });
+    if (!req.file) {
+      res.status(400).json({ error: "No se pudo subir la imagen." });
       return;
-    }
+    };
+    const fileBuffer = req.file.buffer; 
+    const fileName = `uploads/${Date.now()}-${req.file.originalname}`; // Genera un nombre único
+    const mimeType = req.file.mimetype;
+
+    const { fileUrl, signedUrl } = await uploadFileToS3(fileBuffer, fileName, mimeType);
 
     const shopFound = await shopsServices.shops.getById(shop_id);
     if (!shopFound) {
@@ -33,24 +23,24 @@ const create = async (req: Request, res: Response): Promise<void> => {
         .status(404)
         .json({ message: `El negocio con el id: ${shop_id} no existe.` });
       return;
-    }
+    };
 
-    const result = await shopsServices.images.add(req.body);
+    const result = await shopsServices.images.add({ shop_id, image_url: signedUrl });
     if (!result) {
       res.status(400).json({ message: `Error al agregar la subcategoria.` });
       return;
-    }
+    };
 
     const imageExists = await shopsServices.images.lastCreatedEntry({
       shop_id,
-      image_url,
+      image_url: signedUrl,
     });
     if (!imageExists) {
       res
         .status(404)
         .json({ message: `Error al encontrar la imagen agregada.` });
       return;
-    }
+    };
 
     res.status(201).json({
       message: "Imagen agregada exitosamente",
@@ -232,7 +222,6 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
 };
 
 export default {
-  upload,
   create,
   getAll,
   getById,

@@ -5,13 +5,13 @@ import {
   validateSchemaPartial,
 } from "../../../middlewares/validateSchema";
 import { imagesSchema } from "../schemas/images.schema";
-import upload from "@/middlewares/upload";
+import upload from "../../../config/multer.config";
 
 export const imagesRoutes = express.Router();
 
 imagesRoutes.post(
   "/",
-  upload("images").single("image"),
+  upload.single("image_url"),
   validateSchema(imagesSchema),
   imagesController.create
 );
