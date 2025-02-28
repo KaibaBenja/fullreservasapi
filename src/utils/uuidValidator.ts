@@ -10,7 +10,7 @@ export const isValidUUID = (id: string): boolean => {
 
 export const validateUUID = (id: string, res: Response): boolean => {
   if (!id || !isValidUUID(id)) {
-    handleErrorResponse(res, 400, "ID inválido, no tiene formato UUID");
+    handleErrorResponse(res, 400, `El ID: ${id} es inválido, no tiene formato UUID`);
     return false;
   }
   return true;

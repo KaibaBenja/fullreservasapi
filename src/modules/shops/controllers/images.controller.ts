@@ -90,11 +90,11 @@ const editById = async (req: Request, res: Response): Promise<void> => {
     const { shop_id } = req.body;
     const file = req.file;
 
+    if (!validateUUID(id, res)) return;
+
     if ((!req.body || Object.keys(req.body).length === 0) && !file) {
       return handleErrorResponse(res, 400, "Debe enviar al menos un campo para actualizar.");
     };
-
-    if (!validateUUID(id, res)) return;
 
     const imageFound = await shopsServices.images.getById(id);
     if (!imageFound) return handleErrorResponse(res, 404, `La imagen con el id: ${id} no existe.`);
@@ -107,14 +107,10 @@ const editById = async (req: Request, res: Response): Promise<void> => {
     let imageUrl = imageFound.image_url;
     if (file) {
       const imageDeleted = await deleteFileFromS3(imageFound.image_url);
-      if (!imageDeleted) {
-        return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
-      }
+      if (!imageDeleted) return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
 
       const fileUploaded = await uploadFileToS3(file);
-      if (!fileUploaded) {
-        return handleErrorResponse(res, 500, `Error al subir la nueva imagen: ${file.originalname}.`);
-      }
+      if (!fileUploaded) return handleErrorResponse(res, 500, `Error al subir la nueva imagen: ${file.originalname}.`);
 
       imageUrl = fileUploaded.signedUrl;
     };
@@ -123,16 +119,13 @@ const editById = async (req: Request, res: Response): Promise<void> => {
     if (!result) return handleErrorResponse(res, 400, "No se pudo actualizar la imagen.");
 
     const imageUpdated = await shopsServices.images.getById(id);
-    if (!imageUpdated) {
-      return handleErrorResponse(res, 404, "Error al encontrar la imagen actualizada.");
-    };
+    if (!imageUpdated) return handleErrorResponse(res, 404, "Error al encontrar la imagen actualizada.");
 
     res.status(200).json({ message: "Imagen editada exitosamente", image: imageUpdated });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };
-
 
 const deleteById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -142,11 +135,9 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
     const imageFound = await shopsServices.images.getById(id);
     if (!imageFound) return handleErrorResponse(res, 404, `La imagen con el id: ${id} no existe.`);
 
-    try {
-      await deleteFileFromS3(imageFound.image_url);
-    } catch (error) {
+    if (!(await deleteFileFromS3(imageFound.image_url))) {
       return handleErrorResponse(res, 500, "Error al eliminar la imagen.");
-    }
+    };
 
     const result = await shopsServices.images.deleteById(id);
     if (!result) return handleErrorResponse(res, 404, "Error al eliminar la imagen.");

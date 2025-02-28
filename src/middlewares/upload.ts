@@ -27,7 +27,7 @@ export const upload = async (fileBuffer: Buffer, fileName: string, mimeType: str
     const signedUrl = await getSignedUrl(
       s3Client,
       new GetObjectCommand({ Bucket: bucketName, Key: fileName }),
-      { expiresIn: 3600 } // Expira en 1 hora
+      { expiresIn: 315360000 } // 10 años
     );
 
     return {
