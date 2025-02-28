@@ -1,53 +1,50 @@
 import { Request, Response } from "express";
 import * as shopsServices from "../services";
-import {
-  handleErrorResponse,
-  validateUUID,
-} from "../../../utils/uuidValidator";
-import {
-  deleteFileFromS3,
-  uploadFileMiddleware,
-} from "../../../middlewares/upload";
+import { validateUUID } from "../../../utils/uuidValidator";
+import { uploadFileToS3, deleteFileFromS3 } from "../../../middlewares/upload";
+import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { shop_id } = req.body;
-    if (!req.file)
-      return handleErrorResponse(res, 400, "No se pudo subir la imagen.");
-    const { signedUrl } = await uploadFileMiddleware(req);
-    const shopFound = await shopsServices.shops.getById(shop_id);
-    if (!shopFound)
-      return handleErrorResponse(
-        res,
-        404,
-        `El negocio con el id: ${shop_id} no existe.`
-      );
+    const files = req.files as Express.MulterS3.File[];
 
-    const result = await shopsServices.images.add({
-      shop_id,
-      image_url: signedUrl,
-    });
-    if (!result)
-      return handleErrorResponse(res, 400, "Error al agregar la imagen.");
+    if (!files) return handleErrorResponse(res, 400, "Debe subir un archivo.");
 
-    const imageExists = await shopsServices.images.lastCreatedEntry({
-      shop_id,
-      image_url: signedUrl,
-    });
-    if (!imageExists)
-      return handleErrorResponse(
-        res,
-        404,
-        "Error al encontrar la imagen agregada."
-      );
+    const filesUploaded = await Promise.all(
+      files.map(async (file: Express.Multer.File) => {
+        const fileUploaded = await uploadFileToS3(file);
 
-    res
-      .status(201)
-      .json({ message: "Imagen agregada exitosamente", image: imageExists });
+        if (!fileUploaded) throw new Error(`Error al subir la imagen: ${file.originalname}.`);
+
+        await shopsServices.images.add({
+          shop_id,
+          image_url: fileUploaded.signedUrl,
+        });
+
+        return fileUploaded;
+      })
+    );
+
+    if (!filesUploaded.length) return handleErrorResponse(res, 400, "Error al subir TODOS los archivos");
+
+    const imagesExists = await Promise.all(
+      filesUploaded.map(async (image) => {
+        const imageExists = await shopsServices.images.lastCreatedEntry({
+          shop_id,
+          image_url: image.signedUrl,
+        });
+
+        if (!imageExists) throw new Error("Error al encontrar la imagen agregada.");
+
+        return imageExists;
+      })
+    );
+
+    res.status(201).json({ message: "Imagen agregada exitosamente", images: imagesExists });
   } catch (error) {
-    console.error(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
-  }
+  };
 };
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
@@ -57,27 +54,19 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
 
     if (shop_id && typeof shop_id === "string") {
       if (!validateUUID(shop_id, res)) return;
+
       const shopFound = await shopsServices.shops.getById(shop_id);
-      if (!shopFound)
-        return handleErrorResponse(
-          res,
-          404,
-          `El negocio con el id: ${shop_id} no existe.`
-        );
+      if (!shopFound) return handleErrorResponse(res, 404, `El negocio con el id: ${shop_id} no existe.`);
 
       result = await shopsServices.images.getByShopId(shop_id);
-    } else {
-      result = await shopsServices.images.getAll();
-    }
+    } else { result = await shopsServices.images.getAll(); };
 
-    if (!result)
-      return handleErrorResponse(res, 204, "No se encontraron imágenes.");
-    res
-      .status(200)
-      .json({ message: "Imágenes obtenidas exitosamente", images: result });
+    if (!result) return handleErrorResponse(res, 204, "No se encontraron imágenes.");
+
+    res.status(200).json({ message: "Imágenes obtenidas exitosamente", images: result });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
-  }
+  };
 };
 
 const getById = async (req: Request, res: Response): Promise<void> => {
@@ -86,75 +75,64 @@ const getById = async (req: Request, res: Response): Promise<void> => {
     if (!validateUUID(id, res)) return;
 
     const imageFound = await shopsServices.images.getById(id);
-    if (!imageFound)
-      return handleErrorResponse(
-        res,
-        404,
-        `La imagen con el id: ${id} no existe.`
-      );
+    if (!imageFound) return handleErrorResponse(res, 404, `La imagen con el id: ${id} no existe.`);
 
-    res
-      .status(200)
-      .json({ message: "Imagen encontrada exitosamente", image: imageFound });
+
+    res.status(200).json({ message: "Imagen encontrada exitosamente", image: imageFound });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
-  }
+  };
 };
 
 const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { shop_id, image_url } = req.body;
+    const { shop_id } = req.body;
+    const file = req.file;
 
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return handleErrorResponse(
-        res,
-        400,
-        "Debe enviar al menos un campo para actualizar."
-      );
-    }
+    if ((!req.body || Object.keys(req.body).length === 0) && !file) {
+      return handleErrorResponse(res, 400, "Debe enviar al menos un campo para actualizar.");
+    };
 
     if (!validateUUID(id, res)) return;
 
     const imageFound = await shopsServices.images.getById(id);
-    if (!imageFound)
-      return handleErrorResponse(
-        res,
-        404,
-        `La imagen con el id: ${id} no existe.`
-      );
+    if (!imageFound) return handleErrorResponse(res, 404, `La imagen con el id: ${id} no existe.`);
+
 
     if (shop_id && !(await shopsServices.shops.getById(shop_id))) {
-      return handleErrorResponse(
-        res,
-        404,
-        `El negocio con el id: ${shop_id} no existe.`
-      );
-    }
+      return handleErrorResponse(res, 404, `El negocio con el id: ${shop_id} no existe.`);
+    };
 
-    if (image_url && (await shopsServices.images.getByImageUrl(image_url))) {
-      return handleErrorResponse(res, 409, "La imagen ya existe.");
-    }
+    let imageUrl = imageFound.image_url;
+    if (file) {
+      const imageDeleted = await deleteFileFromS3(imageFound.image_url);
+      if (!imageDeleted) {
+        return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
+      }
 
-    const result = await shopsServices.images.editById({ id, ...req.body });
-    if (!result)
-      return handleErrorResponse(res, 400, "No se pudo actualizar la imagen.");
+      const fileUploaded = await uploadFileToS3(file);
+      if (!fileUploaded) {
+        return handleErrorResponse(res, 500, `Error al subir la nueva imagen: ${file.originalname}.`);
+      }
+
+      imageUrl = fileUploaded.signedUrl;
+    };
+
+    const result = await shopsServices.images.editById({ id, shop_id, image_url: imageUrl });
+    if (!result) return handleErrorResponse(res, 400, "No se pudo actualizar la imagen.");
 
     const imageUpdated = await shopsServices.images.getById(id);
-    if (!imageUpdated)
-      return handleErrorResponse(
-        res,
-        404,
-        "Error al encontrar la imagen actualizada."
-      );
+    if (!imageUpdated) {
+      return handleErrorResponse(res, 404, "Error al encontrar la imagen actualizada.");
+    };
 
-    res
-      .status(200)
-      .json({ message: "Imagen editada exitosamente", image: imageUpdated });
+    res.status(200).json({ message: "Imagen editada exitosamente", image: imageUpdated });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
-  }
+  };
 };
+
 
 const deleteById = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -162,12 +140,7 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
     if (!validateUUID(id, res)) return;
 
     const imageFound = await shopsServices.images.getById(id);
-    if (!imageFound)
-      return handleErrorResponse(
-        res,
-        404,
-        `La imagen con el id: ${id} no existe.`
-      );
+    if (!imageFound) return handleErrorResponse(res, 404, `La imagen con el id: ${id} no existe.`);
 
     try {
       await deleteFileFromS3(imageFound.image_url);
@@ -176,12 +149,9 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
     }
 
     const result = await shopsServices.images.deleteById(id);
-    if (!result)
-      return handleErrorResponse(res, 404, "Error al eliminar la imagen.");
+    if (!result) return handleErrorResponse(res, 404, "Error al eliminar la imagen.");
 
-    res
-      .status(200)
-      .json({ message: "Imagen eliminada exitosamente", image: imageFound });
+    res.status(200).json({ message: "Imagen eliminada exitosamente", image: imageFound });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }

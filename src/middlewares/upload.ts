@@ -1,12 +1,6 @@
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3 } from "../config/dotenv.config";
-import { Request } from "express";
 
 export const s3Client = new S3Client({
   region: S3.REGION,
@@ -16,14 +10,7 @@ export const s3Client = new S3Client({
   },
 });
 
-/**
- * Sube un archivo a S3 y genera un signed URL de lectura.
- */
-export const uploadFileToS3 = async (
-  fileBuffer: Buffer,
-  fileName: string,
-  mimeType: string
-) => {
+export const upload = async (fileBuffer: Buffer, fileName: string, mimeType: string) => {
   const bucketName = S3.BUCKET_NAME;
 
   const params = {
@@ -34,11 +21,9 @@ export const uploadFileToS3 = async (
   };
 
   try {
-    // Subir el archivo a S3
     const uploadCommand = new PutObjectCommand(params);
     await s3Client.send(uploadCommand);
 
-    // Generar el signed URL para lectura
     const signedUrl = await getSignedUrl(
       s3Client,
       new GetObjectCommand({ Bucket: bucketName, Key: fileName }),
@@ -50,14 +35,10 @@ export const uploadFileToS3 = async (
       signedUrl,
     };
   } catch (error) {
-    console.error("Error uploading file to S3:", error);
     throw error;
-  }
+  };
 };
 
-/**
- * Elimina un archivo de S3.
- */
 export const deleteFileFromS3 = async (fileName: string) => {
   const params = {
     Bucket: S3.BUCKET_NAME,
@@ -69,19 +50,18 @@ export const deleteFileFromS3 = async (fileName: string) => {
     await s3Client.send(command);
     return `File ${fileName} deleted successfully from S3`;
   } catch (error) {
-    console.error("Error deleting file from S3:", error);
     throw error;
-  }
+  };
 };
 
-export const uploadFileMiddleware = async (req: Request) => {
-  if (!req.file) {
+export const uploadFileToS3 = async (file: Express.Multer.File) => {
+  if (!file) {
     throw new Error("No se encontró un archivo para subir.");
-  }
+  };
 
-  const fileBuffer = req.file.buffer;
-  const fileName = `uploads/${Date.now()}-${req.file.originalname}`;
-  const mimeType = req.file.mimetype;
+  const fileBuffer = file.buffer;
+  const fileName = `uploads/${Date.now()}-${file.originalname}`;
+  const mimeType = file.mimetype;
 
-  return await uploadFileToS3(fileBuffer, fileName, mimeType);
+  return await upload(fileBuffer, fileName, mimeType);
 };

@@ -1,14 +1,8 @@
 import { z } from "zod";
-import { Response } from "express";
 export const uuidSchema = z.string().uuid();
+import { handleErrorResponse } from "./handleErrorResponse";
+import { Response } from "express";
 
-export const handleErrorResponse = (
-  res: Response,
-  status: number,
-  message: string
-) => {
-  res.status(status).json({ message });
-};
 
 export const isValidUUID = (id: string): boolean => {
   return uuidSchema.safeParse(id).success;

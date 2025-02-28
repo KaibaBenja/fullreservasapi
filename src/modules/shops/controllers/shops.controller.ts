@@ -102,7 +102,6 @@ const getAllSecure = async (req: Request, res: Response): Promise<void> => {
       });
     }
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "Error interno del servidor." });
     return;
   };
@@ -149,7 +148,6 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
     responseData.shops = result.map(({ legal_info, bank_info, ...shop }: IShops) => shop);
     res.status(200).json(responseData);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "Error interno del servidor." });
   }
 };
@@ -201,7 +199,6 @@ const getById = async (req: Request, res: Response): Promise<void> => {
       shop, 
     });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Error interno del servidor." });
   }
 };

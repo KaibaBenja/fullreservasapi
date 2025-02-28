@@ -42,8 +42,8 @@ const getAll = async () => {
         'shift_type',
         'average_stay_time',
         'capacity',
-        'legal_info', // QUITAR ESTO DESPUES
-        'bank_info', // QUITAR ESTO DESPUES
+        'legal_info', 
+        'bank_info', 
         'created_at',
         'updated_at'
       ],
