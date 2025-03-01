@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../../../config/sequalize.config'; // Ajustá la ruta según tu estructura de proyecto
+import { sequelize } from '../../../config/sequalize.config';
 
 interface UserAttributes {
   id: Buffer;
@@ -44,12 +44,12 @@ User.init(
     },
     createdAt: {
       type: DataTypes.DATE,
-      field: 'created_at', 
+      field: 'created_at',
       defaultValue: DataTypes.NOW,
     },
     updatedAt: {
       type: DataTypes.DATE,
-      field: 'updated_at', 
+      field: 'updated_at',
       defaultValue: DataTypes.NOW,
     },
   },
@@ -57,8 +57,8 @@ User.init(
     sequelize,
     tableName: 'users',
     timestamps: true,
-    underscored: true, 
-  }
+    underscored: true,
+  },
 );
 
 export default User;
