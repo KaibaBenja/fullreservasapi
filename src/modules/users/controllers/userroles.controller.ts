@@ -38,7 +38,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_id, role_id } = req.params;
+    const { user_id, role_id } = req.query;
     let result;
     let message;
 
@@ -131,7 +131,6 @@ const editById = async (req: Request, res: Response): Promise<void> => {
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 };
-
 
 const deleteById = async (req: Request, res: Response): Promise<void> => {
   try {

@@ -46,14 +46,12 @@ const getAll = async () => {
       }
     );
 
-
     if (!users || users.length === 0) {
       return null;
     };
 
     return users;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al obtener los usuarios");
   };
 };
@@ -75,10 +73,9 @@ const getById = async (id: string) => {
        GROUP BY u.id`,
       {
         type: QueryTypes.SELECT,
-        replacements: { userId: id }, 
+        replacements: { userId: id },
       }
     );
-    
 
     if (!user) {
       return null;
@@ -86,7 +83,6 @@ const getById = async (id: string) => {
 
     return user;
   } catch (error) {
-    console.log(error);
     throw new Error('Error al obtener el usuario por id');
   };
 };
@@ -115,6 +111,41 @@ const getByEmail = async (email: string) => {
     return user.toJSON();
   } catch (error) {
     throw new Error('Error al obtener el usuario por email');
+  };
+};
+
+const getByRole = async (roleId: string) => {
+  try {
+    const users = await sequelize.query(
+      `SELECT 
+        BIN_TO_UUID(u.id) AS id,
+        u.full_name,
+        u.email,
+        u.created_at,
+        u.updated_at,
+        JSON_ARRAYAGG(r.name) AS roles
+      FROM users u
+      LEFT JOIN userroles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
+      WHERE u.id IN (
+        SELECT ur2.user_id 
+        FROM userroles ur2 
+        WHERE ur2.role_id = UUID_TO_BIN(:roleId)
+      ) GROUP BY u.id`,
+      {
+        type: QueryTypes.SELECT,
+        replacements: { roleId: roleId },
+      }
+    );
+
+    if (!users || users.length === 0) {
+      return null;
+    };
+
+    return users;
+  } catch (error) {
+    console.log(error);
+    throw new Error('Error al obtener los usuarios por el id de rol');
   };
 };
 
@@ -161,4 +192,4 @@ const deleteById = async (id: string) => {
 };
 
 
-export default { add, getAll, getById, getByEmail, editById, deleteById };
+export default { add, getAll, getById, getByEmail, getByRole, editById, deleteById };

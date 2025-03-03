@@ -30,13 +30,29 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await usersServices.users.getAll();
-    if (!result) return handleErrorResponse(res, 204, `No se encontraron direcciones de negocios.`);
+    const { role_id } = req.query;
+    let message;
+    let result;
 
-    res.status(201).json({
-      message: "Usuarios obtenidos exitosamente",
-      users: result,
-    });
+    if (role_id && typeof role_id === "string") {
+      if (!validateUUID(role_id, res)) return;
+
+      if (!(await usersServices.roles.getById(role_id))) {
+        return handleErrorResponse(res, 404, `El rol con el id: ${role_id} no existe.`);
+      };
+
+      result = await usersServices.users.getByRole(role_id);
+      message = `Usuarios con el id de rol: ${role_id} obtendidos existosamente.`;
+    } else {
+      result = await usersServices.users.getAll();
+      message = `Roles obtenidos exitosamente.`;
+    }
+
+    if (!result || result.length === 0) {
+      return handleErrorResponse(res, 404, "No se encontraron roles.");
+    };
+
+    res.status(200).json({ message, users: result });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
   };
