@@ -1,67 +1,121 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { S3 } from "../config/dotenv.config";
+import {
+  S3Client,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import { R2 } from "../config/dotenv.config";
+import multer from "multer";
+import multerS3 from "multer-s3";
+import { NextFunction, Request, Response } from "express";
+import streamToString from "../utils/streamToString";
+import { CloudFlareS3 } from "../config/cloudflare.config";
 
-export const s3Client = new S3Client({
-  region: S3.REGION,
-  credentials: {
-    accessKeyId: S3.ACCESS_KEY,
-    secretAccessKey: S3.SECRET_ACCESS_KEY,
-  },
+const upload = multer({
+  storage: multerS3({
+    s3: CloudFlareS3,
+    bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
+    metadata: (req: Request, file, cb) => {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: (req: Request, file, cb) => {
+      cb(null, `uploads/${Date.now()}-${file.originalname}`);
+    },
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB límite
 });
 
-export const upload = async (fileBuffer: Buffer, fileName: string, mimeType: string) => {
-  const bucketName = S3.BUCKET_NAME;
-
-  const params = {
-    Bucket: bucketName,
-    Key: fileName,
-    Body: fileBuffer,
-    ContentType: mimeType,
-  };
-
+const deleteFileMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const uploadCommand = new PutObjectCommand(params);
-    await s3Client.send(uploadCommand);
+    const fileName = req.body.fileName;
 
-    const signedUrl = await getSignedUrl(
-      s3Client,
-      new GetObjectCommand({ Bucket: bucketName, Key: fileName }),
-      { expiresIn: 315360000 } // 10 años
-    );
+    if (!fileName) {
+      return res.status(400).send({ error: "Filename is required" });
+    }
 
-    return {
-      fileUrl: `https://${bucketName}.s3.amazonaws.com/${fileName}`,
-      signedUrl,
+    const params = {
+      Bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
+      Key: `uploads/${fileName}`,
     };
-  } catch (error) {
-    throw error;
-  };
+
+    const response = await CloudFlareS3.send(new DeleteObjectCommand(params));
+
+    if (response.$metadata.httpStatusCode !== 204) {
+      return res.status(400).send({ error: "File could not be deleted" });
+    }
+    res.locals.fileDeleteSuccess = true;
+    next();
+  } catch (error: any) {
+    console.error("Error in deleteFileMiddleware:", error);
+    res.status(500).send({ error: "Internal server error" });
+  }
 };
 
-export const deleteFileFromS3 = async (fileName: string) => {
-  const params = {
-    Bucket: S3.BUCKET_NAME,
-    Key: fileName,
-  };
-
+const readFileMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const command = new DeleteObjectCommand(params);
-    await s3Client.send(command);
-    return `File ${fileName} deleted successfully from S3`;
-  } catch (error) {
-    throw error;
-  };
+    const fileName = req.query.fileName as string;
+
+    if (!fileName) {
+      return res.status(400).send({ error: "Filename is required" });
+    }
+
+    const params = {
+      Bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
+      Key: `uploads/${fileName}`,
+    };
+
+    const data = await CloudFlareS3.send(new GetObjectCommand(params));
+    if (!data.Body) {
+      return res.status(404).send({ error: "File not found" });
+    }
+
+    const content = await streamToString(data.Body as any);
+    try {
+      res.locals.fileContent = JSON.parse(content);
+      next();
+    } catch (error: any) {
+      res.locals.fileContent = content;
+      next();
+    }
+  } catch (error: any) {
+    console.error("Error in readFileMiddleware:", error);
+    res.status(500).send({ error: error.message || "Internal server error" });
+  }
 };
 
-export const uploadFileToS3 = async (file: Express.Multer.File) => {
-  if (!file) {
-    throw new Error("No se encontró un archivo para subir.");
-  };
+export { upload, deleteFileMiddleware, readFileMiddleware };
 
-  const fileBuffer = file.buffer;
-  const fileName = `uploads/${Date.now()}-${file.originalname}`;
-  const mimeType = file.mimetype;
+// export const deleteFileFromS3 = async (fileName: string) => {
+//   const params = {
+//     Bucket: R2.CLOUDFLARE_R2_BUCKET_NAME,
+//     Key: fileName,
+//   };
 
-  return await upload(fileBuffer, fileName, mimeType);
-};
+//   try {
+//     const command = new DeleteObjectCommand(params);
+//     await s3Client.send(command);
+//     return `File ${fileName} deleted successfully from S3`;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
+// export const uploadFileToS3 = async (file: Express.Multer.File) => {
+//   if (!file) {
+//     throw new Error("No se encontró un archivo para subir.");
+//   }
+
+//   const fileBuffer = file.buffer;
+//   const fileName = `uploads/${Date.now()}-${file.originalname}`;
+//   const mimeType = file.mimetype;
+
+//   return await upload(fileBuffer, fileName, mimeType);
+// };
