@@ -1,9 +1,9 @@
 import { IMerchant } from "../types/merchants.types";
-import User from "../models/users.model";
 import Merchant from "../models/merchants.model";
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { QueryTypes } from "sequelize";
+
 
 const add = async ({ user_id, main_category, logo_url }: IMerchant) => {
   try {
@@ -56,7 +56,7 @@ const getAll = async () => {
 
     return users;
   } catch (error) {
-    throw new Error("Error al obtener los usuarios, ");
+    throw new Error("Error al obtener los usuarios. ");
   };
 };
 
@@ -119,43 +119,6 @@ const getByUserId = async (userId: string) => {
   } catch (error) {
     throw new Error('Error al obtener el usuario por id.');
   };
-};
-
-const getByMerchantId = async (merchantId: string) => {
-  try {
-    // Asegúrate de pasar el parámetro correctamente
-    const result = await sequelize.query(
-      `SELECT 
-        BIN_TO_UUID(u.id) AS id,
-        u.full_name,
-        u.email,
-        u.created_at,
-        u.updated_at,
-        JSON_OBJECT(
-          'id', BIN_TO_UUID(m.id),
-          'logo_url', m.logo_url,
-          'main_category', m.main_category,
-          'created_at', m.created_at,
-          'updated_at', m.updated_at
-        ) AS merchant
-      FROM users u
-      LEFT JOIN merchant_settings m ON u.id = m.user_id
-      WHERE m.id = UUID_TO_BIN(:merchantId);`,  // Usamos el parámetro :merchantId directamente aquí
-      {
-        replacements: { merchantId },  // Aseguramos que el parámetro se pase correctamente
-        type: QueryTypes.SELECT,
-      }
-    );
-
-    // Verificar si se ha encontrado el merchant
-    if (!result || result.length === 0) {
-      return null;
-    }
-
-    return result; // Devuelve el resultado directamente
-  } catch (error) {
-    throw new Error('Error al obtener el usuario por el merchantId');
-  }
 };
 
 const getByUserAndCategory = async ({ user_id, main_category }: IMerchant) => {
@@ -228,4 +191,4 @@ const deleteById = async (id: string) => {
 };
 
 
-export default { add, getAll, getById, getByUserId, getByMerchantId, getByUserAndCategory, editById, deleteById };
+export default { add, getAll, getById, getByUserId, getByUserAndCategory, editById, deleteById };
