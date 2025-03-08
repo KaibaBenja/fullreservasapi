@@ -1,32 +1,40 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../../../config/sequalize.config';
 
-class Role extends Model {
+interface RoleAttributes {
+  id: Buffer;
+  name: string;
+  description: string;
+};
+
+type RoleCreationAttributes = Optional<RoleAttributes, 'id' | 'description'>;
+
+class Role extends Model<RoleAttributes, RoleCreationAttributes> implements RoleAttributes {
   public id!: Buffer;
-  public name!: 'CLIENT' | 'MERCHANT' | 'OPERATOR' | 'SUPERADMIN';
-  public description?: string;
-}
+  public name!: string;
+  public description!: string;
+};
 
 Role.init({
   id: {
-    type: DataTypes.BLOB(),
-    allowNull: false,
+    type: DataTypes.BLOB,
     primaryKey: true,
-    defaultValue: Sequelize.literal('(UUID_TO_BIN(UUID()))')
+    defaultValue: sequelize.literal('UUID_TO_BIN(UUID())'),
   },
   name: {
     type: DataTypes.ENUM('CLIENT', 'MERCHANT', 'OPERATOR', 'SUPERADMIN'),
     allowNull: false,
-    unique: true
+    unique: true,
   },
   description: {
     type: DataTypes.STRING(250),
-    allowNull: true
-  }
+    allowNull: true,
+  },
 }, {
   sequelize,
   tableName: 'roles',
-  timestamps: false
+  timestamps: false,
 });
+
 
 export default Role;

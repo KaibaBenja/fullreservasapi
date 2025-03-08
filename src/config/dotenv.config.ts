@@ -15,9 +15,25 @@ export const MYSQL = {
   DATABASE: validateEnv("MYSQL_DATABASE", process.env.MYSQL_DATABASE),
 };
 
-export const S3 = {
-  REGION: validateEnv("AWS_REGION", process.env.AWS_BUCKET_REGION),
-  ACCESS_KEY: validateEnv("AWS_ACCESS_KEY_ID", process.env.AWS_ACCESS_KEY),
-  SECRET_ACCESS_KEY: validateEnv("AWS_SECRET_ACCESS_KEY", process.env.AWS_SECRET_ACCESS_KEY),
-  BUCKET_NAME: validateEnv("AWS_BUCKET_NAME", process.env.AWS_BUCKET_NAME),
+export const R2 = {
+  ENDPOINT: validateEnv(
+    "CLOUDFLARE_ENDPOINT",
+    process.env.CLOUDFLARE_R2_ENDPOINT
+  ),
+  CLOUDFLARE_R2_ACCESS_KEY: validateEnv(
+    "CLOUDFLARE_R2_ACCESS_KEY",
+    process.env.CLOUDFLARE_R2_ACCESS_KEY
+  ),
+  CLOUDFLARE_R2_SECRET_ACCESS_KEY: validateEnv(
+    "CLOUDFLARE_R2_SECRET_ACCESS_KEY",
+    process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY
+  ),
+  CLOUDFLARE_R2_BUCKET_NAME: validateEnv(
+    "CLOUDFLARE_R2_BUCKET_NAME",
+    process.env.CLOUDFLARE_R2_BUCKET_NAME
+  ),
+  CLOUDFLARE_R2_PUBLIC_URL: validateEnv(
+    "CLOUDFLARE_R2_PUBLIC_URL",
+    process.env.CLOUDFLARE_R2_PUBLIC_URL
+  ),
 };
