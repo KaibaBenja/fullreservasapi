@@ -5,22 +5,36 @@ import multerS3 from "multer-s3";
 import { Request } from "express";
 import { CloudFlareS3 } from "../config/cloudflare.config";
 
-
-const upload = (foldername: string) => multer({
-  storage: multerS3({
-    s3: CloudFlareS3,
-    bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
-    metadata: (req: Request, file, cb) => {
-      cb(null, { fieldName: file.fieldname });
+const upload = (foldername: string) =>
+  multer({
+    storage: multerS3({
+      s3: CloudFlareS3,
+      bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
+      metadata: (req: Request, file, cb) => {
+        cb(null, { fieldName: file.fieldname });
+      },
+      key: (req: Request, file, cb) => {
+        cb(null, `${foldername}/${Date.now()}-${file.originalname}`);
+        cb(null, `${foldername}/${Date.now()}-${file.originalname}`);
+      },
+      contentType: multerS3.AUTO_CONTENT_TYPE,
+    }),
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB límite
+    fileFilter: (req: Request, file, cb) => {
+      const allowedMimeTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "image/webp",
+        "application/pdf",
+      ];
+      if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Tipo de archivo no permitido"));
+      }
     },
-    key: (req: Request, file, cb) => {
-      cb(null, `${foldername}/${Date.now()}-${file.originalname}`);
-      cb(null, `${foldername}/${Date.now()}-${file.originalname}`);
-    },
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-  }),
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB límite
-});
+  });
 
 const deleteFileR2 = async (fileUrl: string): Promise<boolean> => {
   try {
@@ -29,7 +43,7 @@ const deleteFileR2 = async (fileUrl: string): Promise<boolean> => {
     if (!fileName) {
       console.error("URL del archivo inválida");
       return false;
-    };
+    }
 
     const params = {
       Bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
@@ -40,7 +54,7 @@ const deleteFileR2 = async (fileUrl: string): Promise<boolean> => {
 
     if (!response || response.$metadata.httpStatusCode !== 204) {
       return false;
-    };
+    }
 
     return true;
   } catch (error) {
@@ -48,6 +62,5 @@ const deleteFileR2 = async (fileUrl: string): Promise<boolean> => {
     return false;
   }
 };
-
 
 export { upload, deleteFileR2 };
