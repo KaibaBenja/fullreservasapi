@@ -2,13 +2,14 @@ import { Request, Response } from "express";
 import * as usersServices from "../service";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
-import { uploadFileToS3, deleteFileFromS3 } from "../../../middlewares/upload";
+import { R2 } from "../../../config/dotenv.config";
+import { deleteFileR2 } from "../../../middlewares/upload";
 
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { user_id } = req.body;
-    const file = req.file;
+    const file = req.file as Express.MulterS3.File;
 
     if (!await usersServices.users.getById(user_id)) {
       return handleErrorResponse(res, 400, `El usuario con el id: ${user_id} no existe.`);
@@ -19,15 +20,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
     };
 
     let logo_url: string | undefined;
-    if (file) {
-      const fileUploaded = await uploadFileToS3(file);
-
-      if (!fileUploaded || !fileUploaded.signedUrl) {
-        throw new Error(`Error al subir la imagen: ${file.originalname}.`);
-      }
-
-      logo_url = fileUploaded.signedUrl;
-    }
+    if (file) logo_url = `${R2.CLOUDFLARE_R2_PUBLIC_URL}/${file.key}`;
 
     const merchantData = { ...req.body, logo_url };
 
@@ -102,7 +95,7 @@ const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { user_id } = req.body;
-    const file = req.file;
+    const file = req.file as Express.MulterS3.File;
 
     if (!validateUUID(id, res)) return;
 
@@ -122,19 +115,13 @@ const editById = async (req: Request, res: Response): Promise<void> => {
     let imageUrl = merchantFound.logo_url;
     if (file) {
       if (imageUrl) {
-        const imageDeleted = await deleteFileFromS3(imageUrl);
-        if (!imageDeleted) return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
+        if (!(await deleteFileR2(imageUrl))) return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
       };
 
-      const fileUploaded = await uploadFileToS3(file);
-      if (!fileUploaded || !fileUploaded.signedUrl) {
-        return handleErrorResponse(res, 500, `Error al subir la nueva imagen: ${file.originalname}.`);
-      }
+      imageUrl = `${R2.CLOUDFLARE_R2_PUBLIC_URL}/${file.key}`;
+    };
 
-      imageUrl = fileUploaded.signedUrl;
-    }
-
-    if (!(await usersServices.merchants.editById({ id, ...req.body, imageUrl }))) {
+    if (!(await usersServices.merchants.editById({ id, ...req.body, logo_url: imageUrl }))) {
       return handleErrorResponse(res, 404, `Error al editar el usuario.`);
     };
 
@@ -165,8 +152,7 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
     };
 
     if (merchantFound.logo_url) {
-      const imageDeleted = await deleteFileFromS3(merchantFound.logo_url);
-      if (!imageDeleted) return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
+      if (!(await deleteFileR2(merchantFound.logo_url))) return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
     }
 
     if (!await usersServices.merchants.deleteById(id)) {
