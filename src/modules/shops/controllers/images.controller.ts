@@ -2,21 +2,19 @@ import { Request, Response } from "express";
 import * as shopsServices from "../services";
 import { validateUUID } from "../../../utils/uuidValidator";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { R2 } from "../../../config/dotenv.config";
-import { CloudFlareS3 } from "../../../config/cloudflare.config";
+import { deleteFileR2 } from "../../../middlewares/upload";
+
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { shop_id } = req.body;
     const files = req.files as Express.MulterS3.File[];
 
-    if (!files || files.length === 0)
-      return handleErrorResponse(res, 400, "Debe subir un archivo.");
+    if (!files || files.length === 0) return handleErrorResponse(res, 400, "Debe subir un archivo.");
 
     const imagesCreated = await Promise.all(
       files.map(async (file: Express.MulterS3.File) => {
-        // Obtenemos la URL del archivo con la función auxiliar del middleware
         const imageUrl = `${R2.CLOUDFLARE_R2_PUBLIC_URL}/${file.key}`;
 
         const imageCreated = await shopsServices.images.add({
@@ -24,21 +22,24 @@ const create = async (req: Request, res: Response): Promise<void> => {
           image_url: imageUrl,
         });
 
-        if (!imageCreated)
+        if (!imageCreated) {
           throw new Error(
             `Error al guardar la referencia de la imagen en la base de datos.`
           );
+        };
 
         return imageCreated;
       })
     );
 
-    if (!imagesCreated.length)
-      return handleErrorResponse(res, 400, "Error al registrar las imágenes");
+    if (!imagesCreated.length) return handleErrorResponse(res, 400, "Error al registrar las imágenes");
+
+    const imagesExists = await shopsServices.images.getByShopId(shop_id);
+    if (!imagesExists) return handleErrorResponse(res, 404, `Error al encontrar las imagenes subidas.`)
 
     res.status(201).json({
       message: "Imágenes agregadas exitosamente",
-      images: imagesCreated,
+      images: imagesExists,
     });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
@@ -101,82 +102,39 @@ const getById = async (req: Request, res: Response): Promise<void> => {
 const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { shop_id } = req.body;
     const file = req.file as Express.MulterS3.File;
 
     if (!validateUUID(id, res)) return;
 
     if ((!req.body || Object.keys(req.body).length === 0) && !file) {
-      return handleErrorResponse(
-        res,
-        400,
-        "Debe enviar al menos un campo para actualizar."
-      );
-    }
+      return handleErrorResponse(res, 400, "Debe enviar al menos un campo para actualizar.");
+    };
 
     const imageFound = await shopsServices.images.getById(id);
-    if (!imageFound)
-      return handleErrorResponse(
-        res,
-        404,
-        `La imagen con el id: ${id} no existe.`
-      );
+    if (!imageFound) return handleErrorResponse(res, 404, `La imagen con el id: ${id} no existe.`);
 
-    if (shop_id && !(await shopsServices.shops.getById(shop_id))) {
-      return handleErrorResponse(
-        res,
-        404,
-        `El negocio con el id: ${shop_id} no existe.`
-      );
-    }
 
-    let imageUrl = imageFound.image_url;
+    let image_url = imageFound.image_url;
     if (file) {
-      // Si hay un nuevo archivo, primero eliminamos el anterior
-      // Extrae el nombre del archivo de la URL (ahora incluye timestamp)
-      const urlParts = imageFound.image_url.split("/");
-      const oldFileName = urlParts[urlParts.length - 1];
-
-      // Preparamos parámetros para eliminar
-      const deleteParams = {
-        Bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
-        Key: `uploads/${oldFileName}`,
+      if (image_url) {
+        if (!(await deleteFileR2(image_url))) return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
       };
 
-      try {
-        // Eliminamos el archivo anterior
-        await CloudFlareS3.send(new DeleteObjectCommand(deleteParams));
-
-        // El archivo nuevo ya está subido gracias al middleware upload
-        imageUrl = file.location;
-      } catch (error) {
-        console.error("Error al eliminar imagen antigua:", error);
-        // Continuamos aunque falle la eliminación, para actualizar con la nueva imagen
-      }
+      image_url = `${R2.CLOUDFLARE_R2_PUBLIC_URL}/${file.key}`;
     }
 
-    const result = await shopsServices.images.editById({
-      id,
-      shop_id,
-      image_url: imageUrl,
-    });
-    if (!result)
-      return handleErrorResponse(res, 400, "No se pudo actualizar la imagen.");
+    const result = await shopsServices.images.editById({ id, image_url });
+    if (!result) return handleErrorResponse(res, 400, "No se pudo actualizar la imagen.");
 
     const imageUpdated = await shopsServices.images.getById(id);
-    if (!imageUpdated)
-      return handleErrorResponse(
-        res,
-        404,
-        "Error al encontrar la imagen actualizada."
-      );
+    if (!imageUpdated) return handleErrorResponse(res, 404, "Error al encontrar la imagen actualizada.");
 
-    res
-      .status(200)
-      .json({ message: "Imagen editada exitosamente", image: imageUpdated });
+    res.status(200).json({
+      message: "Imagen editada exitosamente", image: imageUpdated
+    });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
-  }
+  };
 };
 
 const deleteById = async (req: Request, res: Response): Promise<void> => {
@@ -185,49 +143,65 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
     if (!validateUUID(id, res)) return;
 
     const imageFound = await shopsServices.images.getById(id);
-    if (!imageFound)
-      return handleErrorResponse(
-        res,
-        404,
-        `La imagen con el id: ${id} no existe.`
-      );
+    if (!imageFound) return handleErrorResponse(res, 404, `La imagen con el id: ${id} no existe.`);
 
-    // Extrae el nombre del archivo de la URL (ahora incluye timestamp)
-    const urlParts = imageFound.image_url.split("/");
-    const fileName = urlParts[urlParts.length - 1];
 
-    // Preparamos parámetros para eliminar
-    const deleteParams = {
-      Bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
-      Key: `uploads/${fileName}`,
+    if (imageFound.image_url && !(await deleteFileR2(imageFound.image_url))) {
+      return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
     };
 
-    try {
-      // Eliminamos el archivo
-      await CloudFlareS3.send(new DeleteObjectCommand(deleteParams));
-    } catch (error) {
-      console.error("Error al eliminar imagen de S3:", error);
-      return handleErrorResponse(
-        res,
-        500,
-        "Error al eliminar la imagen de S3."
-      );
-    }
-
     const result = await shopsServices.images.deleteById(id);
-    if (!result)
-      return handleErrorResponse(
-        res,
-        404,
-        "Error al eliminar la imagen de la base de datos."
-      );
+    if (!result) return handleErrorResponse(res, 404, "Error al eliminar la imagen de la base de datos.");
 
-    res
-      .status(200)
-      .json({ message: "Imagen eliminada exitosamente", image: imageFound });
+    res.status(200).json({
+      message: "Imagen eliminada exitosamente", image: imageFound
+    });
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 };
 
-export default { create, getAll, getById, editById, deleteById };
+const deleteAllByShopId = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { shop_id } = req.params;
+    if (!validateUUID(shop_id, res)) return;
+
+    const images = await shopsServices.images.getByShopId(shop_id);
+
+    if (!images || images.length === 0) return handleErrorResponse(res, 404, `No se encontraron imágenes de esta tienda.`);
+
+    const deleteResults = await Promise.all(
+      images.map(async (image) => {
+        try {
+          if (image.image_url) {
+            const deleted = await deleteFileR2(image.image_url);
+            return { id: image.id, deleted: deleted };
+          };
+          return { id: image.id, deleted: false };
+        } catch (error) {
+          return { id: image.id, deleted: false };
+        };
+      })
+    );
+
+    const result = await shopsServices.images.deleteByShopId(shop_id);
+    if (!result || !result.success) return handleErrorResponse(res, 500, "Se eliminaron algunos archivos pero hubo un error al eliminar los registros de la base de datos.");
+
+
+    const successCount = deleteResults.filter(r => r.deleted).length;
+    const failCount = deleteResults.length - successCount;
+
+    res.status(200).json({
+      message: `Imágenes eliminadas exitosamente. (${successCount} eliminadas, ${failCount} con errores)`,
+      shop_id: shop_id,
+      deletedCount: result.deletedCount || successCount,
+      failedCount: failCount
+    });
+  } catch (error) {
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  }
+};
+
+
+
+export default { create, getAll, getById, editById, deleteById, deleteAllByShopId };

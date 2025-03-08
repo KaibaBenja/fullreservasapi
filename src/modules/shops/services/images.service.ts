@@ -133,14 +133,9 @@ const getByImageUrl = async (image_url: string) => {
   };
 };
 
-const editById = async ({ id, shop_id, image_url }: IImages) => {
+const editById = async ({ id, image_url }: Pick<IImages, "id" | "image_url">) => {
   try {
-    const updateData: any = {};
-
-    if (shop_id) updateData.shop_id = uuidToBuffer(shop_id);
-    if (image_url) updateData.image_url = image_url;
-
-    const [updatedRowsCount] = await Images.update(updateData, {
+    const [updatedRowsCount] = await Images.update({ image_url }, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
@@ -150,7 +145,6 @@ const editById = async ({ id, shop_id, image_url }: IImages) => {
 
     return { success: true };
   } catch (error) {
-    console.log(error);
     throw new Error('Error al editar la imagen');
   };
 };
@@ -171,6 +165,24 @@ const deleteById = async (id: string) => {
   };
 };
 
+const deleteByShopId = async (shop_id: string) => {
+  try {
+    const result = await Images.destroy({
+      where: {
+        shop_id: sequelize.fn('UUID_TO_BIN', shop_id)
+      }
+    });
+
+    if (!result) {
+      return null;
+    };
+
+    return { success: true, deletedCount: result, };
+  } catch (error) {
+    throw new Error("Error al eliminar las imágenes por id de negocio.");
+  };
+};
+
 
 export default {
   add,
@@ -180,5 +192,6 @@ export default {
   lastCreatedEntry,
   getByImageUrl,
   editById,
-  deleteById
+  deleteById,
+  deleteByShopId
 };

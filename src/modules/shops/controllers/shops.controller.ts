@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import * as shopsServices from "../services";
-import usersServices from "../../users/users.service";
+import usersServices from "../../users/service/users.service";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
 
