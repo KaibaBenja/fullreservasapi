@@ -17,7 +17,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
     const imagesCreated = await Promise.all(
       files.map(async (file: Express.MulterS3.File) => {
         // Obtenemos la URL del archivo con la función auxiliar del middleware
-        const imageUrl = file.location;
+        const imageUrl = `${R2.CLOUDFLARE_R2_PUBLIC_URL}/${file.key}`;
 
         const imageCreated = await shopsServices.images.add({
           shop_id,

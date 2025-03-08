@@ -10,7 +10,7 @@ import { NextFunction, Request, Response } from "express";
 import streamToString from "../utils/streamToString";
 import { CloudFlareS3 } from "../config/cloudflare.config";
 
-const upload = multer({
+const upload = (foldername: string) => multer({
   storage: multerS3({
     s3: CloudFlareS3,
     bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
@@ -18,11 +18,11 @@ const upload = multer({
       cb(null, { fieldName: file.fieldname });
     },
     key: (req: Request, file, cb) => {
-      cb(null, `uploads/${Date.now()}-${file.originalname}`);
+      cb(null, `${foldername}/${Date.now()}-${file.originalname}`);
     },
     contentType: multerS3.AUTO_CONTENT_TYPE,
   }),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB límite
+  limits: { fileSize: 50 * 1024 * 1024 }, // 10MB límite
 });
 
 const deleteFileMiddleware = async (

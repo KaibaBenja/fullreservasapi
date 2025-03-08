@@ -42,4 +42,8 @@ export const R2 = {
     "CLOUDFLARE_R2_BUCKET_NAME",
     process.env.CLOUDFLARE_R2_BUCKET_NAME
   ),
+  CLOUDFLARE_R2_PUBLIC_URL: validateEnv(
+    "CLOUDFLARE_R2_PUBLIC_URL",
+    process.env.CLOUDFLARE_R2_PUBLIC_URL
+  ),
 };
