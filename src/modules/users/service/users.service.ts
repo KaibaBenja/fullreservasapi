@@ -1,7 +1,6 @@
 import { IUser } from "../types/users.types";
 import bcrypt from 'bcrypt';
 import User from "../models/users.model";
-import Role from "../models/roles.model";
 import { formatName } from "../../../utils/formatName";
 import { sequelize } from "../../../config/sequalize.config";
 import { QueryTypes } from "sequelize";
