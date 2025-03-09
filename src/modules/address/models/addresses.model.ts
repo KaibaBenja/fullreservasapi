@@ -50,7 +50,7 @@ Addresses.init(
     },
     extra: {
       type: DataTypes.STRING(10),
-      allowNull: false,
+      allowNull: true,
     },
     city_id: {
       type: DataTypes.BLOB,
