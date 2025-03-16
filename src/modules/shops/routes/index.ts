@@ -6,6 +6,7 @@ import { imagesRoutes } from "./images.routes";
 import { tablesRoutes } from "./tables.routes";
 import { availableSlotsRoutes } from "./availableSlots.routes";
 import { ratingsRoutes } from "./ratings.routes";
+import { menusRoutes } from "./menus.routes";
 
 export const shopsRoutes = express.Router();
 
@@ -16,4 +17,5 @@ shopsRoutes.use("/images", imagesRoutes);
 shopsRoutes.use("/tables", tablesRoutes);
 shopsRoutes.use("/availableSlots", availableSlotsRoutes);
 shopsRoutes.use("/ratings", ratingsRoutes);
+shopsRoutes.use("/menus", menusRoutes);
 
