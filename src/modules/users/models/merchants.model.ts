@@ -33,6 +33,7 @@ Merchant.init(
     user_id: {
       type: DataTypes.BLOB,
       allowNull: false,
+      unique: true,
       references: {
         model: User,
         key: "id",

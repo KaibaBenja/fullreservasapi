@@ -56,6 +56,7 @@ Rating.init(
     booking_id: {
       type: DataTypes.BLOB,
       allowNull: false,
+      unique: true,
       references: {
         model: Booking,
         key: "id",
