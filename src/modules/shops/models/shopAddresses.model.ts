@@ -37,6 +37,7 @@ shopsAddresseses.init(
     shop_id: {
       type: DataTypes.BLOB,
       allowNull: false,
+      unique: true,
       references: {
         model: Shops,
         key: 'id',

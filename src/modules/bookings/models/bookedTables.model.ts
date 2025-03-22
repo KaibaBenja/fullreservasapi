@@ -39,6 +39,7 @@ BookedTable.init({
   table_id: {
     type: DataTypes.BLOB,
     allowNull: false,
+    unique: true,
     references: {
       model: Table,
       key: "id",
