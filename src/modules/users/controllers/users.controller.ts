@@ -133,9 +133,7 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
     if (!validateUUID(id, res)) return;
 
     const result = await usersServices.users.getById({ id });
-    if (!result) {
-      return handleErrorResponse(res, 404, `El usuario con el id: ${id} no existe.`);
-    };
+    if (!result) return handleErrorResponse(res, 404, `El usuario con el id: ${id} no existe.`);
 
     if (!(await usersServices.users.deleteById({ id }))) {
       return handleErrorResponse(res, 500, `Error al eliminar el usuario.`);

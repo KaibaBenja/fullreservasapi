@@ -67,7 +67,7 @@ const getById = async ({ id }: Pick<IOperator, "id">) => {
   };
 };
 
-const getAllByShopId = async ({ shop_id }: Pick<IOperator, "shop_id">) => {
+const getByShopId = async ({ shop_id }: Pick<IOperator, "shop_id">) => {
   try {
     const result = await sequelize.query(
       `SELECT 
@@ -127,22 +127,31 @@ const getByUserId = async ({ user_id }: Pick<IOperator, "user_id">) => {
   };
 };
 
-const getByUserAndShop = async ({ user_id, shop_id }: IOperator) => {
+const getByUserAndShop = async ({ user_id, shop_id }: Pick<IOperator, "user_id" | "shop_id">) => {
   try {
-    const result = await Operator.findOne({
-      attributes: [
-        [sequelize.literal("BIN_TO_UUID(id)"), "id"],
-        [sequelize.literal("BIN_TO_UUID(user_id)"), "user_id"],
-        [sequelize.literal("BIN_TO_UUID(shop_id)"), "shop_id"],
-        "created_at",
-        "updated_at"
-      ],
-      where: {
-        user_id: sequelize.fn("UUID_TO_BIN", user_id),
-        shop_id: sequelize.fn("UUID_TO_BIN", shop_id)
-      },
-    });
-    return result ? result.toJSON() : null;
+    const result = await sequelize.query(
+      `SELECT 
+          BIN_TO_UUID(u.id) AS id,
+          u.full_name,
+          u.email,
+          u.created_at,
+          u.updated_at,
+          JSON_OBJECT(
+            'id', BIN_TO_UUID(o.id),
+            'shop_id', BIN_TO_UUID(o.shop_id),
+            'created_at', o.created_at,
+            'updated_at', o.updated_at
+          ) AS operator
+       FROM users u
+       INNER JOIN operator_settings o ON u.id = o.user_id
+       WHERE u.id = UUID_TO_BIN(:user_id) AND o.shop_id = UUID_TO_BIN(:shop_id);`,
+      {
+        replacements: { user_id, shop_id },
+        type: QueryTypes.SELECT,
+      }
+    );
+
+    return result.length ? result : null;
   } catch (error) {
     throw new Error("Error al obtener el operador por id de usuario e id de negocio.");
   };
@@ -177,4 +186,4 @@ const deleteById = async ({ id }: Pick<IOperator, "id">) => {
 };
 
 
-export default { add, getAll, getById, getAllByShopId, getByUserAndShop, getByUserId, editById, deleteById };
+export default { add, getAll, getById, getByShopId, getByUserAndShop, getByUserId, editById, deleteById };

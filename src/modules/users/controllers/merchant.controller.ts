@@ -114,9 +114,7 @@ const editById = async (req: Request, res: Response): Promise<void> => {
     };
 
     const result = await usersServices.merchants.getById({ id });
-    if (!result) {
-      return handleErrorResponse(res, 404, `Error al encontrar el comerciante editado.`);
-    };
+    if (!result) return handleErrorResponse(res, 404, `Error al encontrar el comerciante editado.`);
 
     res.status(200).json(result);
   } catch (error) {

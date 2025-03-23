@@ -8,5 +8,4 @@ export const operatorsRoutes = express.Router();
 operatorsRoutes.post("/", validateSchema(operatorsSchema), operatorsController.create);
 operatorsRoutes.get("/", operatorsController.getAll);
 operatorsRoutes.get("/:id", operatorsController.getById);
-operatorsRoutes.patch("/:id", validateSchemaPartial(operatorsSchema), operatorsController.editById);
 operatorsRoutes.delete("/:id", operatorsController.deleteById);
