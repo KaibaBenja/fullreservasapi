@@ -157,22 +157,6 @@ const getByUserAndShop = async ({ user_id, shop_id }: Pick<IOperator, "user_id" 
   };
 };
 
-const editById = async ({ id, user_id }: Pick<IOperator, "id" | "user_id">) => {
-  try {
-    const updateData: any = {};
-
-    if (user_id) updateData.user_id = uuidToBuffer(user_id);
-
-    const [updatedRowsCount] = await Operator.update(updateData, {
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
-    });
-
-    return updatedRowsCount > 0 ? { success: true } : null;
-  } catch (error) {
-    throw new Error('Error al editar el operador.');
-  };
-};
-
 const deleteById = async ({ id }: Pick<IOperator, "id">) => {
   try {
     const result = await Operator.destroy({
@@ -186,4 +170,4 @@ const deleteById = async ({ id }: Pick<IOperator, "id">) => {
 };
 
 
-export default { add, getAll, getById, getByShopId, getByUserAndShop, getByUserId, editById, deleteById };
+export default { add, getAll, getById, getByShopId, getByUserAndShop, getByUserId, deleteById };

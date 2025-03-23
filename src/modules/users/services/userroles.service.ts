@@ -75,22 +75,6 @@ const getAllByFilters = async (filters: Partial<IUserRoles>) => {
   }
 };
 
-const editById = async ({ id, role_id }: IUserRoles) => {
-  try {
-    const updateData: any = {};
-
-    if (role_id) updateData.role_id = uuidToBuffer(role_id);
-
-    const [updatedRowsCount] = await UserRole.update(updateData, {
-      where: { id: sequelize.fn('UUID_TO_BIN', id) }
-    });
-
-    return updatedRowsCount > 0 ? { success: true } : null;
-  } catch (error) {
-    throw new Error('Error al editar el rol de usuario.');
-  };
-};
-
 const deleteById = async ({ id }: Pick<IUserRoles, "id">) => {
   try {
     const result = await UserRole.destroy({
@@ -104,4 +88,4 @@ const deleteById = async ({ id }: Pick<IUserRoles, "id">) => {
 };
 
 
-export default { add, getAll, getById, getAllByFilters, editById, deleteById };
+export default { add, getAll, getById, getAllByFilters, deleteById };
