@@ -7,25 +7,20 @@ import { QueryTypes } from "sequelize";
 
 const add = async ({ user_id, shop_id }: IOperator) => {
   try {
-    const newOperator = await Operator.create({
+    const result = await Operator.create({
       user_id: uuidToBuffer(user_id),
       shop_id: uuidToBuffer(shop_id)
     });
 
-    if (!newOperator) {
-      return null;
-    };
-
-    return { user_id: newOperator.user_id, shop_id: newOperator.shop_id };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al crear un nuevo operador.");
   };
 };
 
 const getAll = async () => {
   try {
-    const users = await sequelize.query(
+    const result = await sequelize.query(
       `SELECT 
         BIN_TO_UUID(u.id) AS id,
         u.full_name,
@@ -45,19 +40,15 @@ const getAll = async () => {
       }
     );
 
-    if (!users || users.length === 0) {
-      return null;
-    };
-
-    return users;
+    return result.length ? result : null;
   } catch (error) {
-    throw new Error("Error al obtener los usuarios de tipo operador. ");
+    throw new Error("Error al obtener los operadores.");
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<IOperator, "id">) => {
   try {
-    const operator = await Operator.findOne({
+    const result = await Operator.findOne({
       attributes: [
         [sequelize.literal("BIN_TO_UUID(id)"), "id"],
         [sequelize.literal("BIN_TO_UUID(user_id)"), "user_id"],
@@ -70,20 +61,15 @@ const getById = async (id: string) => {
       },
     });
 
-    if (!operator) {
-      return null;
-    };
-
-    return operator.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error)
     throw new Error("Error al obtener el operador.");
   };
 };
 
-const getAllByShopId = async (shop_id: string) => {
+const getAllByShopId = async ({ shop_id }: Pick<IOperator, "shop_id">) => {
   try {
-    const users = await sequelize.query(
+    const result = await sequelize.query(
       `SELECT 
           BIN_TO_UUID(u.id) AS id,
           u.full_name,
@@ -105,21 +91,15 @@ const getAllByShopId = async (shop_id: string) => {
       }
     );
 
-
-    if (!users || users.length === 0) {
-      return null;
-    };
-
-    return users;
+    return result.length ? result : null;
   } catch (error) {
-    console.log(error);
-    throw new Error('Error al obtener el operador por shop id.');
+    throw new Error('Error al obtener el operador por el id de negocio.');
   };
 };
 
-const getByUserId = async (user_id: string) => {
+const getByUserId = async ({ user_id }: Pick<IOperator, "user_id">) => {
   try {
-    const user = await sequelize.query(
+    const result = await sequelize.query(
       `SELECT 
           BIN_TO_UUID(u.id) AS id,
           u.full_name,
@@ -141,12 +121,7 @@ const getByUserId = async (user_id: string) => {
       }
     );
 
-
-    if (!user || user.length === 0) {
-      return null;
-    };
-
-    return user;
+    return result.length ? result : null;
   } catch (error) {
     throw new Error('Error al obtener el operador por el id usuario.');
   };
@@ -154,7 +129,7 @@ const getByUserId = async (user_id: string) => {
 
 const getByUserAndShop = async ({ user_id, shop_id }: IOperator) => {
   try {
-    const operator = await Operator.findOne({
+    const result = await Operator.findOne({
       attributes: [
         [sequelize.literal("BIN_TO_UUID(id)"), "id"],
         [sequelize.literal("BIN_TO_UUID(user_id)"), "user_id"],
@@ -167,55 +142,37 @@ const getByUserAndShop = async ({ user_id, shop_id }: IOperator) => {
         shop_id: sequelize.fn("UUID_TO_BIN", shop_id)
       },
     });
-
-    if (!operator) {
-      return null;
-    };
-
-    return operator.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al obtener el operador.");
+    throw new Error("Error al obtener el operador por id de usuario e id de negocio.");
   };
 };
 
-const editById = async ({ id, user_id, shop_id }: IOperator) => {
+const editById = async ({ id, user_id }: Pick<IOperator, "id" | "user_id">) => {
   try {
     const updateData: any = {};
 
     if (user_id) updateData.user_id = uuidToBuffer(user_id);
-    if (shop_id) updateData.shop_id = uuidToBuffer(shop_id);
-
-    if (Object.keys(updateData).length === 0) {
-      return { hasNoFieldsToUpdate: true };
-    };
 
     const [updatedRowsCount] = await Operator.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar el operador');
+    throw new Error('Error al editar el operador.');
   };
 };
 
-const deleteById = async (id: string) => {
+const deleteById = async ({ id }: Pick<IOperator, "id">) => {
   try {
     const result = await Operator.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
-    throw new Error("Error al eliminar el operador");
+    throw new Error("Error al eliminar el operador.");
   };
 };
 
