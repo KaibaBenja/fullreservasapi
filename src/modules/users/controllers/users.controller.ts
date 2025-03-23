@@ -73,7 +73,7 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
       result = await usersServices.users.getAll();
     };
 
-    res.status(200).json(result ? result : []);
+    res.status(200).json(result ?? []);
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
   };
