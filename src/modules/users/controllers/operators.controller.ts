@@ -14,11 +14,11 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 409, `El usuario con el nombre: ${full_name} ya está registrado.`);
     };
 
-    if (!await shopsServices.shops.getById(shop_id)) {
+    if (!await shopsServices.shops.getById({ id: shop_id })) {
       return handleErrorResponse(res, 400, `El negocio con el id: ${shop_id} no existe.`);
     };
 
-    if (await usersServices.operators.getByShopId({ shop_id, })) {
+    if (await usersServices.operators.getByShopId({ shop_id })) {
       return handleErrorResponse(res, 400, `El operador del negocio con id: ${shop_id} ya existe.`);
     };
 
@@ -28,7 +28,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
       full_name: "",
       password
     })) return handleErrorResponse(res, 400, `No se pudo crear el usuario.`);
-    
+
     const user = await usersServices.users.getByEmail({ email: full_name });
     if (!user) return handleErrorResponse(res, 404, `No se encontro el usuarió por email.`);
 
@@ -71,7 +71,7 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
     if (shop_id && typeof shop_id === "string") {
       if (!validateUUID(shop_id, res)) return;
 
-      if (!(await shopsServices.shops.getById(shop_id))) {
+      if (!(await shopsServices.shops.getById({ id: shop_id }))) {
         return handleErrorResponse(res, 404, `No existe el negocio con el id: ${shop_id}`)
       };
 

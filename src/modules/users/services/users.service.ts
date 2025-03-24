@@ -84,7 +84,7 @@ const getById = async ({ id }: Pick<IUser, "id">) => {
       }
     );
 
-    return result ? result : null;
+    return result.length ? result : null;
   } catch (error) {
     throw new Error('Error al obtener el usuario por id');
   };
