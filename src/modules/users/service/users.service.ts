@@ -1,30 +1,9 @@
 import { IUser } from "../types/users.types";
-import bcrypt from 'bcrypt';
+import bcrypt from "bcrypt";
 import User from "../models/users.model";
 import { formatName } from "../../../utils/formatName";
 import { sequelize } from "../../../config/sequalize.config";
 import { QueryTypes } from "sequelize";
-
-
-const add = async ({ full_name, password, email }: IUser) => {
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({
-      full_name: formatName(full_name),
-      password: hashedPassword,
-      email: email,
-    });
-
-    if (!newUser) {
-      return null;
-    };
-
-    return { full_name: newUser.full_name, email: newUser.email };
-  } catch (error) {
-    throw new Error("Error al crear un nuevo usuario");
-  };
-};
 
 const getAll = async () => {
   try {
@@ -47,12 +26,12 @@ const getAll = async () => {
 
     if (!users || users.length === 0) {
       return null;
-    };
+    }
 
     return users;
   } catch (error) {
     throw new Error("Error al obtener los usuarios");
-  };
+  }
 };
 
 const getById = async (id: string) => {
@@ -78,23 +57,23 @@ const getById = async (id: string) => {
 
     if (!user) {
       return null;
-    };
+    }
 
     return user;
   } catch (error) {
-    throw new Error('Error al obtener el usuario por id');
-  };
+    throw new Error("Error al obtener el usuario por id");
+  }
 };
 
 const getByEmail = async (email: string) => {
   try {
     const user = await User.findOne({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        'full_name',
-        'email',
-        'created_at',
-        'updated_at',
+        [sequelize.literal("BIN_TO_UUID(id)"), "id"],
+        "full_name",
+        "email",
+        "created_at",
+        "updated_at",
       ],
       where: sequelize.where(
         sequelize.fn("LOWER", sequelize.col("email")),
@@ -105,12 +84,12 @@ const getByEmail = async (email: string) => {
 
     if (!user) {
       return null;
-    };
+    }
 
     return user.toJSON();
   } catch (error) {
-    throw new Error('Error al obtener el usuario por email');
-  };
+    throw new Error("Error al obtener el usuario por email");
+  }
 };
 
 const getByRole = async (roleId: string) => {
@@ -139,13 +118,13 @@ const getByRole = async (roleId: string) => {
 
     if (!users || users.length === 0) {
       return null;
-    };
+    }
 
     return users;
   } catch (error) {
     console.log(error);
-    throw new Error('Error al obtener los usuarios por el id de rol');
-  };
+    throw new Error("Error al obtener los usuarios por el id de rol");
+  }
 };
 
 const editById = async ({ id, full_name, password, email }: IUser) => {
@@ -158,37 +137,43 @@ const editById = async ({ id, full_name, password, email }: IUser) => {
 
     if (Object.keys(updateData).length === 0) {
       return { hasNoFieldsToUpdate: true };
-    };
+    }
 
     const [updatedRowsCount] = await User.update(updateData, {
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
+      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`),
     });
 
     if (updatedRowsCount === 0) {
       return null;
-    };
+    }
 
     return { success: true };
   } catch (error) {
-    throw new Error('Error al editar el usuario');
-  };
+    throw new Error("Error al editar el usuario");
+  }
 };
 
 const deleteById = async (id: string) => {
   try {
     const result = await User.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`),
     });
 
     if (!result) {
       return null;
-    };
+    }
 
     return { success: true };
   } catch (error) {
     throw new Error("Error al eliminar el usuario");
-  };
+  }
 };
 
-
-export default { add, getAll, getById, getByEmail, getByRole, editById, deleteById };
+export default {
+  getAll,
+  getById,
+  getByEmail,
+  getByRole,
+  editById,
+  deleteById,
+};
