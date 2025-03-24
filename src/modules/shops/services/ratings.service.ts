@@ -142,11 +142,10 @@ const getAllByFilters = async (filters: Partial<IRatings>) => {
     if (id) whereConditions.id = uuidToBuffer(id);
     if (shop_id) whereConditions.shop_id = uuidToBuffer(shop_id);
     if (user_id) whereConditions.user_id = uuidToBuffer(user_id);
-    if (shop_id) whereConditions.shop_id = uuidToBuffer(shop_id);
     if (booking_id) whereConditions.booking_id = uuidToBuffer(booking_id);
     if (rating) whereConditions.rating = rating;
-    if (comment) whereConditions.comment = comment;
     if (status) whereConditions.status = status;
+    if (comment) whereConditions.comment = comment;
 
     const result = await Rating.findAll({
       attributes: [
@@ -180,7 +179,7 @@ const editById = async ({ id, rating, status, comment }: IRatings) => {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    return updatedRowsCount === 0 ? { success: true } : null;
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
     throw new Error('Error al editar la reseña.');
   };
