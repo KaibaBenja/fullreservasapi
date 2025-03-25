@@ -6,22 +6,6 @@ import { sequelize } from "../../../config/sequalize.config";
 import { QueryTypes } from "sequelize";
 
 
-const add = async ({ full_name, password, email }: IUser) => {
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const result = await User.create({
-      full_name: formatName(full_name),
-      password: hashedPassword,
-      email: email,
-    });
-
-    return result ? result.toJSON() : null;
-  } catch (error) {
-    throw new Error("Error al crear un nuevo usuario.");
-  };
-};
-
 const getAll = async () => {
   try {
     const result = await sequelize.query(
@@ -183,4 +167,4 @@ const deleteById = async ({ id }: Pick<IUser, "id">) => {
 };
 
 
-export default { add, getAll, getById, getByEmail, getByRole, editById, deleteById };
+export default { getAll, getById, getByEmail, getByRole, editById, deleteById };

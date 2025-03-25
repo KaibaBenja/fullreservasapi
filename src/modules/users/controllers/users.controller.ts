@@ -1,60 +1,8 @@
 import { Request, Response } from "express";
 import * as usersServices from "../services";
-import * as membershipsServices from "../../memberships/services";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
 
-
-const create = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { email, merchant } = req.body;
-
-    if (await usersServices.users.getByEmail({ email })) {
-      return handleErrorResponse(res, 409, `El usuario con el email: ${email} ya está registrado.`);
-    };
-
-    if (!await usersServices.users.add(req.body)) {
-      return handleErrorResponse(res, 400, `No se pudo crear el usuario.`);
-    };
-
-    const user = await usersServices.users.getByEmail({ email });
-    if (!user) return handleErrorResponse(res, 404, `No se encontro el usuarió por email.`);
-
-    const clientRole = await usersServices.roles.getByName({ name: "CLIENT" });
-    if (!clientRole) return handleErrorResponse(res, 409, `El rol CLIENT no existe.`);
-
-    if (!(await usersServices.userRoles.add({
-      user_id: user.id.toString("utf-8"),
-      role_id: clientRole.id.toString("utf-8")
-    }))) return handleErrorResponse(res, 404, `Error al asignar el rol CLIENT.`);
-
-    if (merchant) {
-      const merchantRole = await usersServices.roles.getByName({ name: "MERCHANT" });
-      if (!merchantRole) return handleErrorResponse(res, 409, `El rol MERCHANT no existe.`);
-
-      if (!(await usersServices.userRoles.add({
-        user_id: user.id.toString("utf-8"),
-        role_id: merchantRole.id.toString("utf-8")
-      }))) return handleErrorResponse(res, 404, `Error al asignar el rol MERCHANT.`);
-
-      if (!(await membershipsServices.memberships.add({
-        user_id: user.id.toString("utf-8"),
-        tier: "FREE",
-        status: "EXPIRED"
-      }))) return handleErrorResponse(res, 404, `Error al asignar la membresia.`);
-    }
-
-    const result = await usersServices.users.getById({ id: user.id.toString("utf-8") });
-    if (!result) return handleErrorResponse(res, 404, `No se pudo encontrar el usuario después de la creación.`);
-
-    res.status(201).json({
-      message: "Usuario creado exitosamente.",
-      user: result,
-    });
-  } catch (error) {
-    handleErrorResponse(res, 500, "Error interno del servidor.");
-  };
-};
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -146,5 +94,5 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-export default { create, getAll, getById, editById, deleteById };
+export default { getAll, getById, editById, deleteById };
 
