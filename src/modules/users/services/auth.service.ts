@@ -17,20 +17,18 @@ export const registerUser = async ({
     const hashedPassword = await bcrypt.hash(password, 10);
     const uuid = uuidv5(id!, NAMESPACE);
 
-    const newUser = await User.create({
+    const result = await User.create({
       id: uuidToBuffer(uuid),
       full_name: formatName(full_name),
       password: hashedPassword,
       email: email,
     });
 
-    if (!newUser) {
-      return null;
-    }
-
-    return { full_name: newUser.full_name, email: newUser.email };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al crear un nuevo usuario");
+    throw error instanceof Error
+      ? error.message
+      : "Error al crear un nuevo usuario";
   }
 };
 
@@ -74,4 +72,11 @@ export const logoutUser = async ({ idToken }: { idToken: string }) => {
   } catch (error) {
     throw new Error("Invalid token or user already logged out");
   }
+};
+
+
+export default {
+  registerUser,
+  loginUser,
+  logoutUser,
 };
