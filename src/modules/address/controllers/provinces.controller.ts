@@ -1,185 +1,114 @@
 import { Request, Response } from "express";
 import * as addressServices from "../services";
-import { isValidUUID } from "../../../utils/uuidValidator";
+import { validateUUID } from "../../../utils/uuidValidator";
+import { handleErrorResponse } from "../../../utils/handleErrorResponse";
+
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, country_id } = req.body;
+    const { country_id, name } = req.body;
 
-    const countryFound = await addressServices.countries.getById(country_id);
-    if (!countryFound) {
-      res.status(404).json({ message: `El Provincia con el id: ${country_id} no existe.` });
-      return;
+    if (!(await addressServices.countries.getById({ id: country_id }))) {
+      return handleErrorResponse(res, 404, `El país con el id: ${country_id} no existe.`);
+    }
+
+    if ((await addressServices.provinces.getByName({ name }))) {
+      return handleErrorResponse(res, 404, `La provincia: ${name} ya existe.`);
     };
 
-    const provinceFound = await addressServices.provinces.getByName(name);
-    if (provinceFound) {
-      res.status(409).json({ message: `La provincia con el nombre: ${name} ya existe.` });
-      return;
+    if (!(await addressServices.provinces.add(req.body))) {
+      return handleErrorResponse(res, 404, `Error al agregar la provincia.`);
     };
 
-    const result = await addressServices.provinces.add(req.body);
-    if (!result) {
-      res.status(400).json({ message: `Error al agregar la Provincia.` });
-      return;
-    };
-
-    const provinceExists = await addressServices.provinces.getByName(name);
-    if (!provinceExists) {
-      res.status(404).json({ message: `Error al encontrar la Provincia agregada` });
-      return;
-    };
+    const result = await addressServices.provinces.getByName({ name });
+    if (!result) return handleErrorResponse(res, 404, `Error al encontrar la provincia agregada.`);
 
     res.status(201).json({
-      message: "Provincia agregado exitosamente",
-      province: provinceExists,
+      message: "Provincia agregada exitosamente",
+      province: result,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error interno del servidor." });
-    return;
+    handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await addressServices.provinces.getAll();
+    const { country_id } = req.query;
+    let result;
 
-    if (!result) {
-      res.status(404).json({ message: `Error al obtener los Provincias.` });
-      return;
+    if (country_id && typeof country_id === 'string') {
+      if (!validateUUID(country_id, res)) return;
+      result = await addressServices.provinces.getByCountryId({ country_id })
+    } else {
+      result = await addressServices.provinces.getAll();
     };
 
-    res.status(201).json({
-      message: "Provincias obtenidos exitosamente",
-      provinces: result,
-    });
+    res.status(200).json(result ?? []);
   } catch (error) {
-    res.status(500).json({ message: "Error interno del servidor." });
-    return;
+    handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };
 
 const getById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    if (!validateUUID(id, res)) return;
 
-    if (!id || !isValidUUID(id)) {
-      res.status(400).json({ message: `ID inválido, no tiene formato UUID` });
-      return;
-    };
+    const result = await addressServices.provinces.getById({ id });
+    if (!result) return handleErrorResponse(res, 404, `La provincia con el id: ${id} no existe.`);
 
-    const provinceFound = await addressServices.provinces.getById(id);
-    if (!provinceFound) {
-      res.status(404).json({ message: `La provincia con el id: ${id} no existe.` });
-      return;
-    };
-
-    res.status(201).json({
-      message: "Provincia encontrado exitosamente",
-      country: provinceFound,
-    });
+    res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: "Error interno del servidor." });
-    return;
+    handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };
 
 const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { name, country_id } = req.body;
+    const { name } = req.body;
+    if (!validateUUID(id, res)) return;
 
-    if (!req.body || Object.keys(req.body).length === 0) {
-      res.status(400).json({ message: "Debe enviar al menos un campo para actualizar." });
-      return
+    if (!(await addressServices.provinces.getById({ id }))) {
+      return handleErrorResponse(res, 404, `La provincia con el id: ${id} no existe.`);
     };
 
-    const provinceFound = await addressServices.provinces.getById(id);
-    if (!provinceFound) {
-      res.status(404).json({ message: `La provincia con el id: ${id} no existe.` });
-      return;
+    if ((await addressServices.provinces.getByName({ name }))) {
+      return handleErrorResponse(res, 409, `La provincia: ${name} ya existe.`);
     };
 
-    if (name) {
-      const provinceFound = await addressServices.provinces.getByName(name);
-      if (provinceFound) {
-        res.status(409).json({ message: `La provincia con el nombre: ${name} ya existe.` });
-        return;
-      };
+    if (!(await addressServices.provinces.editById({ id, name }))) {
+      return handleErrorResponse(res, 404, `Error al editar la probincia.`);
     };
 
-    if (country_id) {
-      if (!isValidUUID(country_id)) {
-        res.status(400).json({ message: `country_id inválido, no tiene formato UUID` });
-        return;
-      };
+    const result = await addressServices.provinces.getById({ id })
+    if (!result) return handleErrorResponse(res, 404, `Error al encontra la probincia editada.`);
 
-      const countryFound = await addressServices.countries.getById(country_id);
-      if (!countryFound) {
-        res.status(404).json({ message: `El Provincia con el id: ${country_id} no existe.` });
-        return;
-      };
-    };
-
-    const result = await addressServices.provinces.editById({ id, ...req.body });
-    if (!result) {
-      res.status(400).json({ message: `No se pudo actualizar la Provincia.` });
-      return;
-    };
-
-    const provinceUpdated = await addressServices.provinces.getById(id);
-    if (!provinceUpdated) {
-      res.status(404).json({ message: `Error al encontrar la provincia actualizada.` });
-      return;
-    };
-
-    res.status(200).json({
-      message: "Provincia editada exitosamente",
-      country: provinceUpdated,
-    });
+    res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: "Error interno del servidor." });
-    return;
+    handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };
 
 const deleteById = async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-
   try {
-    if (!id || !isValidUUID(id)) {
-      res.status(400).json({ message: `ID inválido, no tiene formato UUID` });
-      return;
+    const { id } = req.params;
+    if (!validateUUID(id, res)) return;
+
+    const result = await addressServices.provinces.getById({ id });
+    if (!result) return handleErrorResponse(res, 404, `La provincia con el id: ${id} no existe.`);
+
+    if (!(await addressServices.provinces.deleteById({ id }))) {
+      return handleErrorResponse(res, 404, `Error al eliminar la provincia.`)
     };
 
-    const provinceFound = await addressServices.provinces.getById(id);
-    if (!provinceFound) {
-      res.status(404).json({ message: `La Provincia con el id: ${id} no existe.` });
-      return;
-    };
-
-    const result = await addressServices.provinces.deleteById(id);
-    if (!result) {
-      res.status(404).json({ message: `Error al eliminar la Provincia.` });
-      return;
-    };
-
-    res.status(200).json({
-      message: "Provincia eliminada exitosamente",
-      country: provinceFound,
-    });
+    res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: "Error interno del servidor." });
-    return;
+    handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };
 
 
-export default {
-  create,
-  getAll,
-  getById,
-  editById,
-  deleteById
-};
+export default { create, getAll, getById, editById, deleteById };
 

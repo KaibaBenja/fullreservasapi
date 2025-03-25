@@ -15,11 +15,7 @@ const add = async ({ shop_id, location_type, floor, roof_type, capacity, quantit
       quantity: quantity,
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return result;
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error("Error al agregar la mesa.");
   };
@@ -39,11 +35,7 @@ const getAll = async () => {
       ],
     });
 
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error("Error al obtener las mesas.");
   };
@@ -65,18 +57,23 @@ const getById = async ({ id }: Pick<ITables, "id">) => {
       replacements: [id],
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return result.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener la subcategoria por id');
+    throw new Error('Error al obtener la mesa por id.');
   };
 };
 
-const getAllByLocationType = async ({ location_type }: Pick<ITables, 'location_type'>) => {
+const getAllByFilters = async (filters: Partial<ITables>) => {
   try {
+    const { shop_id, location_type, floor, roof_type } = filters;
+
+    const whereConditions: Record<string, any> = {};
+
+    if (shop_id) whereConditions.shop_id = uuidToBuffer(shop_id);
+    if (location_type) whereConditions.location_type = location_type;
+    if (floor) whereConditions.floor = floor;
+    if (roof_type) whereConditions.roof_type = roof_type;
+
     const result = await Tables.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
@@ -87,70 +84,16 @@ const getAllByLocationType = async ({ location_type }: Pick<ITables, 'location_t
         'capacity',
         'quantity'
       ],
-      where: { location_type: location_type }
+      where: whereConditions
     });
 
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error('Error al obtener la mesa por ubicación.');
-  };
+    throw new Error('Error al obtener las mesas con los filtros proporcionados.');
+  }
 };
 
-const getAllByFloor = async ({ floor }: Pick<ITables, 'floor'>) => {
-  try {
-    const result = await Tables.findAll({
-      attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        'location_type',
-        'floor',
-        'roof_type',
-        'capacity',
-        'quantity'
-      ],
-      where: { floor: floor }
-    });
-
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
-  } catch (error) {
-    throw new Error('Error al obtener la mesa por el piso.');
-  };
-};
-
-const getAllByRoofType = async ({ roof_type }: Pick<ITables, 'roof_type'>) => {
-  try {
-    const result = await Tables.findAll({
-      attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        'location_type',
-        'floor',
-        'roof_type',
-        'capacity',
-        'quantity'
-      ],
-      where: { roof_type: roof_type }
-    });
-
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
-  } catch (error) {
-    throw new Error('Error al obtener la mesa por el tipo de techo.');
-  };
-};
-
-const getAllByFilters = async ({ shop_id, location_type, floor, roof_type }: Pick<ITables, 'shop_id'> & Partial<Pick<ITables, 'location_type' | 'floor' | 'roof_type'>>) => {
+const getAllByFiltersShopId = async ({ shop_id, location_type, floor, roof_type }: Pick<ITables, 'shop_id'> & Partial<Pick<ITables, 'location_type' | 'floor' | 'roof_type'>>) => {
   try {
     const whereConditions: Record<string, any> = {
       shop_id: sequelize.fn('UUID_TO_BIN', shop_id)
@@ -173,42 +116,10 @@ const getAllByFilters = async ({ shop_id, location_type, floor, roof_type }: Pic
       where: whereConditions
     });
 
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
-
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error('Error al obtener las mesas con los filtros proporcionados.');
   }
-};
-
-const getAllByShopId = async ({ shop_id }: Pick<ITables, 'shop_id'>) => {
-  try {
-    const result = await Tables.findAll({
-      attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        'location_type',
-        'floor',
-        'roof_type',
-        'capacity',
-        'quantity'
-      ],
-      where: {
-        shop_id: sequelize.fn('UUID_TO_BIN', shop_id)
-      }
-    });
-
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
-  } catch (error) {
-    throw new Error('Error al obtener la mesa por el id de negocio.');
-  };
 };
 
 const editById = async ({ id, location_type, floor, roof_type, capacity, quantity }: ITables) => {
@@ -225,11 +136,7 @@ const editById = async ({ id, location_type, floor, roof_type, capacity, quantit
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
     throw new Error('Error al editar la mesa.');
   };
@@ -241,15 +148,11 @@ const deleteById = async ({ id }: Pick<ITables, "id">) => {
       where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
     throw new Error("Error al eliminar la mesa.");
   };
 };
 
 
-export default { add, getAll, getById, getAllByLocationType, getAllByFloor, getAllByRoofType, getAllByFilters, getAllByShopId, editById, deleteById };
+export default { add, getAll, getById, getAllByFilters, getAllByFiltersShopId, editById, deleteById };

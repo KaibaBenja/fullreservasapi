@@ -6,6 +6,7 @@ import { addressesSchema } from "../schemas/addresses.schema";
 export const addressesRoutes = express.Router();
 
 addressesRoutes.post("/", validateSchema(addressesSchema), addressesController.create);
+addressesRoutes.post("/filtered", validateSchemaPartial(addressesSchema), addressesController.getAllByFilters);
 addressesRoutes.get("/", addressesController.getAll);
 addressesRoutes.get("/:id", addressesController.getById);
 addressesRoutes.patch("/:id", validateSchemaPartial(addressesSchema), addressesController.editById);

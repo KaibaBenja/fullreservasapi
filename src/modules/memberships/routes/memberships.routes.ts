@@ -7,6 +7,7 @@ export const membershipRoutes = express.Router();
 
 membershipRoutes.post("/", validateSchema(membershipsSchema), membershipsController.create);
 membershipRoutes.get("/", membershipsController.getAll);
+membershipRoutes.post("/filtered", validateSchemaPartial(membershipsSchema), membershipsController.getAllByFilters);
 membershipRoutes.get("/:id", membershipsController.getById);
 membershipRoutes.patch("/:id", validateSchemaPartial(membershipsSchema), membershipsController.editById);
 membershipRoutes.delete("/:id", membershipsController.deleteById);

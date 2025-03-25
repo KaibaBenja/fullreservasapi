@@ -14,12 +14,9 @@ const add = async ({ user_id, tier, status, expire_date }: IMemberships) => {
     if (status) data.status = status;
     if (expire_date) data.expire_date = expire_date;
 
-    const newMembership = await Membership.create(data);
-    if (!newMembership) {
-      return null;
-    };
+    const result = await Membership.create(data);
 
-    return { success: true };
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error("Error al agregar la membresia.");
   };
@@ -27,7 +24,7 @@ const add = async ({ user_id, tier, status, expire_date }: IMemberships) => {
 
 const getAll = async () => {
   try {
-    const memberships = await Membership.findAll({
+    const result = await Membership.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
@@ -39,19 +36,15 @@ const getAll = async () => {
       ],
     });
 
-    if (!memberships || memberships.length === 0) {
-      return null;
-    };
-
-    return memberships.map(membership => membership.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error("Error al obtener las membresias.");
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<IMemberships, "id">) => {
   try {
-    const membership = await Membership.findOne({
+    const result = await Membership.findOne({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
@@ -65,19 +58,24 @@ const getById = async (id: string) => {
       replacements: [id],
     });
 
-    if (!membership) {
-      return null;
-    };
-
-    return membership.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error('Error al obtener la membresia.');
   };
 };
 
-const getByUserId = async (user_id: string) => {
+const getAllByFilters = async (filters: Partial<IMemberships>) => {
   try {
-    const membership = await Membership.findOne({
+    const { user_id, tier, status, expire_date } = filters;
+
+    const whereConditions: Record<string, any> = {};
+
+    if (user_id) whereConditions.user_id = uuidToBuffer(user_id);
+    if (tier) whereConditions.tier = tier;
+    if (status) whereConditions.status = status;
+    if (expire_date) whereConditions.expire_date = expire_date;
+
+    const result = await Membership.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
@@ -87,72 +85,13 @@ const getByUserId = async (user_id: string) => {
         'created_at',
         'updated_at'
       ],
-      where: sequelize.literal(`user_id = UUID_TO_BIN(?)`),
-      replacements: [user_id],
+      where: whereConditions
     });
 
-    if (!membership) {
-      return null;
-    };
-
-    return membership.toJSON();
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error('Error al obtener la membresia por id de usuario.');
-  };
-};
-
-const getAllByTier = async (tier: string) => {
-  try {
-    const memberships = await Membership.findAll({
-      attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
-        'tier',
-        'status',
-        'expire_date',
-        'created_at',
-        'updated_at'
-      ],
-      where: {
-        'tier': tier
-      }
-    });
-
-    if (!memberships || memberships.length === 0) {
-      return null;
-    };
-
-    return memberships.map(membership => membership.toJSON());
-  } catch (error) {
-    throw new Error('Error al obtener las membresias por nivel.');
-  };
-};
-
-const getAllByStatus = async (status: string) => {
-  try {
-    const memberships = await Membership.findAll({
-      attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
-        'tier',
-        'status',
-        'expire_date',
-        'created_at',
-        'updated_at'
-      ],
-      where: {
-        'status': status
-      }
-    });
-
-    if (!memberships || memberships.length === 0) {
-      return null;
-    };
-
-    return memberships.map(membership => membership.toJSON());
-  } catch (error) {
-    throw new Error('Error al obtener las membresias por estado.');
-  };
+    throw new Error('Error al obtener las membresias con los filtros proporcionados.');
+  }
 };
 
 const editById = async ({ id, tier, status, expire_date }: IMemberships) => {
@@ -167,31 +106,23 @@ const editById = async ({ id, tier, status, expire_date }: IMemberships) => {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`),
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
     throw new Error('Error al editar la membresía.');
   };
 };
 
-const deleteById = async (id: string) => {
+const deleteById = async ({ id }: Pick<IMemberships, "id">) => {
   try {
     const result = await Membership.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
     throw new Error("Error al eliminar la membresia.");
   };
 };
 
 
-export default { add, getAll, getById, getByUserId, getAllByTier, getAllByStatus, editById, deleteById };
+export default { add, getAll, getById, getAllByFilters, editById, deleteById };

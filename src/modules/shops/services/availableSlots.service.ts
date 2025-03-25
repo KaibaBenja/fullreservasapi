@@ -13,11 +13,7 @@ const add = async ({ shop_id, start_time, end_time, capacity }: IAvailableSlots)
       capacity: capacity
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return result;
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error("Error al agregar el espacio disponible.");
   };
@@ -35,11 +31,7 @@ const getAll = async () => {
       ],
     });
 
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error("Error al obtener los espacios disponibles.");
   };
@@ -59,11 +51,7 @@ const getById = async ({ id }: Pick<IAvailableSlots, "id">) => {
       replacements: [id],
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return result.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error('Error al obtener el espacio disponible por id.');
   };
@@ -90,12 +78,7 @@ const getAllByFilters = async ({ shop_id, start_time, end_time, capacity }: Pick
       where: whereConditions
     });
 
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
-
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error('Error al obtener los espacios disponibles con los filtros proporcionados.');
   };
@@ -116,11 +99,7 @@ const getAllByShopId = async ({ shop_id }: Pick<IAvailableSlots, 'shop_id'>) => 
       }
     });
 
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error('Error al obtener el espacio disponible por el id de negocio.');
   };
@@ -138,11 +117,7 @@ const editById = async ({ id, start_time, end_time, capacity }: IAvailableSlots)
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
     throw new Error('Error al editar la el espacio disponible.');
   };
@@ -154,11 +129,7 @@ const deleteById = async ({ id }: Pick<IAvailableSlots, "id">) => {
       where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
     throw new Error("Error al eliminar el espacio disponible.");
   };

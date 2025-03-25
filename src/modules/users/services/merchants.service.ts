@@ -14,22 +14,17 @@ const add = async ({ user_id, main_category, logo_url }: IMerchant) => {
 
     if (logo_url) data.logo_url = logo_url;
 
-    const newMerchant = await Merchant.create(data);
+    const result = await Merchant.create(data);
 
-    if (!newMerchant) {
-      return null;
-    };
-
-    return { user_id: newMerchant.user_id, main_category: newMerchant.main_category };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al crear un nuevo comerciante.");
   };
 };
 
 const getAll = async () => {
   try {
-    const users = await sequelize.query(
+    const result = await sequelize.query(
       `SELECT 
         BIN_TO_UUID(u.id) AS id,
         u.full_name,
@@ -44,25 +39,21 @@ const getAll = async () => {
           'updated_at', m.updated_at
         ) AS merchant
       FROM users u
-      INNER JOIN merchant_settings m ON u.id = m.user_id;`, 
+      INNER JOIN merchant_settings m ON u.id = m.user_id;`,
       {
         type: QueryTypes.SELECT,
       }
-    );    
+    );
 
-    if (!users || users.length === 0) {
-      return null;
-    };
-
-    return users;
+    return result.length ? result : null;
   } catch (error) {
-    throw new Error("Error al obtener los usuarios. ");
+    throw new Error("Error al obtener los comerciantes.");
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<IMerchant, "id">) => {
   try {
-    const merchant = await Merchant.findOne({
+    const result = await Merchant.findOne({
       attributes: [
         [sequelize.literal("BIN_TO_UUID(id)"), "id"],
         [sequelize.literal("BIN_TO_UUID(user_id)"), "user_id"],
@@ -76,19 +67,15 @@ const getById = async (id: string) => {
       },
     });
 
-    if (!merchant) {
-      return null;
-    };
-
-    return merchant.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al obtener el merchant.");
+    throw new Error("Error al obtener el comerciante.");
   };
 };
 
-const getByUserId = async (userId: string) => {
+const getByUserId = async ({ user_id }: Pick<IMerchant, "user_id">) => {
   try {
-    const user = await sequelize.query(
+    const result = await sequelize.query(
       `SELECT 
           BIN_TO_UUID(u.id) AS id,
           u.full_name,
@@ -104,26 +91,22 @@ const getByUserId = async (userId: string) => {
         ) AS merchant
         FROM users u
         LEFT JOIN merchant_settings m ON u.id = m.user_id
-        WHERE u.id = UUID_TO_BIN(:userId);`,
+        WHERE u.id = UUID_TO_BIN(:user_id);`,
       {
-        replacements: { userId },
+        replacements: { user_id },
         type: QueryTypes.SELECT,
       }
     );
 
-    if (!user || user.length === 0) {
-      return null;
-    };
-
-    return user;
+    return result.length ? result : null;
   } catch (error) {
-    throw new Error('Error al obtener el usuario por id.');
+    throw new Error('Error al obtener el comerciante por id.');
   };
 };
 
 const getByUserAndCategory = async ({ user_id, main_category }: IMerchant) => {
   try {
-    const merchant = await Merchant.findOne({
+    const result = await Merchant.findOne({
       attributes: [
         [sequelize.literal("BIN_TO_UUID(id)"), "id"],
         [sequelize.literal("BIN_TO_UUID(user_id)"), "user_id"],
@@ -138,55 +121,38 @@ const getByUserAndCategory = async ({ user_id, main_category }: IMerchant) => {
       },
     });
 
-    if (!merchant) {
-      return null;
-    };
-
-    return merchant.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al obtener el merchant.");
+    throw new Error("Error al obtener el comerciante por id de usuario y categoria.");
   };
 };
 
-const editById = async ({ id, user_id, main_category, logo_url }: IMerchant) => {
+const editById = async ({ id, main_category, logo_url }: IMerchant) => {
   try {
     const updateData: any = {};
 
-    if (user_id) updateData.user_id = uuidToBuffer(user_id);
     if (main_category) updateData.main_category = main_category;
     if (logo_url) updateData.logo_url = logo_url;
-
-    if (Object.keys(updateData).length === 0) {
-      return { hasNoFieldsToUpdate: true };
-    };
 
     const [updatedRowsCount] = await Merchant.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar el merchant');
+    throw new Error('Error al editar el comerciante.');
   };
 };
 
-const deleteById = async (id: string) => {
+const deleteById = async ({ id }: Pick<IMerchant, "id">) => {
   try {
     const result = await Merchant.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
-    throw new Error("Error al eliminar el merchant");
+    throw new Error("Error al eliminar el comerciante.");
   };
 };
 

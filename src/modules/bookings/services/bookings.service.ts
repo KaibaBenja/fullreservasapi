@@ -68,7 +68,6 @@ const getById = async ({ id }: Pick<IBookings, "id">) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
     throw new Error('Error al obtener la reserva por id.');
   };
 };

@@ -1,13 +1,13 @@
 import { IAddresses } from "../types/addresses.types";
 import Addresses from "../models/addresses.model";
-import { formatName } from "../utils/formatName";
+import { formatName } from "../../../utils/formatName";
 import { sequelize } from "../../../config/sequalize.config";
-import { Op, Sequelize } from "sequelize";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+
 
 const add = async ({ street, street_number, extra, city_id, province_id, country_id, description }: IAddresses) => {
   try {
-    const newAddress = await Addresses.create({
+    const result = await Addresses.create({
       street: formatName(street),
       street_number: street_number.toUpperCase(),
       extra: extra,
@@ -17,19 +17,15 @@ const add = async ({ street, street_number, extra, city_id, province_id, country
       description: description
     });
 
-    if (!newAddress) {
-      return null;
-    };
-
-    return { street: newAddress.street, street_number: newAddress.street_number };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al agregar la dirección");
+    throw new Error("Error al agregar la dirección.");
   };
 };
 
 const getAll = async () => {
   try {
-    const addresses = await Addresses.findAll({
+    const result = await Addresses.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'street',
@@ -44,19 +40,15 @@ const getAll = async () => {
       ],
     });
 
-    if (!addresses || addresses.length === 0) {
-      return null;
-    };
-
-    return addresses.map(address => address.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error("Error al obtener las direcciones");
+    throw new Error("Error al obtener las direcciones.");
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<IAddresses, "id">) => {
   try {
-    const address = await Addresses.findOne({
+    const result = await Addresses.findOne({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'street',
@@ -73,25 +65,27 @@ const getById = async (id: string) => {
       replacements: [id],
     });
 
-    if (!address) {
-      return null;
-    };
-
-    return address.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener la dirección por id');
+    throw new Error('Error al obtener la dirección por id.');
   };
 };
 
-const getByAddress = async (street: string, street_number: string) => {
+const getAllByFilters = async (filters: Partial<IAddresses>) => {
   try {
-    const address = await Addresses.findOne({
-      where: {
-        [Op.and]: [
-          Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("street")), "=", street.toLowerCase()),
-          Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("street_number")), "=", street_number.toLowerCase()),
-        ],
-      },
+    const { street, street_number, extra, city_id, province_id, country_id, description } = filters;
+
+    const whereConditions: Record<string, any> = {};
+
+    if (street) whereConditions.street = street;
+    if (street_number) whereConditions.street_number = street_number;
+    if (extra) whereConditions.extra = extra;
+    if (city_id) whereConditions.city_id = uuidToBuffer(city_id);
+    if (province_id) whereConditions.province_id = uuidToBuffer(province_id);
+    if (country_id) whereConditions.country_id = uuidToBuffer(country_id);
+    if (description) whereConditions.description = description;
+
+    const result = await Addresses.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'street',
@@ -104,66 +98,45 @@ const getByAddress = async (street: string, street_number: string) => {
         'created_at',
         'updated_at'
       ],
+      where: whereConditions
     });
 
-    if (!address) {
-      return null;
-    };
-
-    return address.toJSON();
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error('Error al obtener la dirección por la calle y el número');
-  };
+    throw new Error('Error al obtener las direcciones con los filtros proporcionados.');
+  }
 };
 
-const editById = async ({ id, street, street_number, extra, city_id, province_id, country_id, description }: IAddresses) => {
+const editById = async ({ id, street, street_number, extra, description }: IAddresses) => {
   try {
     const updateData: any = {};
 
     if (street) updateData.street = formatName(street);
     if (street_number) updateData.street_number = street_number.toUpperCase();
     if (extra) updateData.extra = extra;
-    if (city_id) updateData.city_id = sequelize.literal(`UUID_TO_BIN(${sequelize.escape(city_id)})`);
-    if (province_id) updateData.province_id = sequelize.literal(`UUID_TO_BIN(${sequelize.escape(province_id)})`);
-    if (country_id) updateData.country_id = sequelize.literal(`UUID_TO_BIN(${sequelize.escape(country_id)})`);
     if (description) updateData.description = description;
 
     const [updatedRowsCount] = await Addresses.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar la dirreción');
+    throw new Error('Error al editar la dirreción.');
   };
 };
 
-const deleteById = async (id: string) => {
+const deleteById = async ({ id }: Pick<IAddresses, "id">) => {
   try {
     const result = await Addresses.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
-    throw new Error("Error al eliminar la dirección");
+    throw new Error("Error al eliminar la dirección.");
   };
 };
 
 
-export default{
-  add,
-  getAll,
-  getById,
-  getByAddress,
-  editById,
-  deleteById
-};
+export default { add, getAll, getById, getAllByFilters, editById, deleteById };

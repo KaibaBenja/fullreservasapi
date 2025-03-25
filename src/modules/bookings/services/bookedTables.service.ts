@@ -13,11 +13,7 @@ const add = async ({ booking_id, table_id, tables_booked, guests }: IBookedTable
       guests: guests,
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return result;
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error("Error al agregar la mesa resevada.");
   };
@@ -35,11 +31,7 @@ const getAll = async () => {
       ],
     });
 
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error("Error al obtener las mesas reservadas.");
   };
@@ -59,11 +51,7 @@ const getById = async ({ id }: Pick<IBookedTables, "id">) => {
       replacements: [id],
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return result.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error('Error al obtener la mesa reservada por id.');
   };
@@ -92,12 +80,7 @@ const getAllByFiltersBookingId = async ({
       where: whereConditions
     });
 
-    if (!result || result.length === 0) {
-      return null;
-    };
-
-    return result.map(res => res.toJSON());
-
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error('Error al obtener las mesas reservadas con los filtros proporcionados.');
   };
@@ -142,11 +125,7 @@ const editById = async ({ id, tables_booked, guests }: IBookedTables) => {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
     throw new Error('Error al editar la mesa reservada.');
   };
@@ -158,11 +137,7 @@ const deleteById = async ({ id }: Pick<IBookedTables, "id">) => {
       where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
     throw new Error("Error al eliminar la mesa reservada.");
   };

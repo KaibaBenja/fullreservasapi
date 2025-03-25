@@ -9,5 +9,5 @@ export const addressRoutes = express.Router();
 addressRoutes.use("/countries", countriesRoutes);
 addressRoutes.use("/provinces", provincesRoutes);
 addressRoutes.use("/cities", citiesRoutes);
-addressRoutes.use("/addresses", addressesRoutes);
+addressRoutes.use("/details", addressesRoutes);
 
