@@ -1,9 +1,6 @@
 import express from "express";
 import imagesController from "../controllers/images.controller";
-import {
-  validateSchema,
-  validateSchemaPartial,
-} from "../../../middlewares/validateSchema";
+import { validateSchema, validateSchemaPartial } from "../../../middlewares/validateSchema";
 import { imagesSchema } from "../schemas/images.schema";
 import { upload } from "../../../middlewares/upload";
 

@@ -10,85 +10,89 @@ const add = async ({ full_name, password, email }: IUser) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
+    const result = await User.create({
       full_name: formatName(full_name),
       password: hashedPassword,
       email: email,
     });
 
-    if (!newUser) {
-      return null;
-    };
-
-    return { full_name: newUser.full_name, email: newUser.email };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al crear un nuevo usuario");
+    throw new Error("Error al crear un nuevo usuario.");
   };
 };
 
 const getAll = async () => {
   try {
-    const users = await sequelize.query(
+    const result = await sequelize.query(
       `SELECT 
         BIN_TO_UUID(u.id) AS id,
         u.full_name,
         u.email,
         u.created_at,
         u.updated_at,
-        JSON_ARRAYAGG(r.name) AS roles
+        JSON_ARRAYAGG(r.name) AS roles,
+        JSON_OBJECT(
+          'tier', m.tier,
+          'status', m.status,
+          'expire_date', m.expire_date,
+          'created_at', m.created_at,
+          'updated_at', m.updated_at
+        ) AS membership
       FROM users u
       LEFT JOIN userroles ur ON u.id = ur.user_id
       LEFT JOIN roles r ON ur.role_id = r.id
-      GROUP BY u.id`,
+      LEFT JOIN memberships m ON u.id = m.user_id
+      GROUP BY u.id, m.tier, m.status, m.expire_date, m.created_at, m.updated_at`,
       {
         type: QueryTypes.SELECT,
       }
     );
 
-    if (!users || users.length === 0) {
-      return null;
-    };
-
-    return users;
+    return result.length ? result : null;
   } catch (error) {
-    throw new Error("Error al obtener los usuarios");
+    throw new Error("Error al obtener los usuarios.");
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<IUser, "id">) => {
   try {
-    const user = await sequelize.query(
+    const result = await sequelize.query(
       `SELECT 
-          BIN_TO_UUID(u.id) AS id,
-          u.full_name,
-          u.email,
-          u.created_at,
-          u.updated_at,
-          JSON_ARRAYAGG(r.name) AS roles
-       FROM users u
-       LEFT JOIN userroles ur ON u.id = ur.user_id
-       LEFT JOIN roles r ON ur.role_id = r.id
-       WHERE u.id = UUID_TO_BIN(:userId)
-       GROUP BY u.id`,
+        BIN_TO_UUID(u.id) AS id,
+        u.full_name,
+        u.email,
+        u.created_at,
+        u.updated_at,
+        JSON_ARRAYAGG(r.name) AS roles,
+        JSON_OBJECT(
+          'tier', m.tier,
+          'status', m.status,
+          'expire_date', m.expire_date,
+          'created_at', m.created_at,
+          'updated_at', m.updated_at
+        ) AS membership
+      FROM users u
+      LEFT JOIN userroles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
+      LEFT JOIN memberships m ON u.id = m.user_id
+      WHERE u.id = UUID_TO_BIN(:userId)
+      GROUP BY u.id, m.tier, m.status, m.expire_date, m.created_at, m.updated_at`,
       {
         type: QueryTypes.SELECT,
         replacements: { userId: id },
       }
     );
 
-    if (!user) {
-      return null;
-    };
-
-    return user;
+    return result.length ? result : null;
   } catch (error) {
     throw new Error('Error al obtener el usuario por id');
   };
 };
 
-const getByEmail = async (email: string) => {
+const getByEmail = async ({ email }: Pick<IUser, "email">) => {
   try {
-    const user = await User.findOne({
+    const result = await User.findOne({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'full_name',
@@ -103,48 +107,48 @@ const getByEmail = async (email: string) => {
       ),
     });
 
-    if (!user) {
-      return null;
-    };
-
-    return user.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener el usuario por email');
+    throw new Error('Error al obtener el usuario por email.');
   };
 };
 
 const getByRole = async (roleId: string) => {
   try {
-    const users = await sequelize.query(
+    const result = await sequelize.query(
       `SELECT 
         BIN_TO_UUID(u.id) AS id,
         u.full_name,
         u.email,
         u.created_at,
         u.updated_at,
-        JSON_ARRAYAGG(r.name) AS roles
+        JSON_ARRAYAGG(r.name) AS roles,
+        JSON_OBJECT(
+          'tier', m.tier,
+          'status', m.status,
+          'expire_date', m.expire_date,
+          'created_at', m.created_at,
+          'updated_at', m.updated_at
+        ) AS membership
       FROM users u
       LEFT JOIN userroles ur ON u.id = ur.user_id
       LEFT JOIN roles r ON ur.role_id = r.id
+      LEFT JOIN memberships m ON u.id = m.user_id
       WHERE u.id IN (
         SELECT ur2.user_id 
         FROM userroles ur2 
         WHERE ur2.role_id = UUID_TO_BIN(:roleId)
-      ) GROUP BY u.id`,
+      ) 
+      GROUP BY u.id, m.tier, m.status, m.expire_date, m.created_at, m.updated_at`,
       {
         type: QueryTypes.SELECT,
         replacements: { roleId: roleId },
       }
     );
 
-    if (!users || users.length === 0) {
-      return null;
-    };
-
-    return users;
+    return result.length ? result : null;
   } catch (error) {
-    console.log(error);
-    throw new Error('Error al obtener los usuarios por el id de rol');
+    throw new Error('Error al obtener los usuarios por el id de rol.');
   };
 };
 
@@ -156,37 +160,25 @@ const editById = async ({ id, full_name, password, email }: IUser) => {
     if (email) updateData.email = email;
     if (password) updateData.password = await bcrypt.hash(password, 10);
 
-    if (Object.keys(updateData).length === 0) {
-      return { hasNoFieldsToUpdate: true };
-    };
-
     const [updatedRowsCount] = await User.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar el usuario');
+    throw new Error('Error al editar el usuario.');
   };
 };
 
-const deleteById = async (id: string) => {
+const deleteById = async ({ id }: Pick<IUser, "id">) => {
   try {
     const result = await User.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
-    throw new Error("Error al eliminar el usuario");
+    throw new Error("Error al eliminar el usuario.");
   };
 };
 

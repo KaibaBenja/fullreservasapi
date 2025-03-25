@@ -5,24 +5,20 @@ import { sequelize } from "../../../config/sequalize.config";
 
 const add = async ({ shop_id, image_url }: IImages) => {
   try {
-    const newImages = await Images.create({
+    const result = await Images.create({
       shop_id: uuidToBuffer(shop_id),
       image_url: image_url,
     });
 
-    if (!newImages) {
-      return null;
-    };
-
-    return { shop_id: newImages.shop_id, image_url: newImages.image_url };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al agregar la imagen");
+    throw new Error("Error al agregar la imagen.");
   };
 };
 
 const getAll = async () => {
   try {
-    const images = await Images.findAll({
+    const result = await Images.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
@@ -30,43 +26,33 @@ const getAll = async () => {
       ],
     });
 
-    if (!images || images.length === 0) {
-      return null;
-    };
-
-    return images.map(image => image.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    console.log(error);
-    throw new Error("Error al obtener las imagenes");
+    throw new Error("Error al obtener las imagenes.");
   };
 };
 
-const getByShopId = async (shop_id: string) => {
+const getByShopId = async ({ shop_id }: Pick<IImages, "shop_id">) => {
   try {
-    const images = await Images.findAll({
+    const result = await Images.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
         'image_url'
       ],
-      where: {
-        shop_id: uuidToBuffer(shop_id)
-      }
+      where: sequelize.literal(`shop_id = UUID_TO_BIN(?)`),
+      replacements: [shop_id],
     });
 
-    if (!images || images.length === 0) {
-      return null;
-    };
-
-    return images.map(image => image.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error('Error al obtener la imagen por id');
+    throw new Error('Error al obtener la imagen por id de negocio.');
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<IImages, "id">) => {
   try {
-    const image = await Images.findOne({
+    const result = await Images.findOne({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
@@ -76,11 +62,7 @@ const getById = async (id: string) => {
       replacements: [id],
     });
 
-    if (!image) {
-      return null;
-    };
-
-    return image.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error('Error al obtener la imagen por id');
   };
@@ -88,7 +70,7 @@ const getById = async (id: string) => {
 
 const lastCreatedEntry = async ({ shop_id, image_url }: IImages) => {
   try {
-    const image = await Images.findOne({
+    const result = await Images.findOne({
       where: {
         shop_id: uuidToBuffer(shop_id),
         image_url: image_url,
@@ -100,19 +82,15 @@ const lastCreatedEntry = async ({ shop_id, image_url }: IImages) => {
       ]
     });
 
-    if (!image) {
-      return null;
-    };
-
-    return image.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error('Error al obtener la imagen por shop_id y image_url');
   };
 };
 
-const getByImageUrl = async (image_url: string) => {
+const getByImageUrl = async ({ image_url }: Pick<IImages, "image_url">) => {
   try {
-    const image = await Images.findOne({
+    const result = await Images.findOne({
       where: {
         image_url: image_url,
       },
@@ -123,11 +101,7 @@ const getByImageUrl = async (image_url: string) => {
       ],
     });
 
-    if (!image) {
-      return null;
-    };
-
-    return image.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error('Error al obtener la imagen por image_url');
   };
@@ -139,33 +113,25 @@ const editById = async ({ id, image_url }: Pick<IImages, "id" | "image_url">) =>
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
     throw new Error('Error al editar la imagen');
   };
 };
 
-const deleteById = async (id: string) => {
+const deleteById = async ({ id }: Pick<IImages, "id">) => {
   try {
     const result = await Images.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
     throw new Error("Error al eliminar la imagen");
   };
 };
 
-const deleteByShopId = async (shop_id: string) => {
+const deleteByShopId = async ({ shop_id }: Pick<IImages, "shop_id">) => {
   try {
     const result = await Images.destroy({
       where: {
@@ -173,25 +139,11 @@ const deleteByShopId = async (shop_id: string) => {
       }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true, deletedCount: result, };
+    return result ? { success: true } : null;
   } catch (error) {
     throw new Error("Error al eliminar las imágenes por id de negocio.");
   };
 };
 
 
-export default {
-  add,
-  getAll,
-  getById,
-  getByShopId,
-  lastCreatedEntry,
-  getByImageUrl,
-  editById,
-  deleteById,
-  deleteByShopId
-};
+export default { add, getAll, getById, getByShopId, lastCreatedEntry, getByImageUrl, editById, deleteById, deleteByShopId };

@@ -1,29 +1,26 @@
 import { IProvinces } from "../types/provinces.types";
 import Province from "../models/provinces.model";
-import { formatName } from "../utils/formatName";
+import { formatName } from "../../../utils/formatName";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { sequelize } from "../../../config/sequalize.config";
 
+
 const add = async ({ name, country_id }: IProvinces) => {
   try {
-    const newProvince = await Province.create({
+    const result = await Province.create({
       name: formatName(name),
       country_id: uuidToBuffer(country_id)
     });
 
-    if (!newProvince) {
-      return null;
-    };
-
-    return { name: newProvince.name };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al agregar la nueva provincia");
+    throw new Error("Error al agregar la provincia.");
   };
 };
 
 const getAll = async () => {
   try {
-    const provinces = await Province.findAll({
+    const result = await Province.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
@@ -31,19 +28,15 @@ const getAll = async () => {
       ],
     });
 
-    if (!provinces || provinces.length === 0) {
-      return null;
-    };
-
-    return provinces.map(province => province.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error("Error al obtener las provincias");
+    throw new Error("Error al obtener las provincias.");
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<IProvinces, "id">) => {
   try {
-    const province = await Province.findOne({
+    const result = await Province.findOne({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
@@ -53,19 +46,15 @@ const getById = async (id: string) => {
       replacements: [id],
     });
 
-    if (!province) {
-      return null;
-    };
-
-    return province.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener la provincia por id');
+    throw new Error('Error al obtener la provincia por id.');
   };
 };
 
-const getByName = async (name: string) => {
+const getByName = async ({ name }: Pick<IProvinces, "name">) => {
   try {
-    const province = await Province.findOne({
+    const result = await Province.findOne({
       where: sequelize.where(
         sequelize.fn("LOWER", sequelize.col("name")),
         "=",
@@ -78,59 +67,56 @@ const getByName = async (name: string) => {
       ],
     });
 
-    if (!province) {
-      return null;
-    };
-
-    return province.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener la provincia por el nombre');
+    throw new Error('Error al obtener la provincia por el nombre.');
   };
 };
 
-const editById = async ({ id, name, country_id }: IProvinces) => {
+const getByCountryId = async ({ country_id }: Pick<IProvinces, "country_id">) => {
   try {
-    const updateData: any = {};
-
-    if (name) updateData.name = formatName(name);
-    if (country_id) updateData.country_id = sequelize.literal(`UUID_TO_BIN(${sequelize.escape(country_id)})`);
-
-    const [updatedRowsCount] = await Province.update(updateData, {
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
+    const result = await Province.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+        'name',
+        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id']
+      ],
+      where: sequelize.literal(`country_id = UUID_TO_BIN(?)`),
+      replacements: [country_id],
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error('Error al editar la provincia');
+    throw new Error('Error al obtener las provincias por el id del país.');
   };
 };
 
-const deleteById = async (id: string) => {
+const editById = async ({ id, name }: Pick<IProvinces, "id" | "name">) => {
+  try {
+    const [updatedRowsCount] = await Province.update(
+      { name: formatName(name) },
+      {
+        where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
+      }
+    );
+
+    return updatedRowsCount > 0 ? { success: true } : null;
+  } catch (error) {
+    throw new Error('Error al editar la provincia.');
+  };
+};
+
+const deleteById = async ({ id }: Pick<IProvinces, "id">) => {
   try {
     const result = await Province.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
-    throw new Error("Error al eliminar la provincia");
+    throw new Error("Error al eliminar la provincia.");
   };
 };
 
 
-export default {
-  add,
-  getAll,
-  getById,
-  getByName,
-  editById,
-  deleteById
-};
+export default { add, getAll, getById, getByName, getByCountryId, editById, deleteById };
