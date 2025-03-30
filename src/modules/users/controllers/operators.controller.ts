@@ -22,12 +22,6 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 400, `El operador del negocio con id: ${shop_id} ya existe.`);
     };
 
-    // Crear usuaraio 
-    if (!await usersServices.users.add({
-      email: full_name,
-      full_name: "",
-      password
-    })) return handleErrorResponse(res, 400, `No se pudo crear el usuario.`);
 
     const user = await usersServices.users.getByEmail({ email: full_name });
     if (!user) return handleErrorResponse(res, 404, `No se encontro el usuarió por email.`);
