@@ -29,6 +29,11 @@ export const userSchema = z.object({
     .trim()
     .toLowerCase()
     .email({ message: "El correo electrónico no es válido" })
-    .max(255, { message: "El campo 'email' no puede tener más de 255 caracteres." })
+    .max(255, { message: "El campo 'email' no puede tener más de 255 caracteres." }),
+
+  merchant: z.boolean({
+    invalid_type_error: "El campo 'merchant' debe ser de tipo booleano.",
+    required_error: "El campo 'merchant' es requerido."
+  }).default(false)
 }).strict();
 

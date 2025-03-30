@@ -1,30 +1,26 @@
 import { ICities } from "../types/cities.types";
 import City from "../models/cities.model";
-import { formatName } from "../utils/formatName";
+import { formatName } from "../../../utils/formatName";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { sequelize } from "../../../config/sequalize.config";
 
 const add = async ({ name, zip_code, province_id }: ICities) => {
   try {
-    const newCity = await City.create({
+    const result = await City.create({
       name: formatName(name),
       zip_code: zip_code,
       province_id: uuidToBuffer(province_id)
     });
 
-    if (!newCity) {
-      return null;
-    };
-
-    return { name: newCity.name };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al agregar la nueva ciudad");
+    throw new Error("Error al agregar la ciudad.");
   };
 };
 
 const getAll = async () => {
   try {
-    const cities = await City.findAll({
+    const result = await City.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
@@ -33,19 +29,15 @@ const getAll = async () => {
       ],
     });
 
-    if (!cities || cities.length === 0) {
-      return null;
-    }
-
-    return cities.map(city => city.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error("Error al obtener las ciudades");
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<ICities, "id">) => {
   try {
-    const city = await City.findOne({
+    const result = await City.findOne({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
@@ -56,19 +48,15 @@ const getById = async (id: string) => {
       replacements: [id],
     });
 
-    if (!city) {
-      return null;
-    };
-
-    return city.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener la ciudad por id');
+    throw new Error('Error al obtener la ciudad por id.');
   };
 };
 
-const getByName = async (name: string) => {
+const getByName = async ({ name }: Pick<ICities, "name">) => {
   try {
-    const city = await City.findOne({
+    const result = await City.findOne({
       where: sequelize.where(
         sequelize.fn("LOWER", sequelize.col("name")),
         "=",
@@ -82,60 +70,81 @@ const getByName = async (name: string) => {
       ],
     });
 
-    if (!city) {
-      return null;
-    };
-
-    return city.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener la ciudad por el nombre');
+    throw new Error('Error al obtener la ciudad por el nombre.');
   };
 };
 
-const editById = async ({ id, name, zip_code, province_id }: ICities) => {
+const getByZipCode = async ({ zip_code }: Pick<ICities, "zip_code">) => {
+  try {
+    const result = await City.findOne({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("zip_code")),
+        "=",
+        zip_code.toLowerCase()
+      ),
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+        'name',
+        'zip_code',
+        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id']
+      ],
+    });
+
+    return result ? result.toJSON() : null;
+  } catch (error) {
+    throw new Error('Error al obtener la ciudad por el código postal.');
+  };
+};
+
+const getByProvinceId = async ({ province_id }: Pick<ICities, "province_id">) => {
+  try {
+    const result = await City.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+        'name',
+        'zip_code',
+        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id']
+      ],
+      where: sequelize.literal(`province_id = UUID_TO_BIN(?)`),
+      replacements: [province_id],
+    });
+
+    return result.length ? result.map(res => res.toJSON()) : null;
+  } catch (error) {
+    throw new Error('Error al obtener las ciudades por el id de la provincia.');
+  };
+};
+
+const editById = async ({ id, name, zip_code }: Pick<ICities, "id" | "name" | "zip_code">) => {
   try {
     const updateData: any = {};
 
     if (name) updateData.name = formatName(name);
     if (zip_code) updateData.zip_code = zip_code.toUpperCase();
-    if (province_id) updateData.province_id = sequelize.literal(`UUID_TO_BIN(${sequelize.escape(province_id)})`);
 
     const [updatedRowsCount] = await City.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar la ciudad');
+    throw new Error('Error al editar la ciudad.');
   };
 };
 
-const deleteById = async (id: string) => {
+const deleteById = async ({ id }: Pick<ICities, "id">) => {
   try {
     const result = await City.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
-    throw new Error("Error al eliminar la ciudad");
+    throw new Error("Error al eliminar la ciudad.");
   };
 };
 
 
-export default {
-  add,
-  getAll,
-  getById,
-  getByName,
-  editById,
-  deleteById
-};
+export default { add, getAll, getById, getByName, getByZipCode, getByProvinceId, editById, deleteById };

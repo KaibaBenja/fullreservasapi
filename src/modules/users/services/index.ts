@@ -3,4 +3,4 @@ export { default as roles } from "./roles.service";
 export { default as userRoles } from "./userroles.service";
 export { default as merchants } from "./merchants.service";
 export { default as operators } from "./operators.service";
-
+export { default as auth } from "./auth.service";

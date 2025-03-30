@@ -3,26 +3,23 @@ import Subcategories from "../models/subcategories.model";
 import { formatName } from "../../..//utils/formatName";
 import { sequelize } from "../../../config/sequalize.config";
 
+
 const add = async ({ name, main_category }: ISubcategories) => {
   try {
-    const newSubcategory = await Subcategories.create({
+    const result = await Subcategories.create({
       name: formatName(name),
       main_category: main_category,
     });
 
-    if (!newSubcategory) {
-      return null;
-    };
-
-    return { name: newSubcategory.name, main_category: newSubcategory.main_category };
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error("Error al agregar la subcategoria");
+    throw new Error("Error al agregar la subcategoría.");
   };
 };
 
 const getAll = async () => {
   try {
-    const subcategories = await Subcategories.findAll({
+    const result = await Subcategories.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
@@ -32,19 +29,15 @@ const getAll = async () => {
       ],
     });
 
-    if (!subcategories || subcategories.length === 0) {
-      return null;
-    };
-
-    return subcategories.map(subcategory => subcategory.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error("Error al obtener las subcategorias");
+    throw new Error("Error al obtener las subcategorías.");
   };
 };
 
-const getById = async (id: string) => {
+const getById = async ({ id }: Pick<ISubcategories, "id">) => {
   try {
-    const subcategory = await Subcategories.findOne({
+    const result = await Subcategories.findOne({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
@@ -56,19 +49,15 @@ const getById = async (id: string) => {
       replacements: [id],
     });
 
-    if (!subcategory) {
-      return null;
-    };
-
-    return subcategory.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener la subcategoria por id');
+    throw new Error('Error al obtener la subcategoría por id.');
   };
 };
 
-const getByName = async (name: string) => {
+const getByName = async ({ name }: Pick<ISubcategories, "name">) => {
   try {
-    const subcategory = await Subcategories.findOne({
+    const result = await Subcategories.findOne({
       where: sequelize.where(
         sequelize.fn("LOWER", sequelize.col("name")),
         "=",
@@ -83,19 +72,15 @@ const getByName = async (name: string) => {
       ],
     });
 
-    if (!subcategory) {
-      return null;
-    };
-
-    return subcategory.toJSON();
+    return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener la subcategoria por nombre');
+    throw new Error('Error al obtener la subcategoría por nombre.');
   };
 };
 
-const getAllByMainCategory = async (main_category: string) => {
+const getAllByMainCategory = async ({ main_category }: Pick<ISubcategories, "main_category">) => {
   try {
-    const subcategories = await Subcategories.findAll({
+    const result = await Subcategories.findAll({
       where: {
         main_category: main_category,
       },
@@ -108,13 +93,9 @@ const getAllByMainCategory = async (main_category: string) => {
       ],
     });
 
-    if (!subcategories || subcategories.length === 0) {
-      return null;
-    };
-
-    return subcategories.map(subcategory => subcategory.toJSON());
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    throw new Error("Error al obtener las subcategorias");
+    throw new Error("Error al obtener las subcategorías.");
   };
 };
 
@@ -129,40 +110,23 @@ const editById = async ({ id, name, main_category }: ISubcategories) => {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
-    if (updatedRowsCount === 0) {
-      return null;
-    };
-
-    return { success: true };
+    return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    console.log(error);
-    throw new Error('Error al editar la subcategoria');
+    throw new Error('Error al editar la subcategoría.');
   };
 };
 
-const deleteById = async (id: string) => {
+const deleteById = async ({ id }: Pick<ISubcategories, "id">) => {
   try {
     const result = await Subcategories.destroy({
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id)})`)
+      where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
 
-    if (!result) {
-      return null;
-    };
-
-    return { success: true };
+    return result ? { success: true } : null;
   } catch (error) {
-    throw new Error("Error al eliminar la subcategoria");
+    throw new Error("Error al eliminar la subcategoría.");
   };
 };
 
 
-export default {
-  add,
-  getAll,
-  getById,
-  getByName,
-  getAllByMainCategory,
-  editById,
-  deleteById
-};
+export default { add, getAll, getById, getByName, getAllByMainCategory, editById, deleteById };
