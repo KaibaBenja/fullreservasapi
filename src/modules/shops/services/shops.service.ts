@@ -7,7 +7,7 @@ import { formatName } from "../../../utils/formatName";
 
 
 const add = async (data: IShops) => {
-  const { user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info } = data;
+  const { user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description} = data;
   try {
     const result = await Shops.create({
       user_id: uuidToBuffer(user_id),
@@ -18,7 +18,8 @@ const add = async (data: IShops) => {
       average_stay_time: average_stay_time,
       capacity: capacity,
       legal_info: legal_info,
-      bank_info: bank_info
+      bank_info: bank_info,
+      description: description
     });
 
     return result ? result.toJSON() : null;
@@ -40,6 +41,7 @@ const getAll = async () => {
         'capacity',
         'legal_info',
         'bank_info',
+        'description',
         'created_at',
         'updated_at'
       ],
@@ -75,6 +77,7 @@ const getById = async ({ id }: Pick<IShops, "id">) => {
         'capacity',
         'legal_info',
         'bank_info',
+        'description',
         'created_at',
         'updated_at'
       ],
@@ -159,6 +162,7 @@ const getAllByFilters = async (filters: Partial<IShops> & {
         'capacity',
         'legal_info',
         'bank_info',
+        'description',
         'created_at',
         'updated_at'
       ],
@@ -224,6 +228,7 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
         'shift_type',
         'average_stay_time',
         'capacity',
+        'description',
         'created_at'
       ],
       include: [includeSubcategory],
@@ -238,7 +243,7 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
 
 const editById = async (data: IShops) => {
   try {
-    const { id, user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info } = data;
+    const { id, user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description } = data;
     const updateData: any = {};
 
     if (user_id) updateData.user_id = uuidToBuffer(user_id);
@@ -250,6 +255,7 @@ const editById = async (data: IShops) => {
     if (capacity) updateData.capacity = capacity;
     if (legal_info) updateData.legal_info = legal_info;
     if (bank_info) updateData.bank_info = bank_info;
+    if (description) updateData.description = description;
 
     const [updatedRowsCount] = await Shops.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)

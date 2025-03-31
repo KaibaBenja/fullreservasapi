@@ -62,7 +62,14 @@ export const shopsSchema = z.object({
     required_error: "El campo 'bank_info' es requerido."
   })
     .min(1, { message: "El campo 'bank_info' debe tener al menos 1 carácter." })
-    .max(255, { message: "El campo 'bank_info' no puede tener más de 255 caracteres." })
+    .max(255, { message: "El campo 'bank_info' no puede tener más de 255 caracteres." }),
+
+    description: z.string({
+      invalid_type_error: "El campo 'description' debe ser de tipo string.",
+      required_error: "El campo 'description' es requerido."
+    })
+      .min(1, { message: "El campo 'description' debe tener al menos 1 carácter." })
+      .max(300, { message: "El campo 'description' no puede tener más de 255 caracteres." }),  
 }).strict();
 
 
