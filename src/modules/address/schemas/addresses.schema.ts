@@ -43,5 +43,15 @@ export const addressesSchema = z.object({
   })
     .min(1, { message: "El campo 'description' debe tener al menos 1 carácter." })
     .max(255, { message: "El campo 'description' no puede tener más de 255 caracteres." }),
+
+  latitude: z.number({
+    invalid_type_error: "El campo 'latitude' debe ser de tipo number.",
+    required_error: "El campo 'latitude' es requerido."
+  }).min(-90).max(90),
+
+  longitude: z.number({
+    invalid_type_error: "El campo 'longitude' debe ser de tipo number.",
+    required_error: "El campo 'longitude' es requerido."
+  }).min(-180).max(180),
 }).strict();
 
