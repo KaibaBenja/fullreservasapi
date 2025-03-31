@@ -15,6 +15,7 @@ interface ShopsAttributes {
   legal_info: string;
   bank_info: string;
   description?: string;
+  price_range: 1 | 2 | 3 | 4;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -33,6 +34,7 @@ class Shops extends Model<ShopsAttributes, ShopsCreationAttributes> implements S
   public legal_info!: string;
   public bank_info!: string;
   public description!: string;
+  public price_range!: 1 | 2 | 3 | 4;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -94,6 +96,13 @@ Shops.init(
     description: {
       type: DataTypes.STRING(300),
       allowNull: true,
+    },
+    price_range: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isIn: [[1, 2, 3, 4]],
+      },
     },
     createdAt: {
       type: DataTypes.DATE,

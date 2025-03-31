@@ -7,7 +7,7 @@ import { formatName } from "../../../utils/formatName";
 
 
 const add = async (data: IShops) => {
-  const { user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description} = data;
+  const { user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description, price_range} = data;
   try {
     const result = await Shops.create({
       user_id: uuidToBuffer(user_id),
@@ -19,7 +19,8 @@ const add = async (data: IShops) => {
       capacity: capacity,
       legal_info: legal_info,
       bank_info: bank_info,
-      description: description
+      description: description,
+      price_range: price_range
     });
 
     return result ? result.toJSON() : null;
@@ -42,6 +43,7 @@ const getAll = async () => {
         'legal_info',
         'bank_info',
         'description',
+        'price_range',
         'created_at',
         'updated_at'
       ],
@@ -78,6 +80,7 @@ const getById = async ({ id }: Pick<IShops, "id">) => {
         'legal_info',
         'bank_info',
         'description',
+        'price_range',
         'created_at',
         'updated_at'
       ],
@@ -110,7 +113,7 @@ const getAllByFilters = async (filters: Partial<IShops> & {
     const {
       // Filtros de Shops
       id, user_id, name, phone_number, shift_type,
-      average_stay_time, capacity, legal_info, bank_info,
+      average_stay_time, capacity, legal_info, bank_info, price_range,
 
       // Filtros de Subcategories
       subcategory_id, subcategory_name, main_category
@@ -128,7 +131,8 @@ const getAllByFilters = async (filters: Partial<IShops> & {
     if (capacity) shopsWhereConditions.capacity = capacity;
     if (legal_info) shopsWhereConditions.legal_info = legal_info;
     if (bank_info) shopsWhereConditions.bank_info = bank_info;
-
+    if (price_range) shopsWhereConditions.price_range = price_range;
+    
     // Condiciones WHERE para la tabla Subcategories
     const subcategoryWhereConditions: Record<string, any> = {};
     if (subcategory_name) subcategoryWhereConditions.name = subcategory_name;
@@ -163,6 +167,7 @@ const getAllByFilters = async (filters: Partial<IShops> & {
         'legal_info',
         'bank_info',
         'description',
+        'price_range',
         'created_at',
         'updated_at'
       ],
@@ -185,7 +190,7 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
     const {
       // Filtros de Shops
       id, name, shift_type,
-      average_stay_time, capacity,
+      average_stay_time, capacity, price_range,
 
       // Filtros de Subcategories
       subcategory_name, main_category
@@ -198,6 +203,7 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
     if (shift_type) shopsWhereConditions.shift_type = shift_type;
     if (average_stay_time) shopsWhereConditions.average_stay_time = average_stay_time;
     if (capacity) shopsWhereConditions.capacity = capacity;
+    if (price_range) shopsWhereConditions.price_range = price_range;
 
     // Condiciones WHERE para la tabla Subcategories
     const subcategoryWhereConditions: Record<string, any> = {};
@@ -229,6 +235,7 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
         'average_stay_time',
         'capacity',
         'description',
+        'price_range',
         'created_at'
       ],
       include: [includeSubcategory],
@@ -243,7 +250,7 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
 
 const editById = async (data: IShops) => {
   try {
-    const { id, user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description } = data;
+    const { id, user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description, price_range } = data;
     const updateData: any = {};
 
     if (user_id) updateData.user_id = uuidToBuffer(user_id);
@@ -256,6 +263,7 @@ const editById = async (data: IShops) => {
     if (legal_info) updateData.legal_info = legal_info;
     if (bank_info) updateData.bank_info = bank_info;
     if (description) updateData.description = description;
+    if (price_range) updateData.price_range = price_range;
 
     const [updatedRowsCount] = await Shops.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
