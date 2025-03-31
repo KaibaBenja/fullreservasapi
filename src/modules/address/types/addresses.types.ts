@@ -7,4 +7,6 @@ export interface IAddresses {
   province_id: string;
   country_id: string;
   description: string;
+  latitude: number;
+  longitude: number;
 }

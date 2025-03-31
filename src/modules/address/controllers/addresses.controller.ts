@@ -26,7 +26,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 404, `Error al agregar la dirección.`);
     };
 
-    const result = await addressServices.addresses.getAllByFilters(req.body);
+    const result = await addressServices.addresses.getAllByFilters({ street, street_number, extra, city_id, province_id, country_id });
     if (!result) return handleErrorResponse(res, 404, `Error al encontrar la dirección agregada.`);
 
     res.status(201).json({
