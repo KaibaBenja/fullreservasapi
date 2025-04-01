@@ -11,7 +11,6 @@ const add = async ({ shop_id, open_time, close_time }: ISchedules) => {
       open_time: open_time,
       close_time: close_time
     });
-
     return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error("Error al agregar el horario.");

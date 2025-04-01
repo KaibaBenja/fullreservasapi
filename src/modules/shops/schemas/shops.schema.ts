@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const priceRange = [1, 2, 3, 4];
-const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
+const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 export const shopsSchema = z.object({
   user_id: z.string({
@@ -72,7 +72,8 @@ export const shopsSchema = z.object({
     required_error: "El campo 'description' es requerido."
   })
     .min(1, { message: "El campo 'description' debe tener al menos 1 carácter." })
-    .max(300, { message: "El campo 'description' no puede tener más de 255 caracteres." }),
+    .max(300, { message: "El campo 'description' no puede tener más de 255 caracteres." })
+    .optional(),
 
   price_range: z.number({
     invalid_type_error: "El campo 'price_range' debe ser un número válido."
@@ -112,23 +113,25 @@ export const filterShopSchemaUser = filterShopSchema.omit({
 });
 
 export const createShopSchema = shopsSchema.extend({
-    open_time1: z.string({
-      invalid_type_error: "El campo 'open_time1' debe ser de tipo string.",
-      required_error: "El campo 'open_time1' es requerido."
-    }).regex(timeRegex, { message: "El formato debe ser HH:mm:ss" }),
-  
-    close_time1: z.string({
-      invalid_type_error: "El campo 'close_time1' debe ser de tipo string.",
-      required_error: "El campo 'close_time1' es requerido."
-    }).regex(timeRegex, { message: "El formato debe ser HH:mm:ss" }),
+  open_time1: z.string({
+    invalid_type_error: "El campo 'open_time1' debe ser de tipo string.",
+    required_error: "El campo 'open_time1' es requerido."
+  }).regex(timeRegex, { message: "El formato debe ser HH:mm" }),
 
-    open_time2: z.string({
-      invalid_type_error: "El campo 'open_time2' debe ser de tipo string.",
-      required_error: "El campo 'open_time2' es requerido."
-    }).regex(timeRegex, { message: "El formato debe ser HH:mm:ss" }),
-  
-    close_time2: z.string({
-      invalid_type_error: "El campo 'close_time2' debe ser de tipo string.",
-      required_error: "El campo 'close_time2' es requerido."
-    }).regex(timeRegex, { message: "El formato debe ser HH:mm:ss" })
+  close_time1: z.string({
+    invalid_type_error: "El campo 'close_time1' debe ser de tipo string.",
+    required_error: "El campo 'close_time1' es requerido."
+  }).regex(timeRegex, { message: "El formato debe ser HH:mm" }),
+
+  open_time2: z.string({
+    invalid_type_error: "El campo 'open_time2' debe ser de tipo string.",
+    required_error: "El campo 'open_time2' es requerido."
+  }).regex(timeRegex, { message: "El formato debe ser HH:mm" })
+    .optional(),
+
+  close_time2: z.string({
+    invalid_type_error: "El campo 'close_time2' debe ser de tipo string.",
+    required_error: "El campo 'close_time2' es requerido."
+  }).regex(timeRegex, { message: "El formato debe ser HH:mm" })
+    .optional()
 });

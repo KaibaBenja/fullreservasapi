@@ -2,21 +2,60 @@ import { IAvailableSlots } from "../types/availableSlots.types";
 import AvailableSlots from "../models/availableSlots.model";
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+import { IShops } from "../types/shops.types";
 
 
-const add = async ({ shop_id, start_time, end_time, capacity }: IAvailableSlots) => {
+function parseTime(time: string): number {
+  if (!/^\d{2}:\d{2}$/.test(time)) throw new Error(`Formato incorrecto: ${time}`);
+  
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+function formatTime(minutes: number): string {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:00`; // Agregamos ":00"
+};
+
+const add = async ({
+  shop_id,
+  start_time,
+  end_time,
+  capacity,
+  average_stay_time,
+}: IAvailableSlots & Pick<IShops, 'average_stay_time'>) => {
   try {
-    const result = await AvailableSlots.create({
-      shop_id: uuidToBuffer(shop_id),
-      start_time: start_time,
-      end_time: end_time,
-      capacity: capacity
-    });
+    const slots: any[] = [];
+    let currentTime = parseTime(start_time);
+    const endTime = parseTime(end_time);
+    const averageStayTime = Number(average_stay_time); 
 
-    return result ? result.toJSON() : null;
+    while (currentTime < endTime) {
+      const nextTime = currentTime + averageStayTime;
+
+      if (nextTime > endTime) break;
+
+      const startFormatted = formatTime(currentTime);
+      const endFormatted = formatTime(nextTime);
+
+      const slot = await AvailableSlots.create({
+        shop_id: uuidToBuffer(shop_id),
+        start_time: startFormatted,
+        end_time: endFormatted,
+        capacity
+      });
+
+      if (slot) {
+        slots.push(slot);  
+      }
+      currentTime = nextTime; 
+    }
+
+    return slots.length ? slots : null; 
   } catch (error) {
-    throw new Error("Error al agregar el espacio disponible.");
-  };
+    throw new Error("Error al agregar los espacios disponibles.");
+  }
 };
 
 const getAll = async () => {

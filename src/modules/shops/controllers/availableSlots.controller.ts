@@ -4,29 +4,6 @@ import { validateUUID } from "../../../utils/uuidValidator";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 
 
-const create = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { shop_id } = req.body;
-
-    if (!(await shopsServices.shops.getById({ id: shop_id }))) {
-      return handleErrorResponse(res, 404, `El negocio con el id: ${shop_id} no existe.`);
-    };
-
-    if (!(await shopsServices.availableSlots.add(req.body))) {
-      return handleErrorResponse(res, 400, `Error al agregar el espacio disponible.`);
-    };
-    const result = await shopsServices.availableSlots.getAllByShopId({ shop_id });
-    if (!result) return handleErrorResponse(res, 404, `Error al encontrar el espacio disponible agregado.`);
-
-    res.status(201).json({
-      message: "Espacio disponible agregada exitosamente.",
-      availableSlot: result,
-    });
-  } catch (error) {
-    handleErrorResponse(res, 500, "Error interno del servidor.");
-  };
-};
-
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
     const { shop_id } = req.query;
@@ -115,5 +92,5 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-export default { create, getAll, getAllByFilters, getById, editById, deleteById };
+export default { getAll, getAllByFilters, getById, editById, deleteById };
 

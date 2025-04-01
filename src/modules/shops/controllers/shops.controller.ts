@@ -7,7 +7,7 @@ import { validateUUID } from "../../../utils/uuidValidator";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_id, subcategory_id, shift_type, open_time1, close_time1, open_time2, close_time2, } = req.body;
+    const { user_id, subcategory_id, shift_type, average_stay_time, capacity, open_time1, close_time1, open_time2, close_time2 } = req.body;
 
     if (!(await usersServices.users.getById({ id: user_id }))) {
       return handleErrorResponse(res, 404, `El usuario con el id: ${user_id} no existe.`);
@@ -25,14 +25,18 @@ const create = async (req: Request, res: Response): Promise<void> => {
     };
 
     if (await shopsServices.shops.getAllByFilters({ user_id })) {
-      return handleErrorResponse(res, 404, `El negocio ya existe.`);
+      return handleErrorResponse(res, 409, `El negocio ya existe.`);
+    };
+
+    if (shift_type === "DOUBLESHIFT" && (!open_time1 || !close_time1 || !open_time2 || !close_time2)) {
+      return handleErrorResponse(res, 409, `Faltan datos para el ingreso de horarios para el caso de doble turno.`);
     };
 
     if (!(await shopsServices.shops.add(req.body))) {
       return handleErrorResponse(res, 500, `Error al agregar el negocio.`);
-    };
+    }
 
-    const result = await shopsServices.shops.getAllByFiltersUser({ user_id });
+    const result = await shopsServices.shops.getAllByFilters({ user_id });
     if (!result) return handleErrorResponse(res, 404, `Error al encontrar el negocio agregado.`);
 
     const shopId = Object.values(result[0])[0];
@@ -51,14 +55,36 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 400, `Error al agregar uno o más horarios del negocio.`);
     };
 
+    let available_slots: any[] = [];
+    for (const schedule of schedules) {
+      try {
+        const slots = await shopsServices.availableSlots.add({
+          shop_id: shopId,
+          start_time: schedule.open_time,
+          end_time: schedule.close_time,
+          average_stay_time,
+          capacity
+        });
+
+        if (slots) available_slots.push(...slots);
+      } catch (err) {
+        return handleErrorResponse(res, 400, `Error al agregar espacios libres para el horario de ${schedule.open_time} a ${schedule.close_time}.`);
+      };
+    };
+
+    if (available_slots.length === 0) {
+      return handleErrorResponse(res, 400, `Error al agregar los espacios libres.`);
+    };
+
     res.status(201).json({
       message: "Negocio agregado exitosamente",
       shop: result,
     });
   } catch (error) {
     handleErrorResponse(res, 500, `Error interno del servidor.`);
-  }
+  };
 };
+
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
