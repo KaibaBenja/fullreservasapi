@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const priceRange = [1, 2, 3, 4];
+const timeRegex = /^([01]\d|2[0-3]):([0-5]\d):([0-5]\d)$/;
 
 export const shopsSchema = z.object({
   user_id: z.string({
@@ -100,7 +101,7 @@ export const filterShopSchema = shopsSchema.extend({
       errorMap: () => ({ message: "El campo 'main_category' solo puede ser 'COMMERCE' o 'SERVICE'." })
     })
   )
-})
+});
 
 export const filterShopSchemaUser = filterShopSchema.omit({
   user_id: true,
@@ -108,6 +109,26 @@ export const filterShopSchemaUser = filterShopSchema.omit({
   phone_number: true,
   legal_info: true,
   bank_info: true,
-})
+});
 
+export const createShopSchema = shopsSchema.extend({
+    open_time1: z.string({
+      invalid_type_error: "El campo 'open_time1' debe ser de tipo string.",
+      required_error: "El campo 'open_time1' es requerido."
+    }).regex(timeRegex, { message: "El formato debe ser HH:mm:ss" }),
+  
+    close_time1: z.string({
+      invalid_type_error: "El campo 'close_time1' debe ser de tipo string.",
+      required_error: "El campo 'close_time1' es requerido."
+    }).regex(timeRegex, { message: "El formato debe ser HH:mm:ss" }),
 
+    open_time2: z.string({
+      invalid_type_error: "El campo 'open_time2' debe ser de tipo string.",
+      required_error: "El campo 'open_time2' es requerido."
+    }).regex(timeRegex, { message: "El formato debe ser HH:mm:ss" }),
+  
+    close_time2: z.string({
+      invalid_type_error: "El campo 'close_time2' debe ser de tipo string.",
+      required_error: "El campo 'close_time2' es requerido."
+    }).regex(timeRegex, { message: "El formato debe ser HH:mm:ss" })
+});

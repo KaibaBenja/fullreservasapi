@@ -119,7 +119,7 @@ const editById = async ({ id, start_time, end_time, capacity }: IAvailableSlots)
 
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar la el espacio disponible.');
+    throw new Error('Error al editar el espacio disponible.');
   };
 };
 

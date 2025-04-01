@@ -7,7 +7,7 @@ import { validateUUID } from "../../../utils/uuidValidator";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_id, subcategory_id } = req.body;
+    const { user_id, subcategory_id, shift_type, open_time1, close_time1, open_time2, close_time2, } = req.body;
 
     if (!(await usersServices.users.getById({ id: user_id }))) {
       return handleErrorResponse(res, 404, `El usuario con el id: ${user_id} no existe.`);
@@ -28,10 +28,28 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 404, `El negocio ya existe.`);
     };
 
-    if (!(await shopsServices.shops.add(req.body))) return handleErrorResponse(res, 500, `Error al agregar el negocio.`);
+    if (!(await shopsServices.shops.add(req.body))) {
+      return handleErrorResponse(res, 500, `Error al agregar el negocio.`);
+    };
 
     const result = await shopsServices.shops.getAllByFiltersUser({ user_id });
     if (!result) return handleErrorResponse(res, 404, `Error al encontrar el negocio agregado.`);
+
+    const shopId = Object.values(result[0])[0];
+
+    const schedules = shift_type === "DOUBLESHIFT"
+      ? [
+        { shop_id: shopId, open_time: open_time1, close_time: close_time1 },
+        { shop_id: shopId, open_time: open_time2, close_time: close_time2 }
+      ]
+      : [{ shop_id: shopId, open_time: open_time1, close_time: close_time1 }];
+
+    const scheduleResults = await Promise.all(schedules.map(schedule => shopsServices.schedules.add(schedule)));
+
+    const failedSchedules = scheduleResults.filter(result => !result);
+    if (failedSchedules.length > 0) {
+      return handleErrorResponse(res, 400, `Error al agregar uno o más horarios del negocio.`);
+    };
 
     res.status(201).json({
       message: "Negocio agregado exitosamente",
