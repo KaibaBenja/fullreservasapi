@@ -9,7 +9,7 @@ import { CloudFlareS3 } from "../config/cloudflare.config";
 const uploadConfig = (foldername: string) =>
   multer({
     storage: multerS3({
-      s3: CloudFlareS3,
+      s3: CloudFlareS3 as any,
       bucket: R2.CLOUDFLARE_R2_BUCKET_NAME!,
       metadata: (req: Request, file, cb) => {
         cb(null, { fieldName: file.fieldname });
