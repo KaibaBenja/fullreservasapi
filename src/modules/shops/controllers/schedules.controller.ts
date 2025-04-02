@@ -12,7 +12,7 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
     if (shop_id && typeof shop_id === 'string') {
       if (!validateUUID(shop_id, res)) return;
 
-      result = await shopsServices.schedules.getByShopId({ shop_id });
+      result = await shopsServices.schedules.getAllByShopId({ shop_id });
     } else {
       result = await shopsServices.schedules.getAll();
     };
@@ -64,13 +64,13 @@ const editById = async (req: Request, res: Response): Promise<void> => {
 
 const deleteById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    if (!validateUUID(id, res)) return;
+    const { shop_id } = req.params;
+    if (!validateUUID(shop_id, res)) return;
 
-    const result = await shopsServices.schedules.getById({ id });
-    if (!result) return handleErrorResponse(res, 404, `El horario con el id: ${id} no existe.`);
+    const result = await shopsServices.schedules.getAllByShopId({ shop_id });
+    if (!result) return handleErrorResponse(res, 404, `El horario con el id: ${shop_id} no existe.`);
 
-    if (!(await shopsServices.schedules.deleteById({ id }))) {
+    if (!(await shopsServices.schedules.deleteByShopId({ shop_id }))) {
       return handleErrorResponse(res, 404, `Error al eliminar el horario.`);
     };
 

@@ -53,9 +53,9 @@ const getById = async ({ id }: Pick<ISchedules, "id">) => {
   };
 };
 
-const getByShopId = async ({ shop_id }: Pick<ISchedules, "shop_id">) => {
+const getAllByShopId = async ({ shop_id }: Pick<ISchedules, "shop_id">) => {
   try {
-    const result = await Schedules.findOne({
+    const result = await Schedules.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
@@ -66,7 +66,7 @@ const getByShopId = async ({ shop_id }: Pick<ISchedules, "shop_id">) => {
       replacements: [shop_id],
     });
 
-    return result ? result.toJSON() : null;
+    return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
     throw new Error('Error al obtener el horario por el id de negocio.');
   };
@@ -89,10 +89,10 @@ const editById = async ({ id, open_time, close_time }: ISchedules) => {
   };
 };
 
-const deleteById = async ({ id }: Pick<ISchedules, "id">) => {
+const deleteByShopId = async ({ shop_id }: Pick<ISchedules, "shop_id">) => {
   try {
     const result = await Schedules.destroy({
-      where: { id: sequelize.fn('UUID_TO_BIN', id) }
+      where: { shop_id: sequelize.fn('UUID_TO_BIN', shop_id) }
     });
 
     return result ? { success: true } : null;
@@ -102,4 +102,4 @@ const deleteById = async ({ id }: Pick<ISchedules, "id">) => {
 };
 
 
-export default { add, getAll, getById, getByShopId, editById, deleteById };
+export default { add, getAll, getById, getAllByShopId, editById, deleteByShopId };

@@ -3,7 +3,7 @@ import { z } from "zod";
 const priceRange = [1, 2, 3, 4];
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-export const shopsSchema = z.object({
+export const shopSchema = z.object({
   user_id: z.string({
     invalid_type_error: "El campo 'user_id' debe ser de tipo string.",
     required_error: "El campo 'user_id' es requerido."
@@ -83,7 +83,7 @@ export const shopsSchema = z.object({
 }).strict();
 
 
-export const filterShopSchema = shopsSchema.extend({
+export const filterShopSchema = shopSchema.extend({
   id: z.string({
     invalid_type_error: "El campo 'id' debe ser de tipo string.",
     required_error: "El campo 'id' es requerido."
@@ -112,7 +112,7 @@ export const filterShopSchemaUser = filterShopSchema.omit({
   bank_info: true,
 });
 
-export const createShopSchema = shopsSchema.extend({
+export const shopsSchema = shopSchema.extend({
   open_time1: z.string({
     invalid_type_error: "El campo 'open_time1' debe ser de tipo string.",
     required_error: "El campo 'open_time1' es requerido."

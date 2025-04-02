@@ -3,20 +3,8 @@ import AvailableSlots from "../models/availableSlots.model";
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { IShops } from "../types/shops.types";
+import { formatTime, parseTime } from "../utils/formatTime";
 
-
-function parseTime(time: string): number {
-  if (!/^\d{2}:\d{2}$/.test(time)) throw new Error(`Formato incorrecto: ${time}`);
-  
-  const [hours, minutes] = time.split(":").map(Number);
-  return hours * 60 + minutes;
-};
-
-function formatTime(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:00`; // Agregamos ":00"
-};
 
 const add = async ({
   shop_id,
@@ -29,7 +17,7 @@ const add = async ({
     const slots: any[] = [];
     let currentTime = parseTime(start_time);
     const endTime = parseTime(end_time);
-    const averageStayTime = Number(average_stay_time); 
+    const averageStayTime = Number(average_stay_time);
 
     while (currentTime < endTime) {
       const nextTime = currentTime + averageStayTime;
@@ -47,12 +35,12 @@ const add = async ({
       });
 
       if (slot) {
-        slots.push(slot);  
+        slots.push(slot);
       }
-      currentTime = nextTime; 
+      currentTime = nextTime;
     }
 
-    return slots.length ? slots : null; 
+    return slots.length ? slots : null;
   } catch (error) {
     throw new Error("Error al agregar los espacios disponibles.");
   }
@@ -162,10 +150,10 @@ const editById = async ({ id, start_time, end_time, capacity }: IAvailableSlots)
   };
 };
 
-const deleteById = async ({ id }: Pick<IAvailableSlots, "id">) => {
+const deleteByShopId = async ({ shop_id }: Pick<IAvailableSlots, "shop_id">) => {
   try {
     const result = await AvailableSlots.destroy({
-      where: { id: sequelize.fn('UUID_TO_BIN', id) }
+      where: { shop_id: sequelize.fn('UUID_TO_BIN', shop_id) }
     });
 
     return result ? { success: true } : null;
@@ -175,4 +163,4 @@ const deleteById = async ({ id }: Pick<IAvailableSlots, "id">) => {
 };
 
 
-export default { add, getAll, getById, getAllByFilters, getAllByShopId, editById, deleteById };
+export default { add, getAll, getById, getAllByFilters, getAllByShopId, editById, deleteByShopId };

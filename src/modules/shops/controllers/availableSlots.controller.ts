@@ -77,13 +77,13 @@ const editById = async (req: Request, res: Response): Promise<void> => {
 
 const deleteById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
-    if (!validateUUID(id, res)) return;
+    const { shop_id } = req.params;
+    if (!validateUUID(shop_id, res)) return;
 
-    const result = await shopsServices.availableSlots.getById({ id });
-    if (!result) return handleErrorResponse(res, 404, `El espacio disponible con el id: ${id} no existe.`);
+    const result = await shopsServices.availableSlots.getAllByShopId({ shop_id });
+    if (!result) return handleErrorResponse(res, 404, `El espacio disponible con el id: ${shop_id} no existe.`);
 
-    if (!(await shopsServices.availableSlots.deleteById({ id }))) return handleErrorResponse(res, 404, `Error al eliminar el espacio disponible.`);
+    if (!(await shopsServices.availableSlots.deleteByShopId({ shop_id }))) return handleErrorResponse(res, 404, `Error al eliminar el espacio disponible.`);
 
     res.status(200).json(result);
   } catch (error) {
