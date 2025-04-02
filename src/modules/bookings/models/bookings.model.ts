@@ -15,6 +15,7 @@ interface BookingsAttributes {
   floor: "GROUND LEVEL" | "UPPER LEVEL";
   roof_type: "COVERED" | "UNCOVERED";
   status: "PENDING" | "CONFIRMED" | "CANCELLED";
+  booking_code: string;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -32,6 +33,7 @@ class Booking extends Model<BookingsAttributes, BookingsCreationAttributes> impl
   public floor!: "GROUND LEVEL" | "UPPER LEVEL";
   public roof_type!: "COVERED" | "UNCOVERED";
   public status!: "PENDING" | "CONFIRMED" | "CANCELLED";
+  public booking_code!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 };
@@ -97,6 +99,11 @@ Booking.init(
     status: {
       type: DataTypes.ENUM("PENDING", "CONFIRMED", "CANCELLED"),
       allowNull: false,
+    },
+    booking_code: {
+      type: DataTypes.CHAR(4),
+      allowNull: false,
+      unique: true,
     },
     createdAt: {
       type: DataTypes.DATE,

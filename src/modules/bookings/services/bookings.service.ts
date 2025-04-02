@@ -4,7 +4,7 @@ import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 
 
-const add = async ({ user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status }: IBookings) => {
+const add = async ({ user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status, booking_code }: IBookings) => {
   try {
     const result = await Booking.create({
       user_id: uuidToBuffer(user_id),
@@ -16,6 +16,7 @@ const add = async ({ user_id, shop_id, booked_slot_id, date, guests, location_ty
       floor: floor,
       roof_type: roof_type,
       status: status,
+      booking_code: booking_code
     });
 
     return result ? result.toJSON() : null;
@@ -37,7 +38,8 @@ const getAll = async () => {
         'location_type',
         'floor',
         'roof_type',
-        'status'
+        'status',
+        'booking_code'
       ],
     });
 
@@ -60,7 +62,8 @@ const getById = async ({ id }: Pick<IBookings, "id">) => {
         'location_type',
         'floor',
         'roof_type',
-        'status'
+        'status',
+        'booking_code'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -100,7 +103,8 @@ const getAllByFiltersShopId = async ({
         'location_type',
         'floor',
         'roof_type',
-        'status'
+        'status',
+        'booking_code'
       ],
       where: whereConditions
     });
@@ -112,7 +116,7 @@ const getAllByFiltersShopId = async ({
 };
 
 const getAllByFiltersUserId = async ({
-  user_id, shop_id, booked_slot_id, date, guests,  location_type, floor, roof_type, status
+  user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status
 }: Pick<IBookings, 'user_id'> & Partial<Pick<IBookings, 'shop_id' | 'booked_slot_id' | 'date' | 'guests' | 'location_type' | 'floor' | 'roof_type' | 'status'>>) => {
   try {
     const whereConditions: Record<string, any> = {
@@ -139,7 +143,8 @@ const getAllByFiltersUserId = async ({
         'location_type',
         'floor',
         'roof_type',
-        'status'
+        'status',
+        'booking_code'
       ],
       where: whereConditions
     });
@@ -177,7 +182,8 @@ const getAllByFilters = async (filters: Partial<IBookings>) => {
         'location_type',
         'floor',
         'roof_type',
-        'status'
+        'status',
+        'booking_code'
       ],
       where: whereConditions
     });

@@ -9,4 +9,5 @@ export interface IBookings {
   floor: "GROUND LEVEL" | "UPPER LEVEL";
   roof_type: "COVERED" | "UNCOVERED";
   status: "PENDING" | "CONFIRMED" | "CANCELLED";
+  booking_code: string;
 };

@@ -4,7 +4,7 @@ import * as shopsServices from "../../shops/services";
 import * as bookingsServices from "../services";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
-
+import { generateBookingCode } from "../utils/generateBookingCode";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -22,7 +22,16 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 400, `El espacio disponible con el id: ${booked_slot_id} no existe.`);
     };
 
-    if (!await bookingsServices.bookings.add(req.body)) {
+    let code: string;
+    let exists: boolean;
+
+    do {
+      code = generateBookingCode();
+      const existingBooking = await bookingsServices.bookings.getAllByFilters({ booking_code: code, status: "PENDING" }) ?? [];
+      exists = existingBooking.length > 0;
+    } while (exists);
+
+    if (!(await bookingsServices.bookings.add({ ...req.body, booking_code: code }))) {
       return handleErrorResponse(res, 400, `Error al crear la reserva.`);
     };
 
