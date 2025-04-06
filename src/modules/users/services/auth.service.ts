@@ -52,7 +52,7 @@ export const loginUser = async ({
 
     if (!response.data.idToken) throw new Error("Invalid credentials");
 
-    const { idToken, localId: uid } = response.data;
+    const { localId: uid } = response.data;
     const uuid = uuidv5(uid, NAMESPACE);
     const bufferId = uuidToBuffer(uuid);
 
@@ -64,7 +64,7 @@ export const loginUser = async ({
 
     const token = await admin.auth().createCustomToken(uid);
 
-    return { user: { full_name: user.full_name, email: user.email }, idToken };
+    return { user: { full_name: user.full_name, email: user.email }, token };
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Error al iniciar sesión"
@@ -74,11 +74,18 @@ export const loginUser = async ({
 
 export const logoutUser = async ({ idToken }: { idToken: string }) => {
   try {
+    if (!idToken || typeof idToken !== "string") {
+      throw new Error("No ID token provided");
+    }
+
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     await admin.auth().revokeRefreshTokens(decodedToken.uid);
+
     return { message: "User logged out successfully" };
   } catch (error) {
-    throw new Error("Invalid token or user already logged out");
+    throw new Error(
+      error instanceof Error ? error.message : "Invalid token or user already logged out"
+    );
   }
 };
 
