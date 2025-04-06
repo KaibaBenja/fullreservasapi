@@ -52,7 +52,7 @@ export const loginUser = async ({
 
     if (!response.data.idToken) throw new Error("Invalid credentials");
 
-    const { localId: uid } = response.data;
+    const { idToken, localId: uid } = response.data;
     const uuid = uuidv5(uid, NAMESPACE);
     const bufferId = uuidToBuffer(uuid);
 
@@ -64,7 +64,7 @@ export const loginUser = async ({
 
     const token = await admin.auth().createCustomToken(uid);
 
-    return { user: { full_name: user.full_name, email: user.email }, token };
+    return { user: { full_name: user.full_name, email: user.email }, idToken };
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Error al iniciar sesión"
