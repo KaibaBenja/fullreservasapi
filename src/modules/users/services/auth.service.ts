@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import { formatName } from "../../../utils/formatName";
 import { IUser } from "../types/users.types";
 import { v5 as uuidv5 } from "uuid";
+import axios from "axios";
 
 const NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 export const registerUser = async ({
@@ -35,16 +36,23 @@ export const registerUser = async ({
 export const loginUser = async ({
   email,
   password,
-  idToken,
 }: {
   email: string;
   password: string;
-  idToken: string;
 }) => {
   try {
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const uid = decodedToken.uid;
+    const response = await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
+      {
+        email,
+        password,
+        returnSecureToken: true,
+      }
+    );
 
+    if (!response.data.idToken) throw new Error("Invalid credentials");
+
+    const { localId: uid } = response.data;
     const uuid = uuidv5(uid, NAMESPACE);
     const bufferId = uuidToBuffer(uuid);
 
