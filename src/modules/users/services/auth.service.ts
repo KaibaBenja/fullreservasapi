@@ -50,8 +50,15 @@ export const loginUser = async ({
       }
     );
 
-    const decodedToken = await admin.auth().verifyIdToken(response.data.idToken);
+    const idToken = response.data.idToken;
+
+    if(!idToken) throw new Error("No ID token provided");
+
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
+
+    console.log(decodedToken, idToken);
+    
 
     const uuid = uuidv5(uid, NAMESPACE);
     const bufferId = uuidToBuffer(uuid);
@@ -61,7 +68,7 @@ export const loginUser = async ({
 
     const token = await admin.auth().createCustomToken(uid);
 
-    return { user: { full_name: user.full_name, email: user.email }, token };
+    return { user: { full_name: user.full_name, email: user.email }, idToken };
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Error al iniciar sesión"
