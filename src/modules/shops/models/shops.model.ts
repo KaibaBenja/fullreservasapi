@@ -14,11 +14,13 @@ interface ShopsAttributes {
   capacity: number;
   legal_info: string;
   bank_info: string;
+  description?: string;
+  price_range: 1 | 2 | 3 | 4;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-interface ShopsCreationAttributes extends Optional<ShopsAttributes, 'id' | 'createdAt' | 'updatedAt'> { }
+interface ShopsCreationAttributes extends Optional<ShopsAttributes, 'id' | 'description' | 'createdAt' | 'updatedAt'> { }
 
 class Shops extends Model<ShopsAttributes, ShopsCreationAttributes> implements ShopsAttributes {
   public id!: Buffer;
@@ -31,6 +33,8 @@ class Shops extends Model<ShopsAttributes, ShopsCreationAttributes> implements S
   public capacity!: number;
   public legal_info!: string;
   public bank_info!: string;
+  public description!: string;
+  public price_range!: 1 | 2 | 3 | 4;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -89,6 +93,17 @@ Shops.init(
       type: DataTypes.STRING(150),
       allowNull: true,
     },
+    description: {
+      type: DataTypes.STRING(300),
+      allowNull: true,
+    },
+    price_range: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isIn: [[1, 2, 3, 4]],
+      },
+    },
     createdAt: {
       type: DataTypes.DATE,
       field: 'created_at',
@@ -109,8 +124,8 @@ Shops.init(
 );
 
 Shops.belongsTo(Subcategory, {
-  foreignKey: 'subcategory_id', 
-  as: 'subcategory', 
+  foreignKey: 'subcategory_id',
+  as: 'subcategory',
 });
 
 export default Shops;
