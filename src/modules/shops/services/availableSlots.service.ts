@@ -2,21 +2,48 @@ import { IAvailableSlots } from "../types/availableSlots.types";
 import AvailableSlots from "../models/availableSlots.model";
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+import { IShops } from "../types/shops.types";
+import { formatTime, parseTime } from "../utils/formatTime";
 
 
-const add = async ({ shop_id, start_time, end_time, capacity }: IAvailableSlots) => {
+const add = async ({
+  shop_id,
+  start_time,
+  end_time,
+  capacity,
+  average_stay_time,
+}: IAvailableSlots & Pick<IShops, 'average_stay_time'>) => {
   try {
-    const result = await AvailableSlots.create({
-      shop_id: uuidToBuffer(shop_id),
-      start_time: start_time,
-      end_time: end_time,
-      capacity: capacity
-    });
+    const slots: any[] = [];
+    let currentTime = parseTime(start_time);
+    const endTime = parseTime(end_time);
+    const averageStayTime = Number(average_stay_time);
 
-    return result ? result.toJSON() : null;
+    while (currentTime < endTime) {
+      const nextTime = currentTime + averageStayTime;
+
+      if (nextTime > endTime) break;
+
+      const startFormatted = formatTime(currentTime);
+      const endFormatted = formatTime(nextTime);
+
+      const slot = await AvailableSlots.create({
+        shop_id: uuidToBuffer(shop_id),
+        start_time: startFormatted,
+        end_time: endFormatted,
+        capacity
+      });
+
+      if (slot) {
+        slots.push(slot);
+      }
+      currentTime = nextTime;
+    }
+
+    return slots.length ? slots : null;
   } catch (error) {
-    throw new Error("Error al agregar el espacio disponible.");
-  };
+    throw new Error("Error al agregar los espacios disponibles.");
+  }
 };
 
 const getAll = async () => {
@@ -119,14 +146,14 @@ const editById = async ({ id, start_time, end_time, capacity }: IAvailableSlots)
 
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar la el espacio disponible.');
+    throw new Error('Error al editar el espacio disponible.');
   };
 };
 
-const deleteById = async ({ id }: Pick<IAvailableSlots, "id">) => {
+const deleteByShopId = async ({ shop_id }: Pick<IAvailableSlots, "shop_id">) => {
   try {
     const result = await AvailableSlots.destroy({
-      where: { id: sequelize.fn('UUID_TO_BIN', id) }
+      where: { shop_id: sequelize.fn('UUID_TO_BIN', shop_id) }
     });
 
     return result ? { success: true } : null;
@@ -136,4 +163,4 @@ const deleteById = async ({ id }: Pick<IAvailableSlots, "id">) => {
 };
 
 
-export default { add, getAll, getById, getAllByFilters, getAllByShopId, editById, deleteById };
+export default { add, getAll, getById, getAllByFilters, getAllByShopId, editById, deleteByShopId };

@@ -9,6 +9,8 @@ export interface IShops {
   capacity: number;
   legal_info: string;
   bank_info: string;
+  description?: string;
+  price_range: 1 | 2 | 3 | 4;
   createdAt?: Date;
   updatedAt?: Date;
 }

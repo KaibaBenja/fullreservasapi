@@ -13,6 +13,8 @@ interface AddressesAttributes {
   province_id: Buffer;
   country_id: Buffer;
   description?: string | null;
+  latitude: number;
+  longitude: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -28,6 +30,8 @@ class Addresses extends Model<AddressesAttributes, AddressCreationAttributes> im
   public province_id!: Buffer;
   public country_id!: Buffer;
   public description!: string | null;
+  public latitude!: number;
+  public longitude!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -83,6 +87,14 @@ Addresses.init(
       type: DataTypes.STRING(450),
       allowNull: true,
       defaultValue: null,
+    },
+    latitude: {
+      type: DataTypes.DECIMAL(9, 6),
+      allowNull: false,
+    },
+    longitude: {
+      type: DataTypes.DECIMAL(9, 6),
+      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,
