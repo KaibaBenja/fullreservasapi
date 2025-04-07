@@ -50,17 +50,14 @@ export const loginUser = async ({
       }
     );
 
-    if (!response.data.idToken) throw new Error("Invalid credentials");
+    const decodedToken = await admin.auth().verifyIdToken(response.data.idToken);
+    const uid = decodedToken.uid;
 
-    const { localId: uid } = response.data;
     const uuid = uuidv5(uid, NAMESPACE);
     const bufferId = uuidToBuffer(uuid);
 
     const user = await User.findOne({ where: { email, id: bufferId } });
     if (!user) throw new Error("User not found or UID mismatch");
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new Error("Invalid credentials");
 
     const token = await admin.auth().createCustomToken(uid);
 
@@ -74,18 +71,11 @@ export const loginUser = async ({
 
 export const logoutUser = async ({ idToken }: { idToken: string }) => {
   try {
-    if (!idToken || typeof idToken !== "string") {
-      throw new Error("No ID token provided");
-    }
-
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     await admin.auth().revokeRefreshTokens(decodedToken.uid);
-
     return { message: "User logged out successfully" };
   } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Invalid token or user already logged out"
-    );
+    throw new Error("Invalid token or user already logged out");
   }
 };
 
