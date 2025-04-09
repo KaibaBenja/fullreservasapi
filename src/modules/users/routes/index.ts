@@ -4,6 +4,7 @@ import { rolesRoutes } from "./roles.routes";
 import { userrolesRoutes } from "./userroles.routes";
 import { merchantsRoutes } from "./merchant.routes";
 import { operatorsRoutes } from "./operators.routes";
+import { authRoutes } from "./auth.routes";
 
 export const usersRoutes = express.Router();
 
@@ -12,5 +13,5 @@ usersRoutes.use("/roles", rolesRoutes);
 usersRoutes.use("/userroles", userrolesRoutes);
 usersRoutes.use("/merchants", merchantsRoutes);
 usersRoutes.use("/operators", operatorsRoutes);
-
+usersRoutes.use("/auth", authRoutes);
 
