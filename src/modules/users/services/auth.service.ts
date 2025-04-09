@@ -6,6 +6,7 @@ import { formatName } from "../../../utils/formatName";
 import { IUser } from "../types/users.types";
 import { v5 as uuidv5 } from "uuid";
 import axios from "axios";
+import usersService from "./users.service";
 
 const NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 export const registerUser = async ({
@@ -57,18 +58,18 @@ export const loginUser = async ({
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    console.log(decodedToken, idToken);
-    
 
     const uuid = uuidv5(uid, NAMESPACE);
-    const bufferId = uuidToBuffer(uuid);
+    //const bufferId = uuidToBuffer(uuid);
 
-    const user = await User.findOne({ where: { email, id: bufferId } });
-    if (!user) throw new Error("User not found or UID mismatch");
+    const result = await usersService.getById({ id: uuid });
+    if (!result) throw new Error("User not found or UID mismatch");
+
+    const user = result[0];
 
     const token = await admin.auth().createCustomToken(uid);
 
-    return { user: { full_name: user.full_name, email: user.email }, idToken };
+    return { user , idToken };
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Error al iniciar sesión"
