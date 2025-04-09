@@ -14,6 +14,8 @@ const add = async ({ user_id, shop_id }: IOperator) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
+    console.log(error);
+
     throw new Error("Error al crear un nuevo operador.");
   };
 };
