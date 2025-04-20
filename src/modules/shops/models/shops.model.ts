@@ -1,9 +1,12 @@
-import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../../../config/sequalize.config';
+import { DataTypes, Model, Optional } from "sequelize";
+import { sequelize } from "../../../config/sequalize.config";
 import User from "../../users/models/users.model";
 import Subcategory from "../models/subcategories.model";
+import shopsAddresseses from "../../shops/models/shopAddresses.model";
+import Images from "../models/images.model";
 
 interface ShopsAttributes {
+  [x: string]: any;
   id: Buffer;
   user_id: Buffer;
   subcategory_id: Buffer;
@@ -20,9 +23,16 @@ interface ShopsAttributes {
   updatedAt?: Date;
 }
 
-interface ShopsCreationAttributes extends Optional<ShopsAttributes, 'id' | 'description' | 'createdAt' | 'updatedAt'> { }
+interface ShopsCreationAttributes
+  extends Optional<
+    ShopsAttributes,
+    "id" | "description" | "createdAt" | "updatedAt"
+  > {}
 
-class Shops extends Model<ShopsAttributes, ShopsCreationAttributes> implements ShopsAttributes {
+class Shops
+  extends Model<ShopsAttributes, ShopsCreationAttributes>
+  implements ShopsAttributes
+{
   public id!: Buffer;
   public user_id!: Buffer;
   public subcategory_id!: Buffer;
@@ -45,7 +55,7 @@ Shops.init(
       type: DataTypes.BLOB,
       allowNull: false,
       primaryKey: true,
-      defaultValue: sequelize.literal('UUID_TO_BIN(UUID())'),
+      defaultValue: sequelize.literal("UUID_TO_BIN(UUID())"),
     },
     user_id: {
       type: DataTypes.BLOB,
@@ -74,7 +84,7 @@ Shops.init(
       allowNull: false,
     },
     shift_type: {
-      type: DataTypes.ENUM('SINGLESHIFT', 'DOUBLESHIFT', 'CONTINUOUS'),
+      type: DataTypes.ENUM("SINGLESHIFT", "DOUBLESHIFT", "CONTINUOUS"),
       allowNull: false,
     },
     average_stay_time: {
@@ -106,26 +116,32 @@ Shops.init(
     },
     createdAt: {
       type: DataTypes.DATE,
-      field: 'created_at',
+      field: "created_at",
       defaultValue: DataTypes.NOW,
     },
     updatedAt: {
       type: DataTypes.DATE,
-      field: 'updated_at',
+      field: "updated_at",
       defaultValue: DataTypes.NOW,
     },
   },
   {
     sequelize,
-    tableName: 'shops',
+    tableName: "shops",
     timestamps: false,
     underscored: true,
   }
 );
 
 Shops.belongsTo(Subcategory, {
-  foreignKey: 'subcategory_id',
-  as: 'subcategory',
+  foreignKey: "subcategory_id",
+  as: "subcategory",
 });
+
+Shops.hasMany(shopsAddresseses, { foreignKey: "shop_id" });
+shopsAddresseses.belongsTo(Shops, { foreignKey: "shop_id" });
+
+Shops.hasMany(Images, { foreignKey: "shop_id" });
+Images.belongsTo(Shops, { foreignKey: "shop_id" });
 
 export default Shops;
