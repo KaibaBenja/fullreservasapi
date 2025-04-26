@@ -4,6 +4,9 @@ import Subcategories from "../models/subcategories.model";
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { formatName } from "../../../utils/formatName";
+import Addresses from "../../address/models/addresses.model";
+import Images from "../models/images.model";
+import shopsAddresseses from "../models/shopAddresses.model";
 
 
 const add = async (data: IShops) => {
@@ -238,12 +241,61 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
         'price_range',
         'created_at'
       ],
-      include: [includeSubcategory],
+      include: [
+        includeSubcategory,
+        {
+          model: shopsAddresseses,
+          include: [
+            {
+              model: Addresses,
+              attributes: ['street', 'street_number', 'latitude', 'longitude']
+            }
+          ]
+        },
+        {
+          model: Images,
+          attributes: ['image_url']
+        }
+      ],
       where: Object.keys(shopsWhereConditions).length > 0 ? shopsWhereConditions : undefined
     });
 
-    return result.length ? result.map(res => res.toJSON()) : null;
+    if (!result.length) return null;
+
+    const shops = result.map(res => {
+      const shop = res.toJSON();
+
+      // Extraer datos de dirección
+      const address = shop.shopsAddresseses?.[0]?.Address;
+
+      // Eliminar shopsAddresseses del resultado final
+      delete shop.shopsAddresseses;
+
+      // Adjuntar dirección si existe
+      if (address) {
+        shop.street = address.street;
+        shop.street_number = address.street_number;
+        shop.latitude = address.latitude;
+        shop.longitude = address.longitude;
+      }
+
+      if (shop.Images && shop.Images.length) {
+        shop.images = shop.Images.map((img: any) => img.image_url);
+      } else {
+        shop.images = [];
+      }
+
+      delete shop.Images;
+
+      return shop;
+    });
+
+    // Si se pasó un ID, devolvés un solo comercio
+    if (id) return shops[0];
+
+    return shops;
   } catch (error) {
+    console.log(error);
     throw new Error('Error al obtener los negocios con los filtros proporcionados.');
   }
 };
