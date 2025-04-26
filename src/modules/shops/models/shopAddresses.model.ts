@@ -52,4 +52,7 @@ shopsAddresseses.init(
   }
 );
 
+shopsAddresseses.belongsTo(Addresses, { foreignKey: 'address_id' });
+Addresses.hasMany(shopsAddresseses, { foreignKey: 'address_id' });
+
 export default shopsAddresseses;
