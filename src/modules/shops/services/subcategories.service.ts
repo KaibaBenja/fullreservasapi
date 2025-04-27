@@ -4,12 +4,16 @@ import { formatName } from "../../..//utils/formatName";
 import { sequelize } from "../../../config/sequalize.config";
 
 
-const add = async ({ name, main_category }: ISubcategories) => {
+const add = async ({ name, main_category, logo_url }: ISubcategories) => {
   try {
-    const result = await Subcategories.create({
+    const data: any = {
       name: formatName(name),
       main_category: main_category,
-    });
+    };
+
+    if (logo_url) data.logo_url = logo_url;
+
+    const result = await Subcategories.create(data);
 
     return result ? result.toJSON() : null;
   } catch (error) {
@@ -24,6 +28,7 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'main_category',
+        'logo_url',
         'created_at',
         'updated_at'
       ],
@@ -42,6 +47,7 @@ const getById = async ({ id }: Pick<ISubcategories, "id">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'main_category',
+        'logo_url',
         'created_at',
         'updated_at'
       ],
@@ -67,6 +73,7 @@ const getByName = async ({ name }: Pick<ISubcategories, "name">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'main_category',
+        'logo_url',
         'created_at',
         'updated_at'
       ],
@@ -88,6 +95,7 @@ const getAllByMainCategory = async ({ main_category }: Pick<ISubcategories, "mai
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         "name",
         "main_category",
+        "logo_url",
         "created_at",
         "updated_at",
       ],
@@ -99,12 +107,13 @@ const getAllByMainCategory = async ({ main_category }: Pick<ISubcategories, "mai
   };
 };
 
-const editById = async ({ id, name, main_category }: ISubcategories) => {
+const editById = async ({ id, name, main_category, logo_url }: ISubcategories) => {
   try {
     const updateData: any = {};
 
     if (name) updateData.name = formatName(name);
     if (main_category) updateData.main_category = main_category;
+    if (logo_url) updateData.logo_url = logo_url;
 
     const [updatedRowsCount] = await Subcategories.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
