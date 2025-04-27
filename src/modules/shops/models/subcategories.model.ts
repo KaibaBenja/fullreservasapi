@@ -5,16 +5,18 @@ interface SubcategoriesAttributes {
   id: Buffer;
   name: string;
   main_category: "COMMERCE" | "SERVICE";
+  logo_url: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-interface SubcategoriesCreationAttributes extends Optional<SubcategoriesAttributes, 'id' | 'createdAt' | 'updatedAt'> { }
+interface SubcategoriesCreationAttributes extends Optional<SubcategoriesAttributes, 'id' | 'logo_url' | 'createdAt' | 'updatedAt'> { }
 
 class Subcategories extends Model<SubcategoriesAttributes, SubcategoriesCreationAttributes> implements SubcategoriesAttributes {
   public id!: Buffer;
   public name!: string;
   public main_category!: "COMMERCE" | "SERVICE";
+  public logo_url!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -36,6 +38,10 @@ Subcategories.init(
       type: DataTypes.ENUM("COMMERCE", "SERVICE"),
       allowNull: false,
       unique: true
+    },
+    logo_url: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,

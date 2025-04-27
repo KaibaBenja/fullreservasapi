@@ -2,17 +2,26 @@ import { Request, Response } from "express";
 import * as shopsServices from "../services";
 import { validateUUID } from "../../../utils/uuidValidator";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
+import { R2 } from "../../../config/dotenv.config";
+import { deleteFileR2 } from "../../../middlewares/upload";
+
 
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name } = req.body;
+    const file = req.file as Express.MulterS3.File;
 
     if ((await shopsServices.subcategories.getByName({ name }))) {
       return handleErrorResponse(res, 409, `La subcategoría: ${name} ya existe.`);
     };
 
-    if (!(await shopsServices.subcategories.add(req.body))) {
+    let logo_url: string | undefined;
+    if (file) logo_url = `${R2.CLOUDFLARE_R2_PUBLIC_URL}/${file.key}`;
+
+    const data = { ...req.body, logo_url };
+
+    if (!(await shopsServices.subcategories.add(data))) {
       return handleErrorResponse(res, 400, `Error al agregar la subcategoría.`);
     };
 
@@ -67,16 +76,18 @@ const getById = async (req: Request, res: Response): Promise<void> => {
   };
 };
 
-const editById = async (req: Request, res: Response): Promise<void> => {  
+const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, main_category } = req.body;
+    const file = req.file as Express.MulterS3.File;
 
-    if (!req.body || Object.keys(req.body).length === 0) {
+    if ((!req.body || Object.keys(req.body).length === 0) && !file) {
       return handleErrorResponse(res, 400, "Debe enviar al menos un campo para actualizar.");
     };
 
-    if (!(await shopsServices.subcategories.getById({ id }))) {
+    const subcategory = await shopsServices.subcategories.getById({ id });
+    if (!subcategory) {
       return handleErrorResponse(res, 404, `No se encontró una subcategoría con el id: ${id}.`)
     };
 
@@ -84,7 +95,16 @@ const editById = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 404, `La subcategoría ${name} ya existe.`);
     };
 
-    if (!(await shopsServices.subcategories.editById({ id, name, main_category }))) {
+    let imageUrl = subcategory.logo_url;
+    if (file) {
+      if (imageUrl) {
+        if (!(await deleteFileR2(imageUrl))) return handleErrorResponse(res, 500, "Error al eliminar la imagen anterior.");
+      };
+
+      imageUrl = `${R2.CLOUDFLARE_R2_PUBLIC_URL}/${file.key}`;
+    };
+
+    if (!(await shopsServices.subcategories.editById({ id, ...req.body, logo_url: imageUrl }))) {
       return handleErrorResponse(res, 400, `No se pudo actualizar la subcategoría.`);
     };
 
@@ -105,6 +125,10 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
 
     const result = await shopsServices.subcategories.getById({ id });
     if (!result) return handleErrorResponse(res, 404, `La subcategoría con el id: ${id} no existe.`);
+
+    if (result.logo_url) {
+      if (!(await deleteFileR2(result.logo_url))) return handleErrorResponse(res, 500, "Error al eliminar la imagen.");
+    };
 
     if (!(await shopsServices.subcategories.deleteById({ id }))) {
       return handleErrorResponse(res, 404, `Error al eliminar la subcategoría.`);
