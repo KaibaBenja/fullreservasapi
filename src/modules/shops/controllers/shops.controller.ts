@@ -3,7 +3,7 @@ import * as shopsServices from "../services";
 import * as  usersServices from "../../users/services/";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
-
+import { validateTimes } from "../utils/formatTime";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -32,6 +32,22 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 409, `Faltan datos para el ingreso de horarios para el caso de doble turno.`);
     };
 
+    // Primero armo los schedules sin shop_id
+    const schedules = shift_type === "DOUBLESHIFT"
+      ? [
+        { open_time: open_time1, close_time: close_time1 },
+        { open_time: open_time2, close_time: close_time2 }
+      ]
+      : [{ open_time: open_time1, close_time: close_time1 }];
+
+    // Validación de horarios antes de crear el shop
+    for (const [index, schedule] of schedules.entries()) {
+      const validationError = validateTimes(schedule.open_time, schedule.close_time);
+      if (validationError) {
+        return handleErrorResponse(res, 400, `Error en turno ${index + 1}: ${validationError}`);
+      }
+    }
+
     if (!(await shopsServices.shops.add(req.body))) {
       return handleErrorResponse(res, 500, `Error al agregar el negocio.`);
     }
@@ -41,14 +57,13 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
     const shopId = Object.values(result[0])[0];
 
-    const schedules = shift_type === "DOUBLESHIFT"
-      ? [
-        { shop_id: shopId, open_time: open_time1, close_time: close_time1 },
-        { shop_id: shopId, open_time: open_time2, close_time: close_time2 }
-      ]
-      : [{ shop_id: shopId, open_time: open_time1, close_time: close_time1 }];
+     // Agrego shop_id a cada schedule
+    const schedulesWithShopId = schedules.map(schedule => ({
+      shop_id: shopId,
+      ...schedule,
+    }));
 
-    const scheduleResults = await Promise.all(schedules.map(schedule => shopsServices.schedules.add(schedule)));
+    const scheduleResults = await Promise.all(schedulesWithShopId.map(schedule => shopsServices.schedules.add(schedule)));
 
     const failedSchedules = scheduleResults.filter(result => !result);
     if (failedSchedules.length > 0) {
@@ -92,6 +107,7 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json(result ?? []);
   } catch (error) {
+    console.log(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 };
@@ -188,6 +204,8 @@ const editById = async (req: Request, res: Response): Promise<void> => {
       if (!(await shopsServices.availableSlots.deleteByShopId({ shop_id: id }))) {
         return handleErrorResponse(res, 500, `Error al eliminar los espacios disponibles existentes.`);
       };
+
+      // VALIDACIÓN DE SCHEDULES
 
       // Crear nuevos schedules
       const schedules = shift_type === "DOUBLESHIFT"
