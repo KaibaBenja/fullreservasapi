@@ -20,7 +20,7 @@ interface BookingsAttributes {
   updatedAt?: Date;
 };
 
-type BookingsCreationAttributes = Optional<BookingsAttributes, 'id' | 'createdAt' | 'updatedAt'>;
+type BookingsCreationAttributes = Optional<BookingsAttributes, 'id' | 'status' | 'createdAt' | 'updatedAt'>;
 
 class Booking extends Model<BookingsAttributes, BookingsCreationAttributes> implements BookingsAttributes {
   public id!: Buffer;
@@ -99,6 +99,7 @@ Booking.init(
     status: {
       type: DataTypes.ENUM("PENDING", "CONFIRMED", "CANCELLED"),
       allowNull: false,
+      defaultValue: "PENDING",
     },
     booking_code: {
       type: DataTypes.CHAR(4),

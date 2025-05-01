@@ -15,7 +15,6 @@ const add = async ({ user_id, shop_id, booked_slot_id, date, guests, location_ty
       location_type: location_type,
       floor: floor,
       roof_type: roof_type,
-      status: status,
       booking_code: booking_code
     });
 
@@ -76,8 +75,8 @@ const getById = async ({ id }: Pick<IBookings, "id">) => {
 };
 
 const getAllByFiltersShopId = async ({
-  user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status
-}: Pick<IBookings, 'shop_id'> & Partial<Pick<IBookings, 'user_id' | 'booked_slot_id' | 'date' | 'guests' | 'location_type' | 'floor' | 'roof_type' | 'status'>>) => {
+  user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, booking_code, status
+}: Pick<IBookings, 'shop_id'> & Partial<Pick<IBookings, 'user_id' | 'booked_slot_id' | 'date' | 'guests' | 'location_type' | 'floor' | 'roof_type' | 'booking_code' | 'status'>>) => {
   try {
     const whereConditions: Record<string, any> = {
       shop_id: sequelize.fn('UUID_TO_BIN', shop_id)
@@ -90,6 +89,7 @@ const getAllByFiltersShopId = async ({
     if (location_type) whereConditions.location_type = location_type;
     if (floor) whereConditions.floor = floor;
     if (roof_type) whereConditions.roof_type = roof_type;
+    if (booking_code) whereConditions.booking_code = booking_code;
     if (status) whereConditions.status = status;
 
     const result = await Booking.findAll({
@@ -116,8 +116,8 @@ const getAllByFiltersShopId = async ({
 };
 
 const getAllByFiltersUserId = async ({
-  user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status
-}: Pick<IBookings, 'user_id'> & Partial<Pick<IBookings, 'shop_id' | 'booked_slot_id' | 'date' | 'guests' | 'location_type' | 'floor' | 'roof_type' | 'status'>>) => {
+  user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, booking_code, status
+}: Pick<IBookings, 'user_id'> & Partial<Pick<IBookings, 'shop_id' | 'booked_slot_id' | 'date' | 'guests' | 'location_type' | 'floor' | 'roof_type' | 'booking_code' | 'status'>>) => {
   try {
     const whereConditions: Record<string, any> = {
       user_id: sequelize.fn('UUID_TO_BIN', user_id)
@@ -130,6 +130,7 @@ const getAllByFiltersUserId = async ({
     if (location_type) whereConditions.location_type = location_type;
     if (floor) whereConditions.floor = floor;
     if (roof_type) whereConditions.roof_type = roof_type;
+    if (booking_code) whereConditions.booking_code = booking_code;
     if (status) whereConditions.status = status;
 
     const result = await Booking.findAll({
@@ -157,7 +158,7 @@ const getAllByFiltersUserId = async ({
 
 const getAllByFilters = async (filters: Partial<IBookings>) => {
   try {
-    const { user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status } = filters;
+    const { user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, booking_code, status } = filters;
 
     const whereConditions: Record<string, any> = {};
 
@@ -169,6 +170,7 @@ const getAllByFilters = async (filters: Partial<IBookings>) => {
     if (location_type) whereConditions.location_type = location_type;
     if (floor) whereConditions.floor = floor;
     if (roof_type) whereConditions.roof_type = roof_type;
+    if (booking_code) whereConditions.booking_code = booking_code;
     if (status) whereConditions.status = status;
 
     const result = await Booking.findAll({
