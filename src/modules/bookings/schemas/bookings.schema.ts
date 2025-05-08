@@ -48,13 +48,15 @@ export const bookingSchema = z.object({
     z.enum(["COVERED", "UNCOVERED"], {
       errorMap: () => ({ message: "El campo 'roof_type' solo puede ser 'COVERED' ó 'UNCOVERED'." })
     })
-  ),
+  )
+}).strict();
 
+
+export const bookingSchemaFiter = bookingSchema.extend({
   status: z.preprocess(
     (val) => (typeof val === "string" ? val.toUpperCase() : val),
     z.enum(['PENDING', 'CONFIRMED', 'CANCELLED'], {
       errorMap: () => ({ message: "El campo 'status' solo puede ser 'PENDING', 'CONFIRMED' ó 'CANCELLED'." })
     })
   ),
-}).strict();
-
+});
