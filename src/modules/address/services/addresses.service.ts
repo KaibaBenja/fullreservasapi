@@ -14,6 +14,7 @@ const add = async ({ street, street_number, extra, city_id, province_id, country
       city_id: uuidToBuffer(city_id),
       province_id: uuidToBuffer(province_id),
       country_id: uuidToBuffer(country_id),
+      description: description,
       latitude: latitude,
       longitude: longitude,
     });
