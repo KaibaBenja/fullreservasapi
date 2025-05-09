@@ -97,7 +97,7 @@ countriesRoutes.post("/", validateSchema(countrySchema), countriesController.cre
  *              schema:
  *                  type: array
  *                  items:
- *                      $ref: '#/components/schemas/Country'
+ *                      $ref: '#/components/schemas/Countries'
  *       500:
  *          description: Error interno del servidor.
  */
