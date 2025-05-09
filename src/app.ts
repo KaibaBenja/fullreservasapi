@@ -1,10 +1,12 @@
-import express from "express";
 import cors from 'cors';
-import { mainRoutes } from "./routes/main.routes";
-import { optionCors } from "./config/cors.config";
-import { PORT, HOST } from "./config/dotenv.config";
+import express from "express";
 import logger from "morgan";
+import swaggerUI from "swagger-ui-express";
+import { optionCors } from "./config/cors.config";
+import { HOST, PORT } from "./config/dotenv.config";
 import { sequelize } from "./config/sequalize.config";
+import { mainRoutes } from "./routes/main.routes";
+import specs from "./swagger/swagger";
 
 const app = express();
 
@@ -12,6 +14,7 @@ app.use(cors(optionCors));
 app.use(express.json());
 app.disable("x-powered-by");
 app.use(logger("dev"));
+app.use("/api-docs",swaggerUI.serve, swaggerUI.setup(specs))
 
 sequelize.authenticate()
   .then(() => {
