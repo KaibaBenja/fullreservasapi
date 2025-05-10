@@ -7,7 +7,7 @@ import { optionCors } from "./config/cors.config";
 import { HOST, PORT } from "./config/dotenv.config";
 import { sequelize } from "./config/sequalize.config";
 import { mainRoutes } from "./routes/main.routes";
-import specs from "./swagger/swagger";
+import swaggerSpecs, { swaggerUiOptions } from "./swagger/swagger";
 
 const app = express();
 
@@ -16,16 +16,7 @@ app.use(express.json());
 app.disable("x-powered-by");
 app.use(logger("dev"));
 app.use("/swagger-ui", express.static(path.join(__dirname, "swagger-ui")));
-app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs, {
-    customCssUrl: "/swagger-ui/SwaggerDark.css",
-    customSiteTitle: "Fullreservas API Docs",
-    swaggerOptions: {
-      docExpansion: "none",
-      displayRequestDuration: true,
-      defaultModelsExpandDepth: 1
-    }
-  })
-);
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpecs, swaggerUiOptions));
 
 sequelize.authenticate()
   .then(() => {
