@@ -9,21 +9,21 @@ const swaggerDefinition: OAS3Definition = {
         contact: {
             name: "Leandro Schugurensky, Benjamín Sánchez Morales, Martin Bosch & Nicolás Boattini",
             email: "leo.schugu@gmail.com, sanchezmoralesbenjamin10@gmail.com, martinbosch1996@gmail.com, nicoboattini@gmail.com",
-        },
-        servers: [
-            {   
-                url: "http://localhost:3000",
-                description: "Servidor Local"
-            },
-            {
-                url: "https://fullreservasapi.up.railway.app/api/users/auth/register",
-                description: "API DEVELOPMENT"
-            }
-        ]
+        }
     },
-    
-    
+    servers: [
+        {   
+            url: "http://localhost:3000",
+            description: "Servidor Local"
+        },
+        {
+            url: "https://fullreservasapi.up.railway.app/api/users/auth/register",
+            description: "API DEVELOPMENT"
+        }
+    ]
 };
+    
+    
 
 const swaggerOptions: OAS3Options = {
     swaggerDefinition,
