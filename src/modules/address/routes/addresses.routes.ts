@@ -25,13 +25,13 @@ export const addressesRoutes = express.Router();
  *                  format: uuid
  *                  example: 550e8400-e29b-41d4-a716-446655440000
  *              street:
- *                  type: varchar
+ *                  type: string
  *                  example: Tucuman
  *              street_number:
- *                  type: varchar
+ *                  type: string
  *                  example: 1164
  *              extra:
- *                  type: varchar
+ *                  type: string
  *                  example: 1B
  *              city_id:
  *                  type: binary
@@ -46,7 +46,7 @@ export const addressesRoutes = express.Router();
  *                  format: uuid
  *                  example: 550e8400-e29b-41d4-a716-446655440000
  *              description:
- *                  type: varchar
+ *                  type: string
  *                  example: Oficina
  *              latitude:
  *                  type: decimal
@@ -121,7 +121,7 @@ export const addressesRoutes = express.Router();
  *                              format: uuid
  *                              example: 550e8400-e29b-41d4-a716-446655440000
  *                          description:
- *                              type: varchar
+ *                              type: string
  *                              example: Oficina
  *                          latitude:
  *                              type: decimal
@@ -196,7 +196,7 @@ addressesRoutes.post("/", validateSchema(addressesSchema), addressesController.c
  *                              format: uuid
  *                              example: 550e8400-e29b-41d4-a716-446655440000
  *                          description:
- *                              type: varchar
+ *                              type: string
  *                              example: Oficina
  *                          latitude:
  *                              type: decimal
@@ -308,7 +308,7 @@ addressesRoutes.get("/:id", addressesController.getById);
  *                              format: uuid
  *                              example: 550e8400-e29b-41d4-a716-446655440000
  *                          description:
- *                              type: varchar
+ *                              type: string
  *                              example: Oficina
  *                          latitude:
  *                              type: decimal
