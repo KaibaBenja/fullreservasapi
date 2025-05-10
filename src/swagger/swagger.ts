@@ -13,11 +13,11 @@ const swaggerDefinition: OAS3Definition = {
     },
     servers: [
         {   
-            url: "http://localhost:3000",
+            url: "http://localhost:3300",
             description: "Servidor Local"
         },
         {
-            url: "https://fullreservasapi.up.railway.app/api/users/auth/register",
+            url: "https://fullreservasapi.up.railway.app",
             description: "API DEVELOPMENT"
         }
     ]
