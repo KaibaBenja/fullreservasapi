@@ -156,7 +156,7 @@ countriesRoutes.get("/:id", countriesController.getById);
  *                              example: Argentina
  *      responses:
  *          200:
- *              description: El país fue editada con éxito.
+ *              description: El país fue editado con éxito.
  *              content:
  *                  application/json:
  *                      schema:
@@ -189,7 +189,7 @@ countriesRoutes.patch("/:id", validateSchema(countrySchema), countriesController
  *          description: El id del país
  *      responses:
  *          200:
- *              description: País fue eliminada con éxito.
+ *              description: El país fue eliminada con éxito.
  *              content:
  *                  application/json:
  *                      schema:
@@ -197,7 +197,7 @@ countriesRoutes.patch("/:id", validateSchema(countrySchema), countriesController
  *                          properties:
  *                              success:
  *                                  type: boolean
- *                                  example: True
+ *                                  example: true
  *          404:
  *              description: Error al eliminar. El país con el ID no existe.
  *          500:

@@ -226,7 +226,7 @@ citiesRoutes.patch("/:id", validateSchemaPartial(citiesSchema), citiesController
  *                          properties:
  *                              success:
  *                                  type: boolean
- *                                  example: True
+ *                                  example: true
  *          404:
  *              description: Error al eliminar. La ciudad con el ID no existe.
  *          500:

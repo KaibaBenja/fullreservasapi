@@ -209,7 +209,7 @@ provincesRoutes.patch("/:id", validateSchemaPartial(provinceSchema), provincesCo
  *                          properties:
  *                              success:
  *                                  type: boolean
- *                                  example: True
+ *                                  example: true
  *          404:
  *              description: Error al eliminar. La provincia con el ID no existe.
  *          500:
