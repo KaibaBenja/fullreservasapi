@@ -26,7 +26,7 @@ body {
     border-radius: 2px;
 }
 
-.swagger-ui .info .title, .info h1, .swagger-ui .info h2, .swagger-ui .info h3, .swagger-ui .info h4, .swagger-ui .info h5, .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table {
+.swagger-ui .info .title, .info h1, .swagger-ui .info h2, .swagger-ui .info h3, .swagger-ui .info h4, .swagger-ui .info h5, .swagger-ui .info li, .swagger-ui .info p, .swagger-ui .info table, .swagger-ui .opblock-description-wrapper p, .swagger-ui table thead tr th {
     color: #ffffff;
 }
 .swagger-ui .btn{
@@ -102,7 +102,7 @@ body {
 .swagger-ui .response-col_description,
 .swagger-ui .responses-inner h4,
 .swagger-ui .responses-inner td {
-  color: #ddd;
+  color: #ffffff;
 }
 
 .swagger-ui .tab li,
