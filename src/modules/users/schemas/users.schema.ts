@@ -37,3 +37,8 @@ export const userSchema = z.object({
   }).default(false)
 }).strict();
 
+export const loginSchema = userSchema.pick({
+  email: true,
+  password: true
+})
+

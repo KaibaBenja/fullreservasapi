@@ -70,7 +70,7 @@ const getById = async (req: Request, res: Response): Promise<void> => {
     const result = await shopsServices.subcategories.getById({ id });
     if (!result) return handleErrorResponse(res, 404, `La subcategoría con el id: ${id} no existe.`);
 
-    res.status(201).json(result);
+    res.status(200).json(result);
   } catch (error) {
     handleErrorResponse(res, 500, "Error interno del servidor.");
   };
