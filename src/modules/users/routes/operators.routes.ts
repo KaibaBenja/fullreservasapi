@@ -45,7 +45,7 @@ export const operatorsRoutes = express.Router();
  * @swagger
  * tags:
  *  name: Operator
- *  description: Operadores
+ *  description: Operadores de Comercios
  */
 
 /**

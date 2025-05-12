@@ -51,7 +51,7 @@ export const merchantsRoutes = express.Router();
  * @swagger
  * tags:
  *  name: Merchant
- *  description: Comerciantes
+ *  description: Configuración de Comerciantes
  */
 
 /**
@@ -65,7 +65,7 @@ export const merchantsRoutes = express.Router();
  *      requestBody:
  *          required: true
  *          content:
- *              multupart/form-data:
+ *              multipart/form-data:
  *                  schema:
  *                      type: object
  *                      required:
@@ -82,6 +82,7 @@ export const merchantsRoutes = express.Router();
  *                              example: 550e8400-e29b-41d4-a716-446655440000
  *                          main_category:
  *                              type: string
+ *                              enum: [COMMERCE, SERVICE]
  *                              example: SERVICE
  *      responses:
  *          201:
@@ -229,13 +230,9 @@ merchantsRoutes.get("/:id", merchantsController.getById);
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
- *                 format: uuid
- *                 example: 550e8400-e29b-41d4-a716-446655440000
  *               main_category:
  *                 type: string
- *                 example: COMMERCE
+ *                 enum: [COMMERCE, SERVICE]
  *               logo_url:
  *                 type: string
  *                 format: binary
