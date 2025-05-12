@@ -216,10 +216,6 @@ imagesRoutes.get("/:id", imagesController.getById);
  *                 type: string
  *                 format: binary
  *                 description: Nueva imagen a subir (opcional)
- *               shop_id:
- *                 type: string
- *                 format: uuid
- *                 description: UUID del negocio (opcional, depende de los campos permitidos en tu lógica)
  *     responses:
  *       200:
  *         description: Imagen actualizada exitosamente
@@ -250,7 +246,7 @@ imagesRoutes.get("/:id", imagesController.getById);
  *       500:
  *         description: Error interno del servidor
  */
-imagesRoutes.patch("/:id", upload("images").single("image_url"), validateSchemaPartial(imagesSchema), imagesController.editById);
+imagesRoutes.patch("/:id", upload("images").single("image_url"), imagesController.editById);
 /**
  * @swagger
  * /api/shops/images/{id}:
