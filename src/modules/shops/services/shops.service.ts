@@ -7,10 +7,11 @@ import { formatName } from "../../../utils/formatName";
 import Addresses from "../../address/models/addresses.model";
 import Images from "../models/images.model";
 import shopsAddresseses from "../models/shopAddresses.model";
+import Schedules from "../models/schedules.model";
 
 
 const add = async (data: IShops) => {
-  const { user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description, price_range} = data;
+  const { user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description, price_range } = data;
   try {
     const result = await Shops.create({
       user_id: uuidToBuffer(user_id),
@@ -59,6 +60,11 @@ const getAll = async () => {
             'main_category',
           ],
           as: 'subcategory',
+        },
+        {
+          model: Schedules,
+          attributes: ['open_time', 'close_time'],
+          as: 'schedules',
         },
       ],
     });
@@ -135,7 +141,7 @@ const getAllByFilters = async (filters: Partial<IShops> & {
     if (legal_info) shopsWhereConditions.legal_info = legal_info;
     if (bank_info) shopsWhereConditions.bank_info = bank_info;
     if (price_range) shopsWhereConditions.price_range = price_range;
-    
+
     // Condiciones WHERE para la tabla Subcategories
     const subcategoryWhereConditions: Record<string, any> = {};
     if (subcategory_name) subcategoryWhereConditions.name = subcategory_name;
@@ -174,7 +180,13 @@ const getAllByFilters = async (filters: Partial<IShops> & {
         'created_at',
         'updated_at'
       ],
-      include: [includeSubcategory],
+      include: [includeSubcategory,
+        {
+          model: Schedules,
+          attributes: ['open_time', 'close_time'],
+          as: 'schedules',
+        },
+      ],
       where: Object.keys(shopsWhereConditions).length > 0 ? shopsWhereConditions : undefined
     });
 
@@ -243,6 +255,11 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
       ],
       include: [
         includeSubcategory,
+        {
+          model: Schedules,
+          attributes: ['open_time', 'close_time'],
+          as: 'schedules',
+        },
         {
           model: shopsAddresseses,
           include: [

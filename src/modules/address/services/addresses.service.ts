@@ -7,6 +7,8 @@ import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 
 const add = async ({ street, street_number, extra, city_id, province_id, country_id, description, latitude, longitude }: IAddresses) => {
   try {
+    const optionalData: any = {};
+    if (description) optionalData.description = description;
     const result = await Addresses.create({
       street: formatName(street),
       street_number: street_number.toUpperCase(),
@@ -16,6 +18,7 @@ const add = async ({ street, street_number, extra, city_id, province_id, country
       country_id: uuidToBuffer(country_id),
       latitude: latitude,
       longitude: longitude,
+      ...optionalData
     });
 
     return result ? result.toJSON() : null;

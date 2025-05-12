@@ -8,7 +8,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { shop_id } = req.body;
 
-    if (!(await shopsServices.shops.getById(shop_id))) {
+    if (!(await shopsServices.shops.getById({ id: shop_id }))) {
       return handleErrorResponse(res, 404, `El negocio con el id: ${shop_id} no existe.`);
     };
 

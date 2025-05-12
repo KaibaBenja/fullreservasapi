@@ -3,8 +3,8 @@ import { validateEnv } from "../utils/validateEnv";
 
 dotenv.config();
 
-export const PORT = parseInt(process.env.PORT ?? "8080", 10);
-export const HOST = "0.0.0.0";
+export const PORT = parseInt(process.env.PORT ?? "3300", 10);
+export const HOST = process.env.HOST ?? "localhost"
 export const CORS_ORIGIN = validateEnv("CORS_ORIGIN", process.env.CORS_ORIGIN);
 
 export const MYSQL = {

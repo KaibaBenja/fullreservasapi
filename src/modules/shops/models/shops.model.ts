@@ -4,6 +4,7 @@ import User from "../../users/models/users.model";
 import Subcategory from "../models/subcategories.model";
 import shopsAddresseses from "../../shops/models/shopAddresses.model";
 import Images from "../models/images.model";
+import Schedules from "./schedules.model";
 
 interface ShopsAttributes {
   [x: string]: any;
@@ -27,12 +28,11 @@ interface ShopsCreationAttributes
   extends Optional<
     ShopsAttributes,
     "id" | "description" | "createdAt" | "updatedAt"
-  > {}
+  > { }
 
 class Shops
   extends Model<ShopsAttributes, ShopsCreationAttributes>
-  implements ShopsAttributes
-{
+  implements ShopsAttributes {
   public id!: Buffer;
   public user_id!: Buffer;
   public subcategory_id!: Buffer;
@@ -143,5 +143,8 @@ shopsAddresseses.belongsTo(Shops, { foreignKey: "shop_id" });
 
 Shops.hasMany(Images, { foreignKey: "shop_id" });
 Images.belongsTo(Shops, { foreignKey: "shop_id" });
+
+Shops.hasMany(Schedules, { foreignKey: "shop_id", as: "schedules" }); 
+Schedules.belongsTo(Shops, { foreignKey: "shop_id" }); 
 
 export default Shops;
