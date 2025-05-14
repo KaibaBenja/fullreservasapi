@@ -1,12 +1,13 @@
 import express from "express";
-import { subcategoriesRoutes } from "./subcategories.routes";
+import { availableSlotsRoutes } from "./availableSlots.routes";
+import { imagesRoutes } from "./images.routes";
+import { menusRoutes } from "./menus.routes";
+import { ratingsRoutes } from "./ratings.routes";
+import { schedulesRoutes } from "./schedules.routes";
 import { shopRoutes } from "./shops.routes";
 import { shopsAddressesRoutes } from "./shopsAddresses.routes";
-import { imagesRoutes } from "./images.routes";
+import { subcategoriesRoutes } from "./subcategories.routes";
 import { tablesRoutes } from "./tables.routes";
-import { availableSlotsRoutes } from "./availableSlots.routes";
-import { ratingsRoutes } from "./ratings.routes";
-import { menusRoutes } from "./menus.routes";
 
 export const shopsRoutes = express.Router();
 
@@ -18,4 +19,5 @@ shopsRoutes.use("/tables", tablesRoutes);
 shopsRoutes.use("/availableSlots", availableSlotsRoutes);
 shopsRoutes.use("/ratings", ratingsRoutes);
 shopsRoutes.use("/menus", menusRoutes);
+shopsRoutes.use("/schedules", schedulesRoutes);
 

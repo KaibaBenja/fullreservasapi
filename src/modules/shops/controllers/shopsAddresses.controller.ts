@@ -9,11 +9,14 @@ const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { shop_id, address_id } = req.body;
 
-    if (!(await shopsServices.shops.getById(shop_id))) {
+    if (!validateUUID(shop_id, res)) return;
+    if (!validateUUID(address_id, res)) return;
+    
+    if (!(await shopsServices.shops.getById({id: shop_id}))) {
       return handleErrorResponse(res, 404, `El negocio con el id: ${shop_id} no existe.`);
     };
 
-    if (!(await addressServices.addresses.getById(address_id))) {
+    if (!(await addressServices.addresses.getById({id: address_id}))) {
       return handleErrorResponse(res, 404, `El dirección con el id: ${shop_id} no existe.`);
     };
 
@@ -24,7 +27,6 @@ const create = async (req: Request, res: Response): Promise<void> => {
     if (!(await shopsServices.shopsAddresses.add(req.body))) {
       return handleErrorResponse(res, 400, `Error al agregar la dirección del negocio.`);
     };
-
     const result = await shopsServices.shopsAddresses.getByShopAndAddress({ shop_id, address_id });
     if (!result) return handleErrorResponse(res, 404, `Error al encontrar la dirección del negocio agregada.`);
 
@@ -65,12 +67,14 @@ const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { address_id } = req.body;
+    if (!validateUUID(id, res)) return;
+    if (!validateUUID(address_id, res)) return;
 
     if (!req.body || Object.keys(req.body).length === 0) {
       return handleErrorResponse(res, 400, "Debe enviar al menos un campo para actualizar.");
     };
 
-    if (address_id && !(await addressServices.addresses.getById(address_id))) {
+    if (address_id && !(await addressServices.addresses.getById({id: address_id}))) {
       return handleErrorResponse(res, 404, `La dirección con el id: ${address_id} no existe.`);
     }
 

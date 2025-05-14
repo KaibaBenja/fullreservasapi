@@ -18,7 +18,7 @@ const swaggerDefinition: OAS3Definition = {
             description: "Servidor Local"
         },
         {
-            url: "https://fullreservasapi.up.railway.app",
+            url: "https://fullreservasapi-production.up.railway.app",
             description: "API DEVELOPMENT"
         }
     ]
