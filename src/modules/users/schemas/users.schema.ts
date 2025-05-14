@@ -42,3 +42,19 @@ export const loginSchema = userSchema.pick({
   password: true
 })
 
+export const editUserSchema = userSchema.extend({
+  current_password: z.string({
+    invalid_type_error: "El campo 'current_password' debe ser de tipo string.",
+    required_error: "El campo 'current_password' es requerido."
+  })
+    .min(8, { message: "El campo 'password' debe tener al menos 8 caracteres." })
+    .max(128, { message: "El campo 'password' no puede tener más de 128 caracteres." })
+    .regex(/[A-Z]/, { message: "El campo 'password' debe contener al menos una letra mayúscula." })
+    .regex(/[a-z]/, { message: "El campo 'password' debe contener al menos una letra minúscula." })
+    .regex(/[0-9]/, { message: "El campo 'password' debe contener al menos un número." })
+    .regex(/[^A-Za-z0-9]/, { message: "El campo 'password' debe contener al menos un carácter especial." })
+    .refine(value => !/\s/.test(value), {
+      message: "El campo 'password' no debe contener espacios en blanco."
+    }),
+})
+
