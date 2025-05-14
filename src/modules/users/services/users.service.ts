@@ -1,10 +1,10 @@
-import { IUser } from "../types/users.types";
 import bcrypt from 'bcrypt';
-import User from "../models/users.model";
-import { formatName } from "../../../utils/formatName";
-import { sequelize } from "../../../config/sequalize.config";
 import { QueryTypes } from "sequelize";
-
+import admin from '../../../config/firebase';
+import { sequelize } from "../../../config/sequalize.config";
+import { formatName } from "../../../utils/formatName";
+import User from "../models/users.model";
+import { IUser } from "../types/users.types";
 
 const getAll = async () => {
   try {
@@ -136,13 +136,66 @@ const getByRole = async (roleId: string) => {
   };
 };
 
+const verifyPassword = async ({ id }: Pick<IUser, "id">, current_password: string) => {
+    try {
+      const result = await sequelize.query(
+        `SELECT 
+          u.password
+        FROM users u
+        WHERE u.id = UUID_TO_BIN(:userId)`,
+        {
+          type: QueryTypes.SELECT,
+          replacements: { userId: id },
+        }
+      );
+
+      if (!result.length) return false;
+
+      const user = result[0] as { password: string };
+      const isMatch = await bcrypt.compare(current_password, user.password);
+      return isMatch;
+    } catch (error) {
+      console.error(error);
+      throw new Error('Error al verificar la contraseña del usuario');
+  }
+};
+
 const editById = async ({ id, full_name, password, email }: IUser) => {
   try {
     const updateData: any = {};
+    const firebaseUpdate: admin.auth.UpdateRequest = {};
+    if (full_name) {
+      updateData.full_name = formatName(full_name);
+      firebaseUpdate.displayName = updateData.full_name;
+    }
 
-    if (full_name) updateData.full_name = formatName(full_name);
-    if (email) updateData.email = email;
-    if (password) updateData.password = await bcrypt.hash(password, 10);
+    if (email) {
+      updateData.email = email
+      firebaseUpdate.email = email;
+    }
+
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+      firebaseUpdate.password = password;
+    }
+
+    const result = await sequelize.query(
+      `SELECT 
+        u.firebase_uid
+      FROM users u
+      WHERE u.id = UUID_TO_BIN(:userId)`,
+      {
+        type: QueryTypes.SELECT,
+        replacements: { userId: id },
+      }
+    );
+    if (!result.length) {
+      throw new Error('Usuario no encontrado en FB.');
+    }
+
+    const fb_uid = result[0] as { firebase_uid: string };
+
+    await admin.auth().updateUser(fb_uid.firebase_uid, firebaseUpdate);
 
     const [updatedRowsCount] = await User.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
@@ -156,6 +209,24 @@ const editById = async ({ id, full_name, password, email }: IUser) => {
 
 const deleteById = async ({ id }: Pick<IUser, "id">) => {
   try {
+    const user = await sequelize.query(
+      `SELECT 
+        u.firebase_uid
+      FROM users u
+      WHERE u.id = UUID_TO_BIN(:userId)`,
+      {
+        type: QueryTypes.SELECT,
+        replacements: { userId: id },
+      }
+    );
+    if (!user.length) {
+      throw new Error('Usuario no encontrado en FB.');
+    }
+
+    const fb_uid = user[0] as { firebase_uid: string };
+
+    await admin.auth().deleteUser(fb_uid.firebase_uid);
+
     const result = await User.destroy({
       where: { id: sequelize.fn('UUID_TO_BIN', id) }
     });
@@ -167,4 +238,4 @@ const deleteById = async ({ id }: Pick<IUser, "id">) => {
 };
 
 
-export default { getAll, getById, getByEmail, getByRole, editById, deleteById };
+export default { getAll, getById, getByEmail, getByRole, editById, deleteById, verifyPassword };
