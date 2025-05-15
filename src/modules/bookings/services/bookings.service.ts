@@ -1,7 +1,7 @@
-import { IBookings } from "../types/bookings.types";
-import Booking from "../models/bookings.model";
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+import Booking from "../models/bookings.model";
+import { IBookings } from "../types/bookings.types";
 
 
 const add = async ({ user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status, booking_code }: IBookings) => {
@@ -119,13 +119,14 @@ const getAllByFiltersUserId = async ({
   user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, booking_code, status
 }: Pick<IBookings, 'user_id'> & Partial<Pick<IBookings, 'shop_id' | 'booked_slot_id' | 'date' | 'guests' | 'location_type' | 'floor' | 'roof_type' | 'booking_code' | 'status'>>) => {
   try {
+    //console.log({user: user_id, shop: shop_id, slot: booked_slot_id, date: date, guests: guests, location: location_type, floor: floor, roof: roof_type, code: booking_code, status: status });
     const whereConditions: Record<string, any> = {
       user_id: sequelize.fn('UUID_TO_BIN', user_id)
     };
 
     if (shop_id) whereConditions.shop_id = uuidToBuffer(shop_id);
     if (booked_slot_id) whereConditions.booked_slot_id = uuidToBuffer(booked_slot_id);
-    if (date) whereConditions.date = date;
+    //if (date) whereConditions.date = date;
     if (guests) whereConditions.guests = guests;
     if (location_type) whereConditions.location_type = location_type;
     if (floor) whereConditions.floor = floor;
