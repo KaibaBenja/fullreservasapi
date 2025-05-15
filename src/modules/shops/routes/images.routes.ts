@@ -1,8 +1,8 @@
 import express from "express";
-import imagesController from "../controllers/images.controller";
-import { validateSchema, validateSchemaPartial } from "../../../middlewares/validateSchema";
-import { imagesSchema } from "../schemas/images.schema";
 import { upload } from "../../../middlewares/upload";
+import { validateSchema } from "../../../middlewares/validateSchema";
+import imagesController from "../controllers/images.controller";
+import { imagesSchema } from "../schemas/images.schema";
 
 export const imagesRoutes = express.Router();
 /**
@@ -19,7 +19,7 @@ export const imagesRoutes = express.Router();
  *          type: object
  *          required:
  *              - id
- *              - shop_io
+ *              - shop_id
  *              - image_url
  *          properties:
  *              id:
