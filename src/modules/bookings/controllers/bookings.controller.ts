@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import * as usersServices from "../../users/services";
-import * as shopsServices from "../../shops/services";
-import * as bookingsServices from "../services";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
-import { generateBookingCode } from "../utils/generateBookingCode";
+import * as shopsServices from "../../shops/services";
+import * as usersServices from "../../users/services";
+import * as bookingsServices from "../services";
 import { getAllCombinations } from "../utils/generateAllCombinations";
+import { generateBookingCode } from "../utils/generateBookingCode";
 import { mapComboToTables, TableMapCombo } from "../utils/mapComboToTables";
 
 const create = async (req: Request, res: Response): Promise<void> => {
@@ -147,9 +147,9 @@ const create = async (req: Request, res: Response): Promise<void> => {
     if (sumaActualTables < guests) {
       return handleErrorResponse(res, 409, "No hay mesas disponibles para la cantidad de comensales.");
     };
-
+    console.log({sumaActualTables: sumaActualTables});
     // ✅✅
-    const allCombinations = getAllCombinations(actualTables);
+    const allCombinations = getAllCombinations(actualTables, guests, 12);
     console.log({ allCombinations: allCombinations })
 
     // ✅✅
@@ -227,6 +227,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
       groupedTables[t.table_id].tables_booked++;
       groupedTables[t.table_id].guests += t.guests;
     };
+    console.log({groupedTables: groupedTables})
 
     // Luego insertar los registros agrupados
     for (const table_id in groupedTables) {

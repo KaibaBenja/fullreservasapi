@@ -123,12 +123,15 @@ userRoutes.get("/:id", usersController.getById);
  *                          full_name:
  *                              type: string
  *                              example: John Doe
- *                          password:
- *                              type: string
- *                              example: JohnDoe123$
  *                          email:
  *                              type: string
  *                              example: johndoe@domain.com
+ *                          password:
+ *                              type: string
+ *                              example: JohnDoe123$
+ *                          current_password:
+ *                              type: string
+ *                              example: JohnDoe123$
  *      responses:
  *          200:
  *              description: El usuario fue editado con éxito.
