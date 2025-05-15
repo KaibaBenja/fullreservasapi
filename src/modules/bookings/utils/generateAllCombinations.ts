@@ -1,15 +1,32 @@
-export function getAllCombinations(arr: number[]): number[][] {
+export function getAllCombinations(
+  arr: number[],
+  guests: number,
+  overflowMargin = 12
+): number[][] {
   const result: number[][] = [];
 
-  const recurse = (current: number[], rest: number[]): void => {
-    if (current.length > 0) {
-      result.push(current);
+  const recurse = (
+    current: number[],
+    start: number,
+    currentSum: number
+  ) => {
+    if (currentSum > guests + overflowMargin) return;
+
+    if (currentSum >= guests) {
+      result.push([...current]);
+      // No return; seguimos buscando combinaciones con menos mesas o menor overflow
     }
-    for (let i = 0; i < rest.length; i++) {
-      recurse([...current, rest[i]], rest.slice(i + 1));
+
+    for (let i = start; i < arr.length; i++) {
+
+      current.push(arr[i]);
+      recurse(current, i + 1, currentSum + arr[i]);
+      current.pop();
     }
   };
 
-  recurse([], arr);
+  const sorted = [...arr].sort((a, b) => b - a); // grandes primero
+  recurse([], 0, 0);
+
   return result;
 };
