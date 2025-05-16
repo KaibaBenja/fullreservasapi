@@ -1,7 +1,7 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../../../config/sequalize.config';
-import Shops from "./shops.model";
 import Addresses from "../../address/models/addresses.model";
+import Shops from "./shops.model";
 
 interface shopAddressesAttributes {
   id: Buffer;
@@ -52,7 +52,5 @@ shopsAddresseses.init(
   }
 );
 
-shopsAddresseses.belongsTo(Addresses, { foreignKey: 'address_id' });
-Addresses.hasMany(shopsAddresseses, { foreignKey: 'address_id' });
 
 export default shopsAddresseses;
