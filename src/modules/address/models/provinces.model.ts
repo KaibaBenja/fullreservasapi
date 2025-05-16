@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from "sequelize";
-import { sequelize } from "../../../config/sequalize.config"; 
+import { sequelize } from "../../../config/sequalize.config";
 import Country from "./countries.model";
 
 
@@ -48,7 +48,5 @@ Province.init(
 );
 
 
-Province.belongsTo(Country, { foreignKey: "country_id", onDelete: "CASCADE" });
-Country.hasMany(Province, { foreignKey: "country_id" });
 
 export default Province;

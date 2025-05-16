@@ -2,9 +2,6 @@ import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../../../config/sequalize.config";
 import User from "../../users/models/users.model";
 import Subcategory from "../models/subcategories.model";
-import shopsAddresseses from "../../shops/models/shopAddresses.model";
-import Images from "../models/images.model";
-import Schedules from "./schedules.model";
 
 interface ShopsAttributes {
   [x: string]: any;
@@ -133,18 +130,8 @@ Shops.init(
   }
 );
 
-Shops.belongsTo(Subcategory, {
-  foreignKey: "subcategory_id",
-  as: "subcategory",
-});
 
-Shops.hasMany(shopsAddresseses, { foreignKey: "shop_id" });
-shopsAddresseses.belongsTo(Shops, { foreignKey: "shop_id" });
 
-Shops.hasMany(Images, { foreignKey: "shop_id" });
-Images.belongsTo(Shops, { foreignKey: "shop_id" });
 
-Shops.hasMany(Schedules, { foreignKey: "shop_id", as: "schedules" }); 
-Schedules.belongsTo(Shops, { foreignKey: "shop_id" }); 
 
 export default Shops;
