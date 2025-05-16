@@ -1,5 +1,7 @@
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+import AvailableSlot from "../../shops/models/availableSlots.model";
+import Shop from "../../shops/models/shops.model";
 import Booking from "../models/bookings.model";
 import { IBookings } from "../types/bookings.types";
 
@@ -119,7 +121,6 @@ const getAllByFiltersUserId = async ({
   user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, booking_code, status
 }: Pick<IBookings, 'user_id'> & Partial<Pick<IBookings, 'shop_id' | 'booked_slot_id' | 'date' | 'guests' | 'location_type' | 'floor' | 'roof_type' | 'booking_code' | 'status'>>) => {
   try {
-    //console.log({user: user_id, shop: shop_id, slot: booked_slot_id, date: date, guests: guests, location: location_type, floor: floor, roof: roof_type, code: booking_code, status: status });
     const whereConditions: Record<string, any> = {
       user_id: sequelize.fn('UUID_TO_BIN', user_id)
     };
@@ -136,10 +137,10 @@ const getAllByFiltersUserId = async ({
 
     const result = await Booking.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
-        [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        [sequelize.literal('BIN_TO_UUID(booked_slot_id)'), 'booked_slot_id'],
+        [sequelize.literal('BIN_TO_UUID(Booking.id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Booking.user_id)'), 'user_id'],
+        [sequelize.literal('BIN_TO_UUID(Booking.shop_id)'), 'shop_id'],
+        [sequelize.literal('BIN_TO_UUID(Booking.booked_slot_id)'), 'booked_slot_id'],
         'date',
         'guests',
         'location_type',
@@ -148,7 +149,17 @@ const getAllByFiltersUserId = async ({
         'status',
         'booking_code'
       ],
-      where: whereConditions
+      where: whereConditions,
+      include: [
+      {
+        model: Shop,
+        attributes: ['name'],
+      },
+      {
+        model: AvailableSlot,
+        attributes: ['start_time'],
+      }
+      ]
     });
 
     return result.length ? result.map(res => res.toJSON()) : null;
