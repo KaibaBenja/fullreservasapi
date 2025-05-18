@@ -1,7 +1,9 @@
-import { IBookings } from "../types/bookings.types";
-import Booking from "../models/bookings.model";
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+import AvailableSlot from "../../shops/models/availableSlots.model";
+import Shop from "../../shops/models/shops.model";
+import Booking from "../models/bookings.model";
+import { IBookings } from "../types/bookings.types";
 
 
 const add = async ({ user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status, booking_code }: IBookings) => {
@@ -125,7 +127,7 @@ const getAllByFiltersUserId = async ({
 
     if (shop_id) whereConditions.shop_id = uuidToBuffer(shop_id);
     if (booked_slot_id) whereConditions.booked_slot_id = uuidToBuffer(booked_slot_id);
-    if (date) whereConditions.date = date;
+    //if (date) whereConditions.date = date;
     if (guests) whereConditions.guests = guests;
     if (location_type) whereConditions.location_type = location_type;
     if (floor) whereConditions.floor = floor;
@@ -135,10 +137,10 @@ const getAllByFiltersUserId = async ({
 
     const result = await Booking.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
-        [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        [sequelize.literal('BIN_TO_UUID(booked_slot_id)'), 'booked_slot_id'],
+        [sequelize.literal('BIN_TO_UUID(Booking.id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Booking.user_id)'), 'user_id'],
+        [sequelize.literal('BIN_TO_UUID(Booking.shop_id)'), 'shop_id'],
+        [sequelize.literal('BIN_TO_UUID(Booking.booked_slot_id)'), 'booked_slot_id'],
         'date',
         'guests',
         'location_type',
@@ -147,7 +149,17 @@ const getAllByFiltersUserId = async ({
         'status',
         'booking_code'
       ],
-      where: whereConditions
+      where: whereConditions,
+      include: [
+      {
+        model: Shop,
+        attributes: ['name'],
+      },
+      {
+        model: AvailableSlot,
+        attributes: ['start_time'],
+      }
+      ]
     });
 
     return result.length ? result.map(res => res.toJSON()) : null;

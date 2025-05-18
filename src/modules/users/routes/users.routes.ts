@@ -1,7 +1,7 @@
 import express from "express";
 import { validateSchemaPartial } from "../../../middlewares/validateSchema";
 import usersController from "../controllers/users.controller";
-import { userSchema } from "../schemas/users.schema";
+import { editUserSchema } from "../schemas/users.schema";
 
 export const userRoutes = express.Router();
 /**
@@ -123,12 +123,15 @@ userRoutes.get("/:id", usersController.getById);
  *                          full_name:
  *                              type: string
  *                              example: John Doe
- *                          password:
- *                              type: string
- *                              example: JohnDoe123$
  *                          email:
  *                              type: string
  *                              example: johndoe@domain.com
+ *                          password:
+ *                              type: string
+ *                              example: JohnDoe123$
+ *                          current_password:
+ *                              type: string
+ *                              example: JohnDoe123$
  *      responses:
  *          200:
  *              description: El usuario fue editado con éxito.
@@ -147,7 +150,7 @@ userRoutes.get("/:id", usersController.getById);
  *          500:
  *              description: Error interno del servidor.
  */
-userRoutes.patch("/:id", validateSchemaPartial(userSchema), usersController.editById);
+userRoutes.patch("/:id", validateSchemaPartial(editUserSchema), usersController.editById);
 /**
  * @swagger
  * /api/users/details/{id}:

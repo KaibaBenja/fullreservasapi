@@ -46,7 +46,7 @@ export const bookingRoutes = express.Router();
  *           type: datetime
  *           example: 25/05/2025 11:00:00.000
  *         guests:
- *           type: int
+ *           type: integer
  *           example: 2
  *         location_type:
  *           type: string
@@ -65,7 +65,7 @@ export const bookingRoutes = express.Router();
  *           enum: [PENDING, CONFIRMED, CANCELLED]
  *           example: PENDING
  *         booking_code:
- *           type: int
+ *           type: integer
  *           example: 5431
  *         created_at:
  *           type: datetime

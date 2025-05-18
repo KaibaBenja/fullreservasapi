@@ -24,6 +24,7 @@ export const registerUser = async ({
       full_name: formatName(full_name),
       password: hashedPassword,
       email: email,
+      firebase_uid: id,
     });
 
     return result ? result.toJSON() : null;

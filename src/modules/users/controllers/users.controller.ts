@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import * as usersServices from "../services";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
+import * as usersServices from "../services";
 
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
@@ -45,7 +45,7 @@ const getById = async (req: Request, res: Response): Promise<void> => {
 const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { email } = req.body;
+    const { full_name, email, password, current_password } = req.body;
 
     if (!validateUUID(id, res)) return;
 
@@ -59,11 +59,21 @@ const editById = async (req: Request, res: Response): Promise<void> => {
 
     if (email && await usersServices.users.getByEmail({ email })) {
       return handleErrorResponse(res, 409, `El usuario con el email: ${email} ya existe.`);
+    };
+
+    if (password) {
+      if (!current_password) {
+        return handleErrorResponse(res, 400, "Debe proporcionar la contraseña actual.");
+      }
+      if (!(await usersServices.users.verifyPassword({ id }, current_password))) {
+        return handleErrorResponse(res, 401, "La contraseña actual es incorrecta.");
     }
+    };
 
     if (!(await usersServices.users.editById({ id, ...req.body }))) {
       return handleErrorResponse(res, 400, `Error al editar el usuario.`);
     };
+
 
     const result = await usersServices.users.getById({ id });
     if (!result) return handleErrorResponse(res, 404, `Error al encontrar el usuario actualizado.`);

@@ -6,6 +6,7 @@ import swaggerUI from "swagger-ui-express";
 import { optionCors } from "./config/cors.config";
 import { HOST, PORT } from "./config/dotenv.config";
 import { sequelize } from "./config/sequalize.config";
+import { initAssociations } from "./modules/initAssociations";
 import { mainRoutes } from "./routes/main.routes";
 import swaggerSpecs, { swaggerUiOptions } from "./swagger/swagger";
 
@@ -17,6 +18,8 @@ app.disable("x-powered-by");
 app.use(logger("dev"));
 app.use("/swagger-ui", express.static(path.join(__dirname, "swagger-ui")));
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpecs, swaggerUiOptions));
+
+initAssociations();
 
 sequelize.authenticate()
   .then(() => {

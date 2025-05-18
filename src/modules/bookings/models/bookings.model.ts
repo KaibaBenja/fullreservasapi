@@ -1,8 +1,8 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../../../config/sequalize.config';
-import User from "../../users/models/users.model";
-import Shop from "../../shops/models/shops.model";
 import AvailableSlot from "../../shops/models/availableSlots.model";
+import Shop from "../../shops/models/shops.model";
+import User from "../../users/models/users.model";
 
 interface BookingsAttributes {
   id: Buffer;
