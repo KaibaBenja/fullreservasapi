@@ -31,6 +31,7 @@ Menus.init(
         model: Shops,
         key: "id",
       },
+      unique: true,
       onDelete: "CASCADE",
     },
     file_url: {

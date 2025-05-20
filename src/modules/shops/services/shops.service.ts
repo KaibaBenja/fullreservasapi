@@ -8,10 +8,22 @@ import Addresses from "../../address/models/addresses.model";
 import Images from "../models/images.model";
 import shopsAddresseses from "../models/shopAddresses.model";
 import Schedules from "../models/schedules.model";
-
+import Menus from "../models/menus.model";
 
 const add = async (data: IShops) => {
-  const { user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description, price_range } = data;
+  const {
+    user_id,
+    subcategory_id,
+    name,
+    phone_number,
+    shift_type,
+    average_stay_time,
+    capacity,
+    legal_info,
+    bank_info,
+    description,
+    price_range,
+  } = data;
   try {
     const result = await Shops.create({
       user_id: uuidToBuffer(user_id),
@@ -24,84 +36,94 @@ const add = async (data: IShops) => {
       legal_info: legal_info,
       bank_info: bank_info,
       description: description,
-      price_range: price_range
+      price_range: price_range,
     });
 
     return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error("Error al agregar el negocio.");
-  };
+  }
 };
 
 const getAll = async () => {
   try {
     const result = await Shops.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(Shops.id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(Shops.user_id)'), 'user_id'],
-        'name',
-        'phone_number',
-        'shift_type',
-        'average_stay_time',
-        'capacity',
-        'legal_info',
-        'bank_info',
-        'description',
-        'price_range',
-        'created_at',
-        'updated_at'
+        [sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"],
+        [sequelize.literal("BIN_TO_UUID(Shops.user_id)"), "user_id"],
+        "name",
+        "phone_number",
+        "shift_type",
+        "average_stay_time",
+        "capacity",
+        "legal_info",
+        "bank_info",
+        "description",
+        "price_range",
+        "created_at",
+        "updated_at",
       ],
       include: [
         {
           model: Subcategories,
           attributes: [
-            [sequelize.literal('BIN_TO_UUID(subcategory.id)'), 'id'],
-            'name',
-            'main_category',
+            [sequelize.literal("BIN_TO_UUID(subcategory.id)"), "id"],
+            "name",
+            "main_category",
           ],
-          as: 'subcategory',
+          as: "subcategory",
         },
         {
           model: Schedules,
-          attributes: ['open_time', 'close_time'],
-          as: 'schedules',
+          attributes: ["open_time", "close_time"],
+          as: "schedules",
+        },
+        {
+          model: Menus,
+          attributes: ["file_url"],
+          as: "Menu",
         },
       ],
     });
 
-    return result.length ? result.map(res => res.toJSON()) : null;
+    return result.length ? result.map((res) => res.toJSON()) : null;
   } catch (error) {
     throw new Error("Error al obtener los negocios.");
-  };
+  }
 };
 
 const getById = async ({ id }: Pick<IShops, "id">) => {
   try {
     const result = await Shops.findOne({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(Shops.id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(Shops.user_id)'), 'user_id'],
-        'name',
-        'phone_number',
-        'shift_type',
-        'average_stay_time',
-        'capacity',
-        'legal_info',
-        'bank_info',
-        'description',
-        'price_range',
-        'created_at',
-        'updated_at'
+        [sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"],
+        [sequelize.literal("BIN_TO_UUID(Shops.user_id)"), "user_id"],
+        "name",
+        "phone_number",
+        "shift_type",
+        "average_stay_time",
+        "capacity",
+        "legal_info",
+        "bank_info",
+        "description",
+        "price_range",
+        "created_at",
+        "updated_at",
       ],
       include: [
         {
           model: Subcategories,
           attributes: [
-            [sequelize.literal('BIN_TO_UUID(subcategory.id)'), 'id'],
-            'name',
-            'main_category',
+            [sequelize.literal("BIN_TO_UUID(subcategory.id)"), "id"],
+            "name",
+            "main_category",
           ],
-          as: 'subcategory',
+          as: "subcategory",
+        },
+        {
+          model: Menus,
+          attributes: ["file_url"],
+          as: "Menu",
         },
       ],
       where: sequelize.literal(`Shops.id = UUID_TO_BIN(?)`),
@@ -110,33 +132,47 @@ const getById = async ({ id }: Pick<IShops, "id">) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
-    throw new Error('Error al obtener el negocio por id.');
-  };
+    throw new Error("Error al obtener el negocio por id.");
+  }
 };
 
-const getAllByFilters = async (filters: Partial<IShops> & {
-  subcategory_name?: string;
-  main_category?: string;
-}) => {
+const getAllByFilters = async (
+  filters: Partial<IShops> & {
+    subcategory_name?: string;
+    main_category?: string;
+  }
+) => {
   try {
     const {
       // Filtros de Shops
-      id, user_id, name, phone_number, shift_type,
-      average_stay_time, capacity, legal_info, bank_info, price_range,
+      id,
+      user_id,
+      name,
+      phone_number,
+      shift_type,
+      average_stay_time,
+      capacity,
+      legal_info,
+      bank_info,
+      price_range,
 
       // Filtros de Subcategories
-      subcategory_id, subcategory_name, main_category
+      subcategory_id,
+      subcategory_name,
+      main_category,
     } = filters;
 
     // Condiciones WHERE para la tabla Shops
     const shopsWhereConditions: Record<string, any> = {};
     if (id) shopsWhereConditions.id = uuidToBuffer(id);
     if (user_id) shopsWhereConditions.user_id = uuidToBuffer(user_id);
-    if (subcategory_id) shopsWhereConditions.subcategory_id = uuidToBuffer(subcategory_id);
+    if (subcategory_id)
+      shopsWhereConditions.subcategory_id = uuidToBuffer(subcategory_id);
     if (name) shopsWhereConditions.name = name;
     if (phone_number) shopsWhereConditions.phone_number = phone_number;
     if (shift_type) shopsWhereConditions.shift_type = shift_type;
-    if (average_stay_time) shopsWhereConditions.average_stay_time = average_stay_time;
+    if (average_stay_time)
+      shopsWhereConditions.average_stay_time = average_stay_time;
     if (capacity) shopsWhereConditions.capacity = capacity;
     if (legal_info) shopsWhereConditions.legal_info = legal_info;
     if (bank_info) shopsWhereConditions.bank_info = bank_info;
@@ -151,11 +187,11 @@ const getAllByFilters = async (filters: Partial<IShops> & {
     const includeSubcategory: any = {
       model: Subcategories,
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(subcategory.id)'), 'id'],
-        'name',
-        'main_category',
+        [sequelize.literal("BIN_TO_UUID(subcategory.id)"), "id"],
+        "name",
+        "main_category",
       ],
-      as: 'subcategory',
+      as: "subcategory",
     };
 
     // Añadir condiciones WHERE para Subcategories si existen filtros
@@ -166,49 +202,67 @@ const getAllByFilters = async (filters: Partial<IShops> & {
     // Realizar la consulta con todos los filtros
     const result = await Shops.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(Shops.id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(Shops.user_id)'), 'user_id'],
-        'name',
-        'phone_number',
-        'shift_type',
-        'average_stay_time',
-        'capacity',
-        'legal_info',
-        'bank_info',
-        'description',
-        'price_range',
-        'created_at',
-        'updated_at'
+        [sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"],
+        [sequelize.literal("BIN_TO_UUID(Shops.user_id)"), "user_id"],
+        "name",
+        "phone_number",
+        "shift_type",
+        "average_stay_time",
+        "capacity",
+        "legal_info",
+        "bank_info",
+        "description",
+        "price_range",
+        "created_at",
+        "updated_at",
       ],
-      include: [includeSubcategory,
+      include: [
+        includeSubcategory,
         {
           model: Schedules,
-          attributes: ['open_time', 'close_time'],
-          as: 'schedules',
+          attributes: ["open_time", "close_time"],
+          as: "schedules",
+        },
+        {
+          model: Menus,
+          attributes: ["file_url"],
+          as: "Menu",
         },
       ],
-      where: Object.keys(shopsWhereConditions).length > 0 ? shopsWhereConditions : undefined
+      where:
+        Object.keys(shopsWhereConditions).length > 0
+          ? shopsWhereConditions
+          : undefined,
     });
 
-    return result.length ? result.map(res => res.toJSON()) : null;
+    return result.length ? result.map((res) => res.toJSON()) : null;
   } catch (error) {
-    throw new Error('Error al obtener los negocios con los filtros proporcionados.');
+    throw new Error(
+      "Error al obtener los negocios con los filtros proporcionados."
+    );
   }
 };
 
-const getAllByFiltersUser = async (filters: Partial<IShops> & {
-  subcategory_name?: string;
-  main_category?: string;
-  none?: true;
-}) => {
+const getAllByFiltersUser = async (
+  filters: Partial<IShops> & {
+    subcategory_name?: string;
+    main_category?: string;
+    none?: true;
+  }
+) => {
   try {
     const {
       // Filtros de Shops
-      id, name, shift_type,
-      average_stay_time, capacity, price_range,
+      id,
+      name,
+      shift_type,
+      average_stay_time,
+      capacity,
+      price_range,
 
       // Filtros de Subcategories
-      subcategory_name, main_category
+      subcategory_name,
+      main_category,
     } = filters;
 
     // Condiciones WHERE para la tabla Shops
@@ -216,7 +270,8 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
     if (id) shopsWhereConditions.id = uuidToBuffer(id);
     if (name) shopsWhereConditions.name = name;
     if (shift_type) shopsWhereConditions.shift_type = shift_type;
-    if (average_stay_time) shopsWhereConditions.average_stay_time = average_stay_time;
+    if (average_stay_time)
+      shopsWhereConditions.average_stay_time = average_stay_time;
     if (capacity) shopsWhereConditions.capacity = capacity;
     if (price_range) shopsWhereConditions.price_range = price_range;
 
@@ -228,58 +283,63 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
     // Configuración del include para Subcategories
     const includeSubcategory: any = {
       model: Subcategories,
-      attributes: [
-        'name',
-        'main_category',
-      ],
-      as: 'subcategory',
+      attributes: ["name", "main_category"],
+      as: "subcategory",
     };
 
     // Añadir condiciones WHERE para Subcategories si existen filtros
     if (Object.keys(subcategoryWhereConditions).length > 0) {
       includeSubcategory.where = subcategoryWhereConditions;
-    };
+    }
 
     // Realizar la consulta con todos los filtros
     const result = await Shops.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(Shops.id)'), 'id'],
-        'name',
-        'phone_number',
-        'shift_type',
-        'average_stay_time',
-        'capacity',
-        'description',
-        'price_range',
-        'created_at'
+        [sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"],
+        "name",
+        "phone_number",
+        "shift_type",
+        "average_stay_time",
+        "capacity",
+        "description",
+        "price_range",
+        "created_at",
       ],
       include: [
         includeSubcategory,
         {
           model: Schedules,
-          attributes: ['open_time', 'close_time'],
-          as: 'schedules',
+          attributes: ["open_time", "close_time"],
+          as: "schedules",
         },
         {
           model: shopsAddresseses,
           include: [
             {
               model: Addresses,
-              attributes: ['street', 'street_number', 'latitude', 'longitude']
-            }
-          ]
+              attributes: ["street", "street_number", "latitude", "longitude"],
+            },
+          ],
         },
         {
           model: Images,
-          attributes: ['image_url']
-        }
+          attributes: ["image_url"],
+        },
+        {
+          model: Menus,
+          attributes: ["file_url"],
+          as: "Menu",
+        },
       ],
-      where: Object.keys(shopsWhereConditions).length > 0 ? shopsWhereConditions : undefined
+      where:
+        Object.keys(shopsWhereConditions).length > 0
+          ? shopsWhereConditions
+          : undefined,
     });
 
     if (!result.length) return null;
 
-    const shops = result.map(res => {
+    const shops = result.map((res) => {
       const shop = res.toJSON();
 
       // Extraer datos de dirección
@@ -313,17 +373,33 @@ const getAllByFiltersUser = async (filters: Partial<IShops> & {
     return shops;
   } catch (error) {
     console.log(error);
-    throw new Error('Error al obtener los negocios con los filtros proporcionados.');
+    throw new Error(
+      "Error al obtener los negocios con los filtros proporcionados."
+    );
   }
 };
 
 const editById = async (data: IShops) => {
   try {
-    const { id, user_id, subcategory_id, name, phone_number, shift_type, average_stay_time, capacity, legal_info, bank_info, description, price_range } = data;
+    const {
+      id,
+      user_id,
+      subcategory_id,
+      name,
+      phone_number,
+      shift_type,
+      average_stay_time,
+      capacity,
+      legal_info,
+      bank_info,
+      description,
+      price_range,
+    } = data;
     const updateData: any = {};
 
     if (user_id) updateData.user_id = uuidToBuffer(user_id);
-    if (subcategory_id) updateData.subcategory_id = uuidToBuffer(subcategory_id);
+    if (subcategory_id)
+      updateData.subcategory_id = uuidToBuffer(subcategory_id);
     if (name) updateData.name = formatName(name);
     if (phone_number) updateData.phone_number = phone_number;
     if (shift_type) updateData.shift_type = shift_type;
@@ -335,26 +411,33 @@ const editById = async (data: IShops) => {
     if (price_range) updateData.price_range = price_range;
 
     const [updatedRowsCount] = await Shops.update(updateData, {
-      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
+      where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`),
     });
 
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar el negocio.');
-  };
+    throw new Error("Error al editar el negocio.");
+  }
 };
 
 const deleteById = async ({ id }: Pick<IShops, "id">) => {
   try {
     const result = await Shops.destroy({
-      where: { id: sequelize.fn('UUID_TO_BIN', id) }
+      where: { id: sequelize.fn("UUID_TO_BIN", id) },
     });
 
     return result ? { success: true } : null;
   } catch (error) {
     throw new Error("Error al eliminar el negocio.");
-  };
+  }
 };
 
-
-export default { add, getAll, getById, getAllByFilters, getAllByFiltersUser, editById, deleteById };
+export default {
+  add,
+  getAll,
+  getById,
+  getAllByFilters,
+  getAllByFiltersUser,
+  editById,
+  deleteById,
+};
