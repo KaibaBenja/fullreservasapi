@@ -3,6 +3,7 @@ import Country from "./address/models/countries.model";
 import Province from "./address/models/provinces.model";
 import Booking from "./bookings/models/bookings.model";
 import AvailableSlot from "./shops/models/availableSlots.model";
+import ClosedDay from "./shops/models/closedDays.model";
 import Image from "./shops/models/images.model";
 import Menu from "./shops/models/menus.model";
 import Schedule from "./shops/models/schedules.model";
@@ -40,4 +41,7 @@ export function initAssociations() {
 
     Shop.hasOne(Menu, { foreignKey: 'shop_id', sourceKey: 'id' });
     Menu.belongsTo(Shop, { foreignKey: 'shop_id', targetKey: 'id' });
+
+    Shop.hasMany(ClosedDay, { foreignKey: "shop_id", as: "closed_days"});
+    ClosedDay.belongsTo(Shop, {foreignKey: "shop_id"});
 }

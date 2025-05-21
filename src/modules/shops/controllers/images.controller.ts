@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import * as shopsServices from "../services";
-import { validateUUID } from "../../../utils/uuidValidator";
-import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { R2 } from "../../../config/dotenv.config";
 import { deleteFileR2 } from "../../../middlewares/upload";
+import { handleErrorResponse } from "../../../utils/handleErrorResponse";
+import { validateUUID } from "../../../utils/uuidValidator";
+import * as shopsServices from "../services";
 
 
 const create = async (req: Request, res: Response): Promise<void> => {
@@ -35,7 +35,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
     if (!imagesCreated.length) return handleErrorResponse(res, 400, "Error al registrar las imágenes");
 
     const imagesExists = await shopsServices.images.getByShopId({ shop_id });
-    if (!imagesExists) return handleErrorResponse(res, 404, `Error al encontrar las imagenes subidas.`)
+    if (!imagesExists) return handleErrorResponse(res, 404, `Error al encontrar las imagenes subidas.`);
 
     res.status(201).json({
       message: "Imágenes agregadas exitosamente",

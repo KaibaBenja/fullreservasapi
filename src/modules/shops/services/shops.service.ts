@@ -2,6 +2,7 @@ import { sequelize } from "../../../config/sequalize.config";
 import { formatName } from "../../../utils/formatName";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import Addresses from "../../address/models/addresses.model";
+import ClosedDays from "../models/closedDays.model";
 import Images from "../models/images.model";
 import Menus from "../models/menus.model";
 import Schedules from "../models/schedules.model";
@@ -9,6 +10,10 @@ import shopsAddresseses from "../models/shopAddresses.model";
 import Shops from "../models/shops.model";
 import Subcategories from "../models/subcategories.model";
 import { IShops } from "../types/shops.types";
+
+const dayNames = [
+  "Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"
+];
 
 const add = async (data: IShops) => {
   const {
@@ -330,6 +335,11 @@ const getAllByFiltersUser = async (
           attributes: ["file_url"],
           as: "Menu",
         },
+        {
+          model: ClosedDays,
+          attributes: ["day_of_week"],
+          as: "closed_days",
+        },
       ],
       where:
         Object.keys(shopsWhereConditions).length > 0
@@ -338,6 +348,7 @@ const getAllByFiltersUser = async (
     });
 
     if (!result.length) return null;
+
 
     const shops = result.map((res) => {
       const shop = res.toJSON();
@@ -363,6 +374,14 @@ const getAllByFiltersUser = async (
       }
 
       delete shop.Images;
+
+      // ClosedDays ➜ calcular open_days
+      const closedDays: number[] = shop.closed_days?.map((d: any) => d.day_of_week) || [];
+      const allDays = [0, 1, 2, 3, 4, 5, 6];
+      const openDays = allDays.filter(d => !closedDays.includes(d));
+
+      shop.open_days = openDays.map(day => dayNames[day]);
+      delete shop.closed_days;
 
       return shop;
     });

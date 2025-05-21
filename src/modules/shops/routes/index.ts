@@ -1,5 +1,6 @@
 import express from "express";
 import { availableSlotsRoutes } from "./availableSlots.routes";
+import { closedDaysRoutes } from "./closedDays.routes";
 import { imagesRoutes } from "./images.routes";
 import { menusRoutes } from "./menus.routes";
 import { ratingsRoutes } from "./ratings.routes";
@@ -20,4 +21,5 @@ shopsRoutes.use("/availableSlots", availableSlotsRoutes);
 shopsRoutes.use("/ratings", ratingsRoutes);
 shopsRoutes.use("/menus", menusRoutes);
 shopsRoutes.use("/schedules", schedulesRoutes);
+shopsRoutes.use("/closed-days", closedDaysRoutes);
 
