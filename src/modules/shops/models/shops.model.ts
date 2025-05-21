@@ -2,7 +2,6 @@ import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../../../config/sequalize.config";
 import User from "../../users/models/users.model";
 import Subcategory from "../models/subcategories.model";
-import Menus from "./menus.model";
 
 interface ShopsAttributes {
   [x: string]: any;
@@ -130,9 +129,5 @@ Shops.init(
     underscored: true,
   }
 );
-
-Shops.hasOne(Menus, { foreignKey: 'shop_id', sourceKey: 'id' });
-Menus.belongsTo(Shops, { foreignKey: 'shop_id', targetKey: 'id' });
-
 
 export default Shops;

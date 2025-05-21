@@ -4,6 +4,7 @@ import Province from "./address/models/provinces.model";
 import Booking from "./bookings/models/bookings.model";
 import AvailableSlot from "./shops/models/availableSlots.model";
 import Image from "./shops/models/images.model";
+import Menu from "./shops/models/menus.model";
 import Schedule from "./shops/models/schedules.model";
 import ShopAddress from "./shops/models/shopAddresses.model";
 import Shop from "./shops/models/shops.model";
@@ -36,4 +37,7 @@ export function initAssociations() {
 
     AvailableSlot.hasMany(Booking, {foreignKey: "booked_slot_id", as: "bookings"});
     Booking.belongsTo(AvailableSlot, {foreignKey: "booked_slot_id"});
+
+    Shop.hasOne(Menu, { foreignKey: 'shop_id', sourceKey: 'id' });
+    Menu.belongsTo(Shop, { foreignKey: 'shop_id', targetKey: 'id' });
 }
