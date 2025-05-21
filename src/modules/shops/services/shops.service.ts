@@ -1,14 +1,14 @@
-import { IShops } from "../types/shops.types";
-import Shops from "../models/shops.model";
-import Subcategories from "../models/subcategories.model";
 import { sequelize } from "../../../config/sequalize.config";
-import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { formatName } from "../../../utils/formatName";
+import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import Addresses from "../../address/models/addresses.model";
 import Images from "../models/images.model";
-import shopsAddresseses from "../models/shopAddresses.model";
-import Schedules from "../models/schedules.model";
 import Menus from "../models/menus.model";
+import Schedules from "../models/schedules.model";
+import shopsAddresseses from "../models/shopAddresses.model";
+import Shops from "../models/shops.model";
+import Subcategories from "../models/subcategories.model";
+import { IShops } from "../types/shops.types";
 
 const add = async (data: IShops) => {
   const {
@@ -432,12 +432,4 @@ const deleteById = async ({ id }: Pick<IShops, "id">) => {
   }
 };
 
-export default {
-  add,
-  getAll,
-  getById,
-  getAllByFilters,
-  getAllByFiltersUser,
-  editById,
-  deleteById,
-};
+export default { add,  getAll,  getById,  getAllByFilters,  getAllByFiltersUser,  editById,  deleteById };
