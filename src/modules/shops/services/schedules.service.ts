@@ -1,6 +1,6 @@
 import { ISchedules } from "../types/schedules.types";
 import Schedules from "../models/schedules.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 
 

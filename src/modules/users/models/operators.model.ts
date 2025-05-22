@@ -1,4 +1,4 @@
-import { sequelize } from '../../../config/sequalize.config';
+import { sequelize } from '../../../config/sequelize/sequalize.config';
 import { DataTypes, Model, Optional } from 'sequelize';
 import User from "./users.model";
 import Shop from "../../shops/models/shops.model";

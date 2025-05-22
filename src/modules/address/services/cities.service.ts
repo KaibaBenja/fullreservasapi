@@ -2,7 +2,7 @@ import { ICities } from "../types/cities.types";
 import City from "../models/cities.model";
 import { formatName } from "../../../utils/formatName";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 const add = async ({ name, zip_code, province_id }: ICities) => {
   try {

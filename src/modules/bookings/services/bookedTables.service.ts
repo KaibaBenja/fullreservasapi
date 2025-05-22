@@ -1,6 +1,6 @@
 import { IBookedTables } from "../types/bookedTables.types";
 import Bookedtable from "../models/bookedTables.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 
 

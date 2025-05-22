@@ -1,6 +1,6 @@
 import { IMemberships } from "../types/memberships.types";
 import Membership from "../models/memberships.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 
 

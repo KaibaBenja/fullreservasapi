@@ -1,6 +1,6 @@
 import { ITables } from "../types/tables.types";
 import Tables from "../models/tables.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 
 

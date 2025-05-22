@@ -1,7 +1,7 @@
 import { ISubcategories } from "../types/subcategories.types";
 import Subcategories from "../models/subcategories.model";
 import { formatName } from "../../..//utils/formatName";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 
 const add = async ({ name, main_category, logo_url }: ISubcategories) => {

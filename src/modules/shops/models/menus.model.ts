@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../../../config/sequalize.config';
+import { sequelize } from '../../../config/sequelize/sequalize.config';
 import Shops from "./shops.model";
 
 interface MenusAttributes {

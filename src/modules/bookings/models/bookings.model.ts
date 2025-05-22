@@ -1,5 +1,5 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../../../config/sequalize.config';
+import { sequelize } from '../../../config/sequelize/sequalize.config';
 import AvailableSlot from "../../shops/models/availableSlots.model";
 import Shop from "../../shops/models/shops.model";
 import User from "../../users/models/users.model";
