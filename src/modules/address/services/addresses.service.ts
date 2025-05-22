@@ -1,7 +1,7 @@
 import { IAddresses } from "../types/addresses.types";
 import Addresses from "../models/addresses.model";
 import { formatName } from "../../../utils/formatName";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 
 

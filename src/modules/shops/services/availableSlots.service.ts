@@ -1,6 +1,6 @@
 import { IAvailableSlots } from "../types/availableSlots.types";
 import AvailableSlots from "../models/availableSlots.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { IShops } from "../types/shops.types";
 import { formatTime, parseTime } from "../utils/formatTime";

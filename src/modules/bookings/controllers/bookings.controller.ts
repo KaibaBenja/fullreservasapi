@@ -9,6 +9,7 @@ import { getAllCombinations } from "../utils/generateAllCombinations";
 import { generateBookingCode } from "../utils/generateBookingCode";
 import { getDayName } from "../utils/getDayName";
 import { mapComboToTables, TableMapCombo } from "../utils/mapComboToTables";
+import { isWithinValidRange } from "../../../utils/formatDate";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -27,186 +28,204 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 400, `El espacio disponible con el id: ${booked_slot_id} no existe.`);
     };
 
+    if (await bookingsServices.bookings.getAllByFiltersShopId({ shop_id, user_id, status: "PENDING" })) {
+      return handleErrorResponse(res, 403, "No puedes tener más de una reserva activa en el mismo negocio.");
+    };
+
     const daysClosed = await shopsServices.closedDays.getByShopId({ shop_id });
-    if (!daysClosed) {
-      return handleErrorResponse(res, 500, "Error al obtener los días cerrados del negocio.");
-    }
+    if (!daysClosed) return handleErrorResponse(res, 409, "Error al obtener los días cerrados del negocio.");
+
     const localDateString = date.replace(" ", "T");
     const bookingDay = new Date(localDateString).getDay();
 
     const isClosed = daysClosed.some(day => day.day_of_week === bookingDay);
-    if (isClosed) {
-      return handleErrorResponse(res, 403, `El comercio no abre los días ${getDayName(bookingDay)}.`);
-    }
+    if (isClosed) return handleErrorResponse(res, 403, `El comercio no abre los días ${getDayName(bookingDay)}.`);
 
-    // Buscar todos los bookings por fecha y hora en un mismo comercio 
-    // ✅✅
-    const currentBookings = await bookingsServices.bookings.getAllByFiltersShopId({ shop_id, date, booked_slot_id, status: "PENDING" });
-    console.log({ currentBookings: currentBookings });
-    if (currentBookings) {
-      let suma_guest = 0;
-
-      // Cantidad de comensales reservados en horario y día
-      for (const booking of currentBookings) {
-        suma_guest += booking.guests;
-      };
-
-      // Se resta a la capacidad total los reservados obteniendo la DISPONIBILIDAD!
-      const total_guests = shop.capacity - suma_guest;
-      console.log({
-        shopCapacity: shop.capacity,
-        suma_guest: suma_guest,
-        total_guests: total_guests,
-      })
-      // Si el resultado es menor, el comercio no tiene capacidad :c
-      if (total_guests < guests) {
-        return handleErrorResponse(res, 409, `El negocio no tiene disponibilidad para el horario y la cantidad de comensales.`);
-      };
+    // Validar si el date no anterior a la fecha y hora actual y que no sea mayor a 2 meses
+    if (!isWithinValidRange(date)) {
+      return handleErrorResponse(res, 403, "La fecha de reserva no esta en el rango establecido.");
     };
 
-    // ✅✅
-    // Busqueda de mesas por lo solicitado del cliente 
-    const tableFilters: Pick<ITables, 'shop_id'> & Partial<Pick<ITables, 'location_type' | 'floor' | 'roof_type'>> = {
-      shop_id,
-    };
-    if (location_type) tableFilters.location_type = location_type;
-    if (floor) tableFilters.floor = floor;
-    if (roof_type) tableFilters.roof_type = roof_type;
+    const commerceCategory = await shopsServices.shops.getMainCategoryByShopId({ id: shop_id });
+    const mainCategory = commerceCategory?.subcategory?.main_category;
+    if (!mainCategory) return handleErrorResponse(res, 409, "Error al obtener la categoría.");
 
-    const filteredTables = await shopsServices.tables.getAllByFiltersShopId(tableFilters);
-    if (!filteredTables) return handleErrorResponse(res, 404, "El comercio no dispone de mesas con las características solicitadas.");
+    // console.log(mainCategory);
 
+    const isCommerce = (mainCategory == 'COMMERCE');
 
-    // ✅✅
-    // Mesas reservadas en el día y horario 
-    const currentBookedTables = [];
-    if (currentBookings) {
-      for (const currentBooking of currentBookings) {
-        // Se busca en bookedTables las mesas reservadas por cada reserva del día y horario (currentBookings)
-        const bookedTables = await bookingsServices.bookedTables.getAllByFiltersBookingId({
-          booking_id: currentBooking.id.toString("utf-8")
-        });
+    let tablesToBook = null;
 
-        // Si hay resultado agregarlo al array :3
-        if (bookedTables && bookedTables.length > 0) {
-          currentBookedTables.push(...bookedTables);
+    if (isCommerce) {
+      // Buscar todos los bookings por fecha y hora en un mismo comercio 
+      // ✅✅
+      const currentBookings = await bookingsServices.bookings.getAllByFiltersShopId({ shop_id, date, booked_slot_id, status: "PENDING" });
+      // console.log({ currentBookings: currentBookings });
+      if (currentBookings) {
+        let suma_guest = 0;
+
+        // Cantidad de comensales reservados en horario y día
+        for (const booking of currentBookings) {
+          suma_guest += booking.guests;
+        };
+
+        // Se resta a la capacidad total los reservados obteniendo la DISPONIBILIDAD!
+        const total_guests = shop.capacity - suma_guest;
+        // console.log({
+        //   shopCapacity: shop.capacity,
+        //   suma_guest: suma_guest,
+        //   total_guests: total_guests,
+        // })
+        // Si el resultado es menor, el comercio no tiene capacidad :c
+        if (total_guests < guests) {
+          return handleErrorResponse(res, 409, `El negocio no tiene disponibilidad para el horario y la cantidad de comensales.`);
         };
       };
-    };
-    console.log({ currentBookedTables: currentBookedTables })
 
-    // ✅✅
-    const availableTables = [];
-    if (currentBookedTables.length > 0) {
-      for (const filteredTable of filteredTables) {
-        // Mesas reservadas en el día y horario con mismas características
-        const CBT = currentBookedTables.filter(
-          (item) => item.table_id === filteredTable.id
-        );
+      // ✅✅
+      // Busqueda de mesas por lo solicitado del cliente 
+      const tableFilters: Pick<ITables, 'shop_id'> & Partial<Pick<ITables, 'location_type' | 'floor' | 'roof_type'>> = {
+        shop_id,
+      };
+      if (location_type) tableFilters.location_type = location_type;
+      if (floor) tableFilters.floor = floor;
+      if (roof_type) tableFilters.roof_type = roof_type;
 
-        /*
-          Se crea un array con la cantidad real de mesas disponibles.
-          Para eso se toma la cantidad total de mesas de filteredTables 
-          (siempre por table_id) y se resta la cantidad de mesas reservadas 
-          en EqualCurrentBookedTables.
-        */
-        if (CBT.length > 0) {
-          // Sumamos las mesas reservadas con el mismo table_id
-          const totalBooked = CBT.reduce((sum, item) => sum + item.tables_booked, 0);
+      const filteredTables = await shopsServices.tables.getAllByFiltersShopId(tableFilters);
+      if (!filteredTables) return handleErrorResponse(res, 404, "El comercio no dispone de mesas con las características solicitadas.");
 
-          const actualQuantity = filteredTable.quantity - totalBooked;
 
-          /*
-            Si la resta es mayor a cero, se guarda esa table_id y el 
-            resultado de la resta (capacidad real = actualQuantity) 
-            en availableTables(table_id, ActualQuantity)
-          */
-          if (actualQuantity > 0) {
-            availableTables.push({
-              table_id: filteredTable.id,
-              remaining: actualQuantity,
-              guests: filteredTable.capacity
-            });
+      // ✅✅
+      // Mesas reservadas en el día y horario 
+      const currentBookedTables = [];
+      if (currentBookings) {
+        for (const currentBooking of currentBookings) {
+          // Se busca en bookedTables las mesas reservadas por cada reserva del día y horario (currentBookings)
+          const bookedTables = await bookingsServices.bookedTables.getAllByFiltersBookingId({
+            booking_id: currentBooking.id.toString("utf-8")
+          });
+
+          // Si hay resultado agregarlo al array :3
+          if (bookedTables && bookedTables.length > 0) {
+            currentBookedTables.push(...bookedTables);
           };
         };
       };
-    } else {
-      for (const filteredTable of filteredTables) {
-        availableTables.push({
-          table_id: filteredTable.id,
-          remaining: filteredTable.quantity,
-          guests: filteredTable.capacity
-        });
-      }
-    };
-    if (!availableTables) {
-      return handleErrorResponse(res, 409, "Todas las mesas con las características solicitadas se encuentran ocupadas.");
-    };
-    console.log({ availableTables: availableTables });
+      // console.log({ currentBookedTables: currentBookedTables })
 
+      // ✅✅
+      const availableTables = [];
+      if (currentBookedTables.length > 0) {
+        for (const filteredTable of filteredTables) {
+          // Mesas reservadas en el día y horario con mismas características
+          const CBT = currentBookedTables.filter(
+            (item) => item.table_id === filteredTable.id
+          );
 
-    // ✅✅
-    /*
-      Se desglosa las mesas disponibles en capacidades individuales y se guarda en un array. 
-      Capacidad veces Cantidad.
-      Ej: Si tengo 2 mesas de 4 personas y 3 mesas de 5 personas, el array sería asi: [4, 4, 5, 5, 5]
-    */
-    const actualTables = [];
-    for (const table of availableTables) {
-      for (let i = 0; i < table.remaining; i++) {
-        actualTables.push(table.guests);
+          /*
+            Se crea un array con la cantidad real de mesas disponibles.
+            Para eso se toma la cantidad total de mesas de filteredTables 
+            (siempre por table_id) y se resta la cantidad de mesas reservadas 
+            en EqualCurrentBookedTables.
+          */
+          if (CBT.length > 0) {
+            // Sumamos las mesas reservadas con el mismo table_id
+            const totalBooked = CBT.reduce((sum, item) => sum + item.tables_booked, 0);
+
+            const actualQuantity = filteredTable.quantity - totalBooked;
+
+            /*
+              Si la resta es mayor a cero, se guarda esa table_id y el 
+              resultado de la resta (capacidad real = actualQuantity) 
+              en availableTables(table_id, ActualQuantity)
+            */
+            if (actualQuantity > 0) {
+              availableTables.push({
+                table_id: filteredTable.id,
+                remaining: actualQuantity,
+                guests: filteredTable.capacity
+              });
+            };
+          };
+        };
+      } else {
+        for (const filteredTable of filteredTables) {
+          availableTables.push({
+            table_id: filteredTable.id,
+            remaining: filteredTable.quantity,
+            guests: filteredTable.capacity
+          });
+        }
       };
-    };
-    console.log({ actualTables: actualTables });
-
-    const sumaActualTables = actualTables.reduce((acumulador, valorActual) => acumulador + valorActual, 0);
-    if (sumaActualTables < guests) {
-      return handleErrorResponse(res, 409, "No hay mesas disponibles para la cantidad de comensales.");
-    };
-    console.log({sumaActualTables: sumaActualTables});
-    // ✅✅
-    const allCombinations = getAllCombinations(actualTables, guests, 12);
-    console.log({ allCombinations: allCombinations })
-
-    // ✅✅
-    const validCombinations: number[][] = allCombinations.filter((combination: number[]) => {
-      const totalSeats: number = combination.reduce((acc, val) => acc + val, 0);
-      return totalSeats >= guests;
-    });
-    console.log({ PRESORTvalidCombinations: validCombinations });
-
-    // ✅✅
-    validCombinations.sort((a: number[], b: number[]): number => {
-      if (a.length !== b.length) {
-        return a.length - b.length;
+      if (!availableTables) {
+        return handleErrorResponse(res, 409, "Todas las mesas con las características solicitadas se encuentran ocupadas.");
       };
+      // console.log({ availableTables: availableTables });
 
-      const aWaste: number = a.reduce((acc, val) => acc + val, 0) - guests;
-      const bWaste: number = b.reduce((acc, val) => acc + val, 0) - guests;
 
-      return aWaste - bWaste;
-    });
-    console.log({ POSTSORTvalidCombinations: validCombinations });
+      // ✅✅
+      /*
+        Se desglosa las mesas disponibles en capacidades individuales y se guarda en un array. 
+        Capacidad veces Cantidad.
+        Ej: Si tengo 2 mesas de 4 personas y 3 mesas de 5 personas, el array sería asi: [4, 4, 5, 5, 5]
+      */
+      const actualTables = [];
+      for (const table of availableTables) {
+        for (let i = 0; i < table.remaining; i++) {
+          actualTables.push(table.guests);
+        };
+      };
+      // console.log({ actualTables: actualTables });
 
-    // ✅✅
-    const bestTableCombination = validCombinations.length > 0 ? validCombinations[0] : null;
-    if (!bestTableCombination) {
-      return handleErrorResponse(res, 404, "No se encontró la combinación adecuada.");
+      const sumaActualTables = actualTables.reduce((acumulador, valorActual) => acumulador + valorActual, 0);
+      if (sumaActualTables < guests) {
+        return handleErrorResponse(res, 409, "No hay mesas disponibles para la cantidad de comensales.");
+      };
+      // console.log({sumaActualTables: sumaActualTables});
+      // ✅✅
+      const allCombinations = getAllCombinations(actualTables, guests, 12);
+      //console.log({ allCombinations: allCombinations })
+
+      // ✅✅
+      const validCombinations: number[][] = allCombinations.filter((combination: number[]) => {
+        const totalSeats: number = combination.reduce((acc, val) => acc + val, 0);
+        return totalSeats >= guests;
+      });
+      // console.log({ PRESORTvalidCombinations: validCombinations });
+
+      // ✅✅
+      validCombinations.sort((a: number[], b: number[]): number => {
+        if (a.length !== b.length) {
+          return a.length - b.length;
+        };
+
+        const aWaste: number = a.reduce((acc, val) => acc + val, 0) - guests;
+        const bWaste: number = b.reduce((acc, val) => acc + val, 0) - guests;
+
+        return aWaste - bWaste;
+      });
+      // console.log({ POSTSORTvalidCombinations: validCombinations });
+
+      // ✅✅
+      const bestTableCombination = validCombinations.length > 0 ? validCombinations[0] : null;
+      if (!bestTableCombination) {
+        return handleErrorResponse(res, 404, "No se encontró la combinación adecuada.");
+      };
+      // console.log({ bestTableCombination: bestTableCombination });
+
+
+      // ✅✅
+      const formattedTables: TableMapCombo[] = availableTables.map((t) => ({
+        table_id: t.table_id.toString("utf-8"),
+        guests: t.guests,
+        remaining: t.remaining
+      }));
+      // console.log({ formattedTables: formattedTables });
+
+      // ✅✅
+      tablesToBook = mapComboToTables(bestTableCombination, formattedTables);
+      // console.log({ tablesToBook: tablesToBook });
     };
-    console.log({ bestTableCombination: bestTableCombination });
-
-
-    // ✅✅
-    const formattedTables: TableMapCombo[] = availableTables.map((t) => ({
-      table_id: t.table_id.toString("utf-8"),
-      guests: t.guests,
-      remaining: t.remaining
-    }));
-    console.log({ formattedTables: formattedTables });
-
-    // ✅✅
-    const tablesToBook = mapComboToTables(bestTableCombination, formattedTables);
-    console.log({ tablesToBook: tablesToBook });
 
     let code: string;
     let exists: boolean;
@@ -227,52 +246,55 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
     const bookingCreatedId = Object.values(bookingCreated[0])[0];
 
-    // Segundo crear booked
-    if (!tablesToBook) {
-      return handleErrorResponse(res, 400, "Error inesperado.")
-    };
+    let resTables = null;
+    if (isCommerce) {
+      // Segundo crear booked
+      if (!tablesToBook) return handleErrorResponse(res, 400, "Error inesperado.")
 
-    // ✅✅
-    // Primero agrupar
-    const groupedTables: Record<string, { tables_booked: number; guests: number }> = {};
-    for (const t of tablesToBook) {
-      if (!groupedTables[t.table_id]) {
-        groupedTables[t.table_id] = { tables_booked: 0, guests: 0 };
-      }
+      // ✅✅
+      // Primero agrupar
+      const groupedTables: Record<string, { tables_booked: number; guests: number }> = {};
+      for (const t of tablesToBook) {
+        if (!groupedTables[t.table_id]) {
+          groupedTables[t.table_id] = { tables_booked: 0, guests: 0 };
+        };
 
-      groupedTables[t.table_id].tables_booked++;
-      groupedTables[t.table_id].guests += t.guests;
-    };
-    console.log({groupedTables: groupedTables})
-
-    // Luego insertar los registros agrupados
-    for (const table_id in groupedTables) {
-      const { tables_booked, guests } = groupedTables[table_id];
-      console.log({ table_id: table_id });
-      try {
-        await bookingsServices.bookedTables.add({
-          booking_id: bookingCreatedId.toString("utf-8"),
-          table_id,
-          tables_booked,
-          guests,
-        });
-      } catch (err) {
-        console.log(err);
-        return handleErrorResponse(res, 400, "Error al crear las bookedTables.");
+        groupedTables[t.table_id].tables_booked++;
+        groupedTables[t.table_id].guests += t.guests;
       };
+      // console.log({ groupedTables: groupedTables })
+
+      // Luego insertar los registros agrupados
+      for (const table_id in groupedTables) {
+        const { tables_booked, guests } = groupedTables[table_id];
+        // console.log({ table_id: table_id });
+        try {
+          await bookingsServices.bookedTables.add({
+            booking_id: bookingCreatedId.toString("utf-8"),
+            table_id,
+            tables_booked,
+            guests,
+          });
+        } catch (err) {
+          // console.log(err);
+          return handleErrorResponse(res, 400, "Error al crear las bookedTables.");
+        };
+      };
+
+      resTables = await bookingsServices.bookedTables.getAllByFiltersBookingId({
+        booking_id: bookingCreatedId.toString("utf-8")
+      });
+      if (!resTables) return handleErrorResponse(res, 404, `Error al encontrar la reserva.`);
+    }
+
+    const result: Record<string, any> = {
+      booking: bookingCreated
     };
+    if (resTables) result.bookedTables = resTables;
 
-    const result = await bookingsServices.bookedTables.getAllByFiltersBookingId({
-      booking_id: bookingCreatedId.toString("utf-8")
-    });
-    if (!result) return handleErrorResponse(res, 404, `Error al encontrar la reserva.`);
-
-    res.status(201).json({
-      message: "Reserva creado exitosamente",
-      result: { booking: bookingCreated, bookedTables: result },
-    });
+    res.status(201).json({ message: "Reserva creado exitosamente", result });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };

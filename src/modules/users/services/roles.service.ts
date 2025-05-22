@@ -1,6 +1,6 @@
 import { IRole } from "../types/roles.types";
 import Role from "../models/roles.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 
 const getAll = async () => {

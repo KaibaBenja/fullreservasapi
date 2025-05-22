@@ -1,6 +1,6 @@
 import { IOperator } from "../types/operators.types";
 import Operator from "../models/operators.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import { QueryTypes } from "sequelize";
 

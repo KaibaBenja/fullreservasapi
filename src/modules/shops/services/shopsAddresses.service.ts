@@ -1,7 +1,7 @@
 import { IShopsAddresses } from "../types/shopsAddresses.types";
 import ShopsAddresses from "../models/shopAddresses.model";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 
 const add = async ({ shop_id, address_id }: IShopsAddresses) => {

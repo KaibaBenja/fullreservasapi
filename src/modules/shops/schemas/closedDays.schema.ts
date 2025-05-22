@@ -13,15 +13,14 @@ export const ClosedDaysSchema = z.object({
   }).refine((val) => validDays.includes(val), {
     message: `Cada valor de 'day_of_week' debe ser uno de los siguientes: ${validDays.join(', ')}`
   })).nonempty("Debe haber al menos un día cerrado.")
-  
 }).strict();
 
 export const SoloDaySchema = z.object({
   day_of_week: z.number({
-      invalid_type_error: "El campo 'day_of_week' debe ser un número válido."
-    }).refine((val) => validDays.includes(val), {
-      message: `El day_of_week debe ser uno de los siguientes valores: ${validDays.join(', ')}`
-    })
+    invalid_type_error: "El campo 'day_of_week' debe ser un número válido."
+  }).refine((val) => validDays.includes(val), {
+    message: `El day_of_week debe ser uno de los siguientes valores: ${validDays.join(', ')}`
+  })
 })
 
-export const DayOfWeekSchema = ClosedDaysSchema.pick({ day_of_week: true});
+export const DayOfWeekSchema = ClosedDaysSchema.pick({ day_of_week: true });

@@ -1,6 +1,6 @@
 import { IFooter } from "../types/footer.types";
 import Footer from "../models/footer.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 const add = async (data: IFooter) => {
   try {

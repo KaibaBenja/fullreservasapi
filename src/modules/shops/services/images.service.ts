@@ -1,7 +1,7 @@
 import { IImages } from "../types/images.types";
 import Images from "../models/images.model";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 const add = async ({ shop_id, image_url }: IImages) => {
   try {

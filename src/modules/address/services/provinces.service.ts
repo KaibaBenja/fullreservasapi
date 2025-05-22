@@ -2,7 +2,7 @@ import { IProvinces } from "../types/provinces.types";
 import Province from "../models/provinces.model";
 import { formatName } from "../../../utils/formatName";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 
 const add = async ({ name, country_id }: IProvinces) => {

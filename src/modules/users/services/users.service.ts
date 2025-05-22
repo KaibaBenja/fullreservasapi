@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { QueryTypes } from "sequelize";
 import admin from '../../../config/firebase';
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { formatName } from "../../../utils/formatName";
 import User from "../models/users.model";
 import { IUser } from "../types/users.types";

@@ -1,6 +1,6 @@
 import mysql2 from 'mysql2';
 import { Sequelize } from 'sequelize';
-import { MYSQL } from "../config/dotenv.config";
+import { MYSQL } from "../dotenv.config";
 
 const sequelize = new Sequelize(
   MYSQL.DATABASE,  
