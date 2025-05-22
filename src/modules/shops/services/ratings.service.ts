@@ -1,6 +1,6 @@
 import { IRatings } from "../types/ratings.types";
 import Rating from "../models/ratings.model";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 
 

@@ -1,7 +1,7 @@
 import { IUserRoles } from "../types/userroles.types";
 import UserRole from "../models/userroles.model";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 
 const add = async ({ user_id, role_id }: IUserRoles) => {

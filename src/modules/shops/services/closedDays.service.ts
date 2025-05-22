@@ -1,4 +1,4 @@
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import ClosedDay from "../models/closedDays.model";
 import { IClosedDays } from "../types/closedDays.types";
@@ -115,9 +115,7 @@ const deleteById = async ({ id }: Pick<IClosedDays, "id">) => {
 const deleteByShopId = async ({ shop_id }: Pick<IClosedDays, "shop_id">) => {
   try {
     const result = await ClosedDay.destroy({
-      where: {
-        shop_id: sequelize.fn('UUID_TO_BIN', shop_id)
-      }
+      where: { shop_id: sequelize.fn('UUID_TO_BIN', shop_id) }
     });
 
     return result ? { success: true } : null;

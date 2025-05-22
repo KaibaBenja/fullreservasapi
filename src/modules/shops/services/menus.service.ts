@@ -1,7 +1,7 @@
 import { IMenus } from "../types/menus.types";
 import Menus from "../models/menus.model";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 const add = async ({ shop_id, file_url }: IMenus) => {
   try {

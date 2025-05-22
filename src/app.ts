@@ -5,8 +5,8 @@ import path from "path";
 import swaggerUI from "swagger-ui-express";
 import { optionCors } from "./config/cors.config";
 import { HOST, PORT } from "./config/dotenv.config";
-import { sequelize } from "./config/sequalize.config";
-import { initAssociations } from "./modules/initAssociations";
+import { sequelize } from "./config/sequelize/sequalize.config";
+import { initAssociations } from "./config/sequelize/initAssociations";
 import { mainRoutes } from "./routes/main.routes";
 import swaggerSpecs, { swaggerUiOptions } from "./swagger/swagger";
 

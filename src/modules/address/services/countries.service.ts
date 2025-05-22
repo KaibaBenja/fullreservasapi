@@ -1,7 +1,7 @@
 import { ICountries } from "../types/countries.types";
 import Country from "../models/countries.model";
 import { formatName } from "../../../utils/formatName";
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 
 const add = async ({ name }: ICountries) => {

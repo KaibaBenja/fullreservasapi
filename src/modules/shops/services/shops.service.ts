@@ -1,4 +1,4 @@
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { formatName } from "../../../utils/formatName";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import Addresses from "../../address/models/addresses.model";
@@ -171,13 +171,11 @@ const getAllByFilters = async (
     const shopsWhereConditions: Record<string, any> = {};
     if (id) shopsWhereConditions.id = uuidToBuffer(id);
     if (user_id) shopsWhereConditions.user_id = uuidToBuffer(user_id);
-    if (subcategory_id)
-      shopsWhereConditions.subcategory_id = uuidToBuffer(subcategory_id);
+    if (subcategory_id) shopsWhereConditions.subcategory_id = uuidToBuffer(subcategory_id);
     if (name) shopsWhereConditions.name = name;
     if (phone_number) shopsWhereConditions.phone_number = phone_number;
     if (shift_type) shopsWhereConditions.shift_type = shift_type;
-    if (average_stay_time)
-      shopsWhereConditions.average_stay_time = average_stay_time;
+    if (average_stay_time) shopsWhereConditions.average_stay_time = average_stay_time;
     if (capacity) shopsWhereConditions.capacity = capacity;
     if (legal_info) shopsWhereConditions.legal_info = legal_info;
     if (bank_info) shopsWhereConditions.bank_info = bank_info;
@@ -202,7 +200,7 @@ const getAllByFilters = async (
     // Añadir condiciones WHERE para Subcategories si existen filtros
     if (Object.keys(subcategoryWhereConditions).length > 0) {
       includeSubcategory.where = subcategoryWhereConditions;
-    }
+    };
 
     // Realizar la consulta con todos los filtros
     const result = await Shops.findAll({
@@ -275,8 +273,7 @@ const getAllByFiltersUser = async (
     if (id) shopsWhereConditions.id = uuidToBuffer(id);
     if (name) shopsWhereConditions.name = name;
     if (shift_type) shopsWhereConditions.shift_type = shift_type;
-    if (average_stay_time)
-      shopsWhereConditions.average_stay_time = average_stay_time;
+    if (average_stay_time) shopsWhereConditions.average_stay_time = average_stay_time;
     if (capacity) shopsWhereConditions.capacity = capacity;
     if (price_range) shopsWhereConditions.price_range = price_range;
 
@@ -391,10 +388,33 @@ const getAllByFiltersUser = async (
 
     return shops;
   } catch (error) {
-    console.log(error);
-    throw new Error(
-      "Error al obtener los negocios con los filtros proporcionados."
-    );
+    throw new Error("Error al obtener los negocios con los filtros proporcionados.");
+  }
+};
+
+const getMainCategoryByShopId = async ({ id }: Pick<IShops, "id">) => {
+  try {
+    const result = await Shops.findOne({
+      attributes: [
+        [sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"],
+      ],
+      include: [
+        {
+          model: Subcategories,
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(subcategory.id)"), "id"],
+            "main_category",
+          ],
+          as: "subcategory",
+        },
+      ],
+      where: sequelize.literal(`Shops.id = UUID_TO_BIN(?)`),
+      replacements: [id],
+    });
+
+    return result ? result.toJSON() : null;
+  } catch (error) {
+    throw new Error("Error la categoría por id de negocio.");
   }
 };
 
@@ -451,4 +471,4 @@ const deleteById = async ({ id }: Pick<IShops, "id">) => {
   }
 };
 
-export default { add,  getAll,  getById,  getAllByFilters,  getAllByFiltersUser,  editById,  deleteById };
+export default { add, getAll, getById, getAllByFilters, getAllByFiltersUser, getMainCategoryByShopId, editById, deleteById };

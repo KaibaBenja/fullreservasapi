@@ -1,4 +1,4 @@
-import { sequelize } from "../../../config/sequalize.config";
+import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import AvailableSlot from "../../shops/models/availableSlots.model";
 import Rating from "../../shops/models/ratings.model";

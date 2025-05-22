@@ -4,28 +4,28 @@ import { validateUUID } from "../../../utils/uuidValidator";
 import * as shopsServices from "../services";
 
 const create = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const {shop_id, day_of_week} = req.body;
+  try {
+    const { shop_id, day_of_week } = req.body;
 
-        if (!(await shopsServices.shops.getById({ id: shop_id }))) {
-              return handleErrorResponse(res, 404, `El negocio con el id: ${shop_id} no existe.`);
-        };
+    if (!(await shopsServices.shops.getById({ id: shop_id }))) {
+      return handleErrorResponse(res, 404, `El negocio con el id: ${shop_id} no existe.`);
+    };
 
-        if (!(await shopsServices.closedDays.add(req.body))) {
-              return handleErrorResponse(res, 400, `No se pudo agregar los días cerrados o están repetidos`);
-        };
+    if (!(await shopsServices.closedDays.add(req.body))) {
+      return handleErrorResponse(res, 409, `No se pudo agregar los días cerrados o están repetidos`);
+    };
 
-        const closedDayExists = await shopsServices.closedDays.getByShopId({ shop_id });
+    const closedDayExists = await shopsServices.closedDays.getByShopId({ shop_id });
 
-        if (!closedDayExists) return handleErrorResponse(res, 404, `Error al encontrar los días cerrados.`);
-        
-        res.status(201).json({
-        message: `Dias cerrados agregado con éxito ${day_of_week}`,
-        closed_days: closedDayExists
+    if (!closedDayExists) return handleErrorResponse(res, 404, `Error al encontrar los días cerrados.`);
+
+    res.status(201).json({
+      message: `Dias cerrados agregado con éxito ${day_of_week}.`,
+      closed_days: closedDayExists
     });
-    } catch (error) {
-        handleErrorResponse(res, 500, "Error interno del servidor.");
-    }
+  } catch (error) {
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  }
 }
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
@@ -74,7 +74,7 @@ const editById = async (req: Request, res: Response): Promise<void> => {
     };
 
     if (!(await shopsServices.closedDays.editById({ id, ...req.body }))) {
-      return handleErrorResponse(res, 400, `No se pudo actualizar el día cerrado`);
+      return handleErrorResponse(res, 409, `No se pudo actualizar el día cerrado`);
     };
 
     const result = await shopsServices.closedDays.getById({ id });
@@ -96,7 +96,7 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
     if (!result) return handleErrorResponse(res, 404, `El día cerrado con el id: ${id} no existe.`);
 
     if (!(await shopsServices.closedDays.deleteById({ id }))) {
-      return handleErrorResponse(res, 400, `No se pudo eliminar el día cerrado`);
+      return handleErrorResponse(res, 409, `No se pudo eliminar el día cerrado.`);
     };
 
     res.status(200).json(result);
@@ -112,10 +112,10 @@ const deleteAllByShopId = async (req: Request, res: Response): Promise<void> => 
 
     const result = await shopsServices.closedDays.getByShopId({ shop_id });
 
-    if (!result || result.length === 0) return handleErrorResponse(res, 404, `No se encontraron imágenes de esta tienda.`);
+    if (!result || result.length === 0) return handleErrorResponse(res, 404, `No se encontraron los días cerrados del comercio.`);
 
     if (!(await shopsServices.closedDays.deleteByShopId({ shop_id }))) {
-      return handleErrorResponse(res, 500, "Error al eliminar las imagenes.");
+      return handleErrorResponse(res, 500, "Error al eliminar los días cerrados del comercio.");
     };
 
     res.status(200).json(result);
