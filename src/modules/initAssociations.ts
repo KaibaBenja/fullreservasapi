@@ -6,6 +6,7 @@ import AvailableSlot from "./shops/models/availableSlots.model";
 import ClosedDay from "./shops/models/closedDays.model";
 import Image from "./shops/models/images.model";
 import Menu from "./shops/models/menus.model";
+import Rating from "./shops/models/ratings.model";
 import Schedule from "./shops/models/schedules.model";
 import ShopAddress from "./shops/models/shopAddresses.model";
 import Shop from "./shops/models/shops.model";
@@ -44,4 +45,7 @@ export function initAssociations() {
 
     Shop.hasMany(ClosedDay, { foreignKey: "shop_id", as: "closed_days"});
     ClosedDay.belongsTo(Shop, {foreignKey: "shop_id"});
+
+    Booking.hasOne(Rating, {foreignKey: 'booking_id', as: "rating"});
+    Rating.belongsTo(Booking, {foreignKey: 'booking_id'});
 }

@@ -1,6 +1,7 @@
 import { sequelize } from "../../../config/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import AvailableSlot from "../../shops/models/availableSlots.model";
+import Rating from "../../shops/models/ratings.model";
 import Shop from "../../shops/models/shops.model";
 import Booking from "../models/bookings.model";
 import { IBookings } from "../types/bookings.types";
@@ -158,8 +159,22 @@ const getAllByFiltersUserId = async ({
       {
         model: AvailableSlot,
         attributes: ['start_time'],
+      },
+      {
+        model: Rating,
+        as: 'rating',
+        attributes: [
+          [sequelize.literal('BIN_TO_UUID(rating.id)'), 'id'], 
+          [sequelize.literal('BIN_TO_UUID(rating.shop_id)'), 'shop_id'],
+          [sequelize.literal('BIN_TO_UUID(rating.user_id)'), 'user_id'],
+          [sequelize.literal('BIN_TO_UUID(rating.booking_id)'), 'booking_id'],
+          'rating', 
+          'status', 
+          'comment'
+        ],
       }
-      ]
+      ],
+      order: [['date', 'ASC']]
     });
 
     return result.length ? result.map(res => res.toJSON()) : null;
@@ -219,12 +234,40 @@ const editById = async ({ id, date, guests, location_type, floor, roof_type, sta
     if (roof_type) updateData.roof_type = roof_type;
     if (status) updateData.status = status;
 
+    // Si el nuevo status es CONFIRMED, obtenemos la reserva
+    let bookingData: any = null;
+    if (status === 'CONFIRMED') {
+      bookingData = await Booking.findOne({
+        where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`),
+        attributes: [
+          [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+          [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
+          [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
+        ],
+        raw: true
+      });
+
+      if (!bookingData) throw new Error("No se encontró la reserva para confirmar.");
+    }
+
     const [updatedRowsCount] = await Booking.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
 
+    if (status === 'CONFIRMED') {
+      await Rating.create({
+        booking_id: uuidToBuffer(bookingData.id),
+        user_id: uuidToBuffer(bookingData.user_id),
+        shop_id: uuidToBuffer(bookingData.shop_id),
+        rating: 0.0,
+        status: 'PENDING',
+        comment: undefined
+      });
+    }
+
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
+    console.log({error: error});
     throw new Error('Error al editar la reserva.');
   };
 };
