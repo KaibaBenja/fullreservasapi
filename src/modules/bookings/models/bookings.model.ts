@@ -11,16 +11,16 @@ interface BookingsAttributes {
   booked_slot_id: Buffer;
   date: Date;
   guests: number;
-  location_type: "INSIDE" | "OUTSIDE";
-  floor: "GROUND LEVEL" | "UPPER LEVEL";
-  roof_type: "COVERED" | "UNCOVERED";
+  location_type?: "INSIDE" | "OUTSIDE";
+  floor?: "GROUND LEVEL" | "UPPER LEVEL";
+  roof_type?: "COVERED" | "UNCOVERED";
   status: "PENDING" | "CONFIRMED" | "CANCELLED";
   booking_code: string;
   createdAt?: Date;
   updatedAt?: Date;
 };
 
-type BookingsCreationAttributes = Optional<BookingsAttributes, 'id' | 'status' | 'createdAt' | 'updatedAt'>;
+type BookingsCreationAttributes = Optional<BookingsAttributes, 'id' | 'status' | 'location_type' | 'floor' | 'roof_type' | 'createdAt' | 'updatedAt'>;
 
 class Booking extends Model<BookingsAttributes, BookingsCreationAttributes> implements BookingsAttributes {
   public id!: Buffer;
@@ -83,18 +83,15 @@ Booking.init(
     },
     location_type: {
       type: DataTypes.ENUM("INSIDE", "OUTSIDE"),
-      allowNull: false,
-      unique: true
+      allowNull: true,
     },
     floor: {
       type: DataTypes.ENUM("GROUND LEVEL", "UPPER LEVEL"),
-      allowNull: false,
-      unique: true
+      allowNull: true,
     },
     roof_type: {
       type: DataTypes.ENUM("COVERED", "UNCOVERED"),
-      allowNull: false,
-      unique: true
+      allowNull: true,
     },
     status: {
       type: DataTypes.ENUM("PENDING", "CONFIRMED", "CANCELLED"),
@@ -104,7 +101,6 @@ Booking.init(
     booking_code: {
       type: DataTypes.CHAR(4),
       allowNull: false,
-      unique: true,
     },
     createdAt: {
       type: DataTypes.DATE,

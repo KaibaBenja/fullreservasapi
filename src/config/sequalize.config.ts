@@ -1,6 +1,6 @@
+import mysql2 from 'mysql2';
 import { Sequelize } from 'sequelize';
 import { MYSQL } from "../config/dotenv.config";
-import mysql2 from 'mysql2';
 
 const sequelize = new Sequelize(
   MYSQL.DATABASE,  
@@ -11,6 +11,11 @@ const sequelize = new Sequelize(
     port: MYSQL.PORT,   
     dialect: "mysql",  
     dialectModule: mysql2,
+    dialectOptions: {
+      dateStrings: true, // Evita que Sequelize convierta a objeto Date automáticamente
+      typeCast: true,    // Para asegurarte de recibir strings, no Date
+    },
+    timezone: "-03:00",
     pool: {
       max: 5,
       min: 0,

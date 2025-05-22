@@ -34,21 +34,21 @@ export const bookingSchema = z.object({
     z.enum(["INSIDE", "OUTSIDE"], {
       errorMap: () => ({ message: "El campo 'location_type' solo puede ser 'INSIDE' ó 'OUTSIDE'." })
     })
-  ),
+  ).optional(),
 
   floor: z.preprocess(
     (val) => (typeof val === "string" ? val.toUpperCase() : val),
     z.enum(["GROUND LEVEL", "UPPER LEVEL"], {
       errorMap: () => ({ message: "El campo 'floor' solo puede ser 'GROUND LEVEL' ó 'UPPER LEVEL'." })
     })
-  ),
+  ).optional(),
 
   roof_type: z.preprocess(
     (val) => (typeof val === "string" ? val.toUpperCase() : val),
     z.enum(["COVERED", "UNCOVERED"], {
       errorMap: () => ({ message: "El campo 'roof_type' solo puede ser 'COVERED' ó 'UNCOVERED'." })
     })
-  )
+  ).optional()
 }).strict();
 
 

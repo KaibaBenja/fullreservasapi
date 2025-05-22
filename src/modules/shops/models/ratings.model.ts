@@ -1,8 +1,8 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import { sequelize } from "../../../config/sequalize.config";
+import Booking from "../../bookings/models/bookings.model";
 import Shop from "../../shops/models/shops.model";
 import User from "../../users/models/users.model";
-import Booking from "../../bookings/models/bookings.model";
 
 interface RatingAttributes {
   id: Buffer;
@@ -67,7 +67,7 @@ Rating.init(
       type: DataTypes.DECIMAL(2, 1),
       allowNull: false,
       validate: {
-        isIn: [[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]],
+        isIn: [[0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0]],
       },
     },
     status: {

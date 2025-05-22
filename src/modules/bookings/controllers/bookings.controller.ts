@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { ITables } from "src/modules/shops/types/tables.types";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
 import * as shopsServices from "../../shops/services";
@@ -6,6 +7,7 @@ import * as usersServices from "../../users/services";
 import * as bookingsServices from "../services";
 import { getAllCombinations } from "../utils/generateAllCombinations";
 import { generateBookingCode } from "../utils/generateBookingCode";
+import { getDayName } from "../utils/getDayName";
 import { mapComboToTables, TableMapCombo } from "../utils/mapComboToTables";
 
 const create = async (req: Request, res: Response): Promise<void> => {
@@ -25,9 +27,21 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 400, `El espacio disponible con el id: ${booked_slot_id} no existe.`);
     };
 
+    const daysClosed = await shopsServices.closedDays.getByShopId({ shop_id });
+    if (!daysClosed) {
+      return handleErrorResponse(res, 500, "Error al obtener los días cerrados del negocio.");
+    }
+    const localDateString = date.replace(" ", "T");
+    const bookingDay = new Date(localDateString).getDay();
+
+    const isClosed = daysClosed.some(day => day.day_of_week === bookingDay);
+    if (isClosed) {
+      return handleErrorResponse(res, 403, `El comercio no abre los días ${getDayName(bookingDay)}.`);
+    }
+
     // Buscar todos los bookings por fecha y hora en un mismo comercio 
     // ✅✅
-    const currentBookings = await bookingsServices.bookings.getAllByFiltersShopId({ shop_id, date, booked_slot_id });
+    const currentBookings = await bookingsServices.bookings.getAllByFiltersShopId({ shop_id, date, booked_slot_id, status: "PENDING" });
     console.log({ currentBookings: currentBookings });
     if (currentBookings) {
       let suma_guest = 0;
@@ -52,12 +66,14 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
     // ✅✅
     // Busqueda de mesas por lo solicitado del cliente 
-    const filteredTables = await shopsServices.tables.getAllByFiltersShopId({
+    const tableFilters: Pick<ITables, 'shop_id'> & Partial<Pick<ITables, 'location_type' | 'floor' | 'roof_type'>> = {
       shop_id,
-      location_type,
-      floor,
-      roof_type
-    });
+    };
+    if (location_type) tableFilters.location_type = location_type;
+    if (floor) tableFilters.floor = floor;
+    if (roof_type) tableFilters.roof_type = roof_type;
+
+    const filteredTables = await shopsServices.tables.getAllByFiltersShopId(tableFilters);
     if (!filteredTables) return handleErrorResponse(res, 404, "El comercio no dispone de mesas con las características solicitadas.");
 
 
