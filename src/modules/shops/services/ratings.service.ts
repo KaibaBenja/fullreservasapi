@@ -2,6 +2,7 @@ import { IRatings } from "../types/ratings.types";
 import Rating from "../models/ratings.model";
 import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+import User from "../../users/models/users.model";
 
 
 const add = async ({ shop_id, user_id, booking_id, rating, status, comment }: IRatings) => {
@@ -81,20 +82,29 @@ const getAllByFiltersShopId = async ({
 
     const result = await Rating.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
-        [sequelize.literal('BIN_TO_UUID(booking_id)'), 'booking_id'],
+        [sequelize.literal('BIN_TO_UUID(Rating.id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Rating.shop_id)'), 'shop_id'],
+        [sequelize.literal('BIN_TO_UUID(Rating.user_id)'), 'user_id'],
+        [sequelize.literal('BIN_TO_UUID(Rating.booking_id)'), 'booking_id'],
         'rating',
         'status',
         'comment',
         'created_at'
+      ],
+      include: [
+        {
+          model: User,
+          attributes: [
+            "full_name",
+          ],
+        },
       ],
       where: whereConditions
     });
 
     return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
+    console.log(error);
     throw new Error('Error al obtener las reseñas con los filtros proporcionados.');
   };
 };
