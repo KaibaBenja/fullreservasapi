@@ -182,4 +182,5 @@ bookingRoutes.post("/filtered-user/:user_id", validateSchemaPartial(bookingSchem
 bookingRoutes.get("/", bookingsController.getAll);
 bookingRoutes.get("/:id", bookingsController.getById);
 bookingRoutes.patch("/:id", validateSchemaPartial(bookingSchemaFiter), bookingsController.editById);
+bookingRoutes.patch("/confirm/:code", validateSchemaPartial(bookingSchemaFiter), bookingsController.confirmByCode);
 bookingRoutes.delete("/:id", bookingsController.deleteById);

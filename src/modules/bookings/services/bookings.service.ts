@@ -152,27 +152,27 @@ const getAllByFiltersUserId = async ({
       ],
       where: whereConditions,
       include: [
-      {
-        model: Shop,
-        attributes: ['name'],
-      },
-      {
-        model: AvailableSlot,
-        attributes: ['start_time'],
-      },
-      {
-        model: Rating,
-        as: 'rating',
-        attributes: [
-          [sequelize.literal('BIN_TO_UUID(rating.id)'), 'id'], 
-          [sequelize.literal('BIN_TO_UUID(rating.shop_id)'), 'shop_id'],
-          [sequelize.literal('BIN_TO_UUID(rating.user_id)'), 'user_id'],
-          [sequelize.literal('BIN_TO_UUID(rating.booking_id)'), 'booking_id'],
-          'rating', 
-          'status', 
-          'comment'
-        ],
-      }
+        {
+          model: Shop,
+          attributes: ['name'],
+        },
+        {
+          model: AvailableSlot,
+          attributes: ['start_time'],
+        },
+        {
+          model: Rating,
+          as: 'rating',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(rating.id)'), 'id'],
+            [sequelize.literal('BIN_TO_UUID(rating.shop_id)'), 'shop_id'],
+            [sequelize.literal('BIN_TO_UUID(rating.user_id)'), 'user_id'],
+            [sequelize.literal('BIN_TO_UUID(rating.booking_id)'), 'booking_id'],
+            'rating',
+            'status',
+            'comment'
+          ],
+        }
       ],
       order: [['date', 'ASC']]
     });
@@ -223,8 +223,9 @@ const getAllByFilters = async (filters: Partial<IBookings>) => {
   }
 };
 
-const editById = async ({ id, date, guests, location_type, floor, roof_type, status }: IBookings) => {
+const editById = async (data: Partial<IBookings>) => {
   try {
+    const { id, date, guests, location_type, floor, roof_type, status } = data;
     const updateData: any = {};
 
     if (date) updateData.date = date;
@@ -267,7 +268,7 @@ const editById = async ({ id, date, guests, location_type, floor, roof_type, sta
 
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    console.log({error: error});
+    console.log({ error: error });
     throw new Error('Error al editar la reserva.');
   };
 };
