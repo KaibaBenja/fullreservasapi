@@ -57,7 +57,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
     const shopId = Object.values(result[0])[0];
 
-     // Agrego shop_id a cada schedule
+    // Agrego shop_id a cada schedule
     const schedulesWithShopId = schedules.map(schedule => ({
       shop_id: shopId,
       ...schedule,
@@ -99,7 +99,6 @@ const create = async (req: Request, res: Response): Promise<void> => {
     handleErrorResponse(res, 500, `Error interno del servidor.`);
   };
 };
-
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -284,7 +283,6 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
   };
 };
 
-
 const getAllByFiltersUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await shopsServices.shops.getAllByFiltersUser(req.body);
@@ -297,10 +295,44 @@ const getAllByFiltersUser = async (req: Request, res: Response): Promise<void> =
 
 const getAllPublic = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await shopsServices.shops.getAllByFiltersUser({ none: true });
+    const shops = await shopsServices.shops.getAllByFiltersUser({ none: true });
 
-    res.status(200).json(result);
+    if (!shops) return handleErrorResponse(res, 400, "?");
+
+    const shopsWithRatings = await Promise.all(
+      shops.map(async (shop: any) => {
+        try {
+          const ratings = await shopsServices.ratings.getAllByFiltersShopId({ shop_id: shop.id, status: 'COMPLETED' });
+
+          // Calcular promedio si hay ratings
+          let average_rating: number | null = null;
+          let ratingCount: number = 0;
+          if (ratings && ratings.length > 0) {
+            const total = ratings.reduce((acc, curr) => {
+              const rating = typeof curr.rating === 'string' ? parseFloat(curr.rating) : curr.rating;
+              return acc + rating;
+            }, 0);
+            ratingCount = ratings.length;
+            average_rating = parseFloat((total / ratings.length).toFixed(2)); // promedio con 2 decimales
+          };
+
+          return { ...shop, average_rating, ratingCount };
+        } catch (e) {
+          // En caso de error, devolver el shop sin rating
+          return { ...shop, average_rating: null, ratingCount: 0 };
+        }
+      })
+    );
+
+    shopsWithRatings.sort((a, b) => {
+      const ratingA = a.averageRating ?? 0;
+      const ratingB = b.averageRating ?? 0;
+      return ratingB - ratingA;
+    });
+
+    res.status(200).json(shopsWithRatings);
   } catch (error) {
+    console.error(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 };
