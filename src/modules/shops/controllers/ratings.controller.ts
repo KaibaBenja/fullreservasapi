@@ -84,6 +84,7 @@ const getAllByFiltersShopId = async (req: Request, res: Response): Promise<void>
 
     res.status(201).json(result ?? []);
   } catch (error) {
+    console.log(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };
