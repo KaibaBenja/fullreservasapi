@@ -394,6 +394,32 @@ const editById = async (req: Request, res: Response): Promise<void> => {
   };
 };
 
+const confirmByCode = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { code } = req.params;
+
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return handleErrorResponse(res, 400, "Debe enviar al menos un campo para actualizar.");
+    };
+
+    const booking = await bookingsServices.bookings.getAllByFilters({ booking_code: code, status: 'PENDING' });
+    if (!booking) return handleErrorResponse(res, 404, `La reserva no existe.`);
+
+    const bookingId = Object.values(booking[0])[0];
+
+    if (!(await bookingsServices.bookings.editById({ id: bookingId, status: 'CONFIRMED' }))) {
+      return handleErrorResponse(res, 400, `No se pudo actualizar la reserva.`);
+    };
+
+    const result = await bookingsServices.bookings.getById({ id: bookingId });
+    if (!result) return handleErrorResponse(res, 404, `Error al encontrar la reserva actualizada.`);
+
+    res.status(201).json(result);
+  } catch (error) {
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  };
+};
+
 const deleteById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -413,5 +439,5 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-export default { create, getAll, getAllByFiltersUserId, getAllByFiltersShopId, getAllByFilters, getById, editById, deleteById };
+export default { create, getAll, getAllByFiltersUserId, getAllByFiltersShopId, getAllByFilters, getById, editById, confirmByCode, deleteById };
 
