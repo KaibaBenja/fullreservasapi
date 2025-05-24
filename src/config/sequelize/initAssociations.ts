@@ -12,7 +12,8 @@ import ShopAddress from "../../modules/shops/models/shopAddresses.model";
 import Shop from "../../modules/shops/models/shops.model";
 import Subcategory from "../../modules/shops/models/subcategories.model";
 import User from "../../modules/users/models/users.model";
-
+import Membership from "../../modules/memberships/models/memberships.model";
+import MembershipPlan from "../../modules/memberships/models/membershipsPlans.model";
 
 export function initAssociations() {
     Province.belongsTo(Country, { foreignKey: "country_id", onDelete: "CASCADE" });
@@ -55,4 +56,7 @@ export function initAssociations() {
 
     User.hasMany(Rating, { foreignKey: 'user_id', as: 'rating' });
     Rating.belongsTo(User, { foreignKey: 'user_id' });
+
+    MembershipPlan.hasMany(Membership, { foreignKey: 'tier', sourceKey: 'id' });
+    Membership.belongsTo(MembershipPlan, {foreignKey: 'tier', targetKey: 'id'});
 }

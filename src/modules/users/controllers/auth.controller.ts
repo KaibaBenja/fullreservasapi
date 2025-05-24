@@ -19,10 +19,10 @@ export const register: RequestHandler = async (req, res) => {
       displayName: full_name,
     });
 
-    if(!await usersServices.auth.registerUser({ ...req.body, id: userRecord.uid })){
+    if (!await usersServices.auth.registerUser({ ...req.body, id: userRecord.uid })) {
       return handleErrorResponse(res, 400, `No se pudo crear el usuario.`);
     }
-    
+
     const user = await usersServices.users.getByEmail({ email });
     if (!user) return handleErrorResponse(res, 404, `No se encontro el usuarió por email.`);
 
@@ -43,9 +43,12 @@ export const register: RequestHandler = async (req, res) => {
         role_id: merchantRole.id.toString("utf-8")
       }))) return handleErrorResponse(res, 404, `Error al asignar el rol MERCHANT.`);
 
+      const freePlan = await membershipsServices.membershipsPlans.getAllByFilters({ tier_name: 'FREE' });
+      if (!freePlan) return handleErrorResponse(res, 404, "Plan de membresía no encontrado.")
+
       if (!(await membershipsServices.memberships.add({
         user_id: user.id.toString("utf-8"),
-        tier: "FREE",
+        tier: freePlan[0].id.toString('utf-8'),
         status: "EXPIRED"
       }))) return handleErrorResponse(res, 404, `Error al asignar la membresia.`);
     }
