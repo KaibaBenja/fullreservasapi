@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ITables } from "src/modules/shops/types/tables.types";
+import { isWithinValidRange } from "../../../utils/formatDate";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
 import * as shopsServices from "../../shops/services";
@@ -9,7 +10,6 @@ import { getAllCombinations } from "../utils/generateAllCombinations";
 import { generateBookingCode } from "../utils/generateBookingCode";
 import { getDayName } from "../utils/getDayName";
 import { mapComboToTables, TableMapCombo } from "../utils/mapComboToTables";
-import { isWithinValidRange } from "../../../utils/formatDate";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -33,13 +33,14 @@ const create = async (req: Request, res: Response): Promise<void> => {
     };
 
     const daysClosed = await shopsServices.closedDays.getByShopId({ shop_id });
-    if (!daysClosed) return handleErrorResponse(res, 409, "Error al obtener los días cerrados del negocio.");
+    if (daysClosed){
+      const localDateString = date.replace(" ", "T");
+      const bookingDay = new Date(localDateString).getDay();
+      const isClosed = daysClosed.some(day => day.day_of_week === bookingDay);
+      if (isClosed) return handleErrorResponse(res, 403, `El comercio no abre los días ${getDayName(bookingDay)}.`);
+    } 
 
-    const localDateString = date.replace(" ", "T");
-    const bookingDay = new Date(localDateString).getDay();
-
-    const isClosed = daysClosed.some(day => day.day_of_week === bookingDay);
-    if (isClosed) return handleErrorResponse(res, 403, `El comercio no abre los días ${getDayName(bookingDay)}.`);
+    
 
     // Validar si el date no anterior a la fecha y hora actual y que no sea mayor a 2 meses
     if (!isWithinValidRange(date)) {
