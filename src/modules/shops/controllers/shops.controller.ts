@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import * as shopsServices from "../services";
-import * as  usersServices from "../../users/services/";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
+import * as usersServices from "../../users/services/";
+import * as shopsServices from "../services";
 import { validateTimes } from "../utils/formatTime";
 
 const create = async (req: Request, res: Response): Promise<void> => {
@@ -325,8 +325,8 @@ const getAllPublic = async (req: Request, res: Response): Promise<void> => {
     );
 
     shopsWithRatings.sort((a, b) => {
-      const ratingA = a.averageRating ?? 0;
-      const ratingB = b.averageRating ?? 0;
+      const ratingA = a.average_rating ?? 0;
+      const ratingB = b.average_rating ?? 0;
       return ratingB - ratingA;
     });
 
