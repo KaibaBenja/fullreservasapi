@@ -399,10 +399,6 @@ const confirmByCode = async (req: Request, res: Response): Promise<void> => {
   try {
     const { code } = req.params;
 
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return handleErrorResponse(res, 400, "Debe enviar al menos un campo para actualizar.");
-    };
-
     const booking = await bookingsServices.bookings.getAllByFilters({ booking_code: code, status: 'PENDING' });
     if (!booking) return handleErrorResponse(res, 404, `La reserva no existe.`);
 
