@@ -6,12 +6,11 @@ export const membershipsSchema = z.object({
     required_error: "El campo 'user_id' es requerido."
   }).uuid({ message: "El campo 'user_id' debe ser un UUID válido." }),
 
-  tier: z.preprocess(
-    (val) => (typeof val === "string" ? val.toUpperCase() : val), 
-    z.enum(["FREE", "BASIC", "ADVANCED", "PREMIUM"], {
-      errorMap: () => ({ message: `El campo 'tier' solo puede ser "FREE", "BASIC", "ADVANCED", "PREMIUM".` })
-    })
-  ),
+  tier: z.string({
+    invalid_type_error: "El campo 'user_id' debe ser de tipo string.",
+    required_error: "El campo 'user_id' es requerido."
+  }).uuid({ message: "El campo 'user_id' debe ser un UUID válido." }),
+
 
   status: z.preprocess(
     (val) => (typeof val === "string" ? val.toUpperCase() : val), 

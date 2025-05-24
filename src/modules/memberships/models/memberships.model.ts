@@ -1,11 +1,12 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../../../config/sequelize/sequalize.config';
 import User from "../../users/models/users.model";
+import MembershipPlan from "../models/membershipsPlans.model";
 
 interface MembershipAttributes {
   id: Buffer;
   user_id: Buffer;
-  tier: 'FREE' | 'BASIC' | 'ADVANCED' | 'PREMIUM';
+  tier: Buffer;
   status: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'EXPIRED' | 'DELAYED';
   expire_date?: Date | null;
   createdAt?: Date;
@@ -17,7 +18,7 @@ interface MembershipCreationAttributes extends Optional<MembershipAttributes, 'i
 class Membership extends Model<MembershipAttributes, MembershipCreationAttributes> implements MembershipAttributes {
   public id!: Buffer;
   public user_id!: Buffer;
-  public tier!: 'FREE' | 'BASIC' | 'ADVANCED' | 'PREMIUM';
+  public tier!: Buffer;
   public status!: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'EXPIRED' | 'DELAYED';
   public expire_date?: Date | null;
   public readonly createdAt!: Date;
@@ -43,8 +44,14 @@ Membership.init(
       onDelete: "CASCADE",
     },
     tier: {
-      type: DataTypes.ENUM('FREE', 'BASIC', 'ADVANCED', 'PREMIUM'),
-      allowNull: false,
+      type: DataTypes.BLOB,
+      allowNull: true,
+      references: {
+        model: MembershipPlan,
+        key: "id",
+      },
+      onDelete: "SET NULL",
+      onUpdate: "RESTRICT"
     },
     status: {
       type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'PENDING', 'EXPIRED', 'DELAYED'),

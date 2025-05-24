@@ -2,13 +2,14 @@ import { IMemberships } from "../types/memberships.types";
 import Membership from "../models/memberships.model";
 import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+import MembershipPlan from "../models/membershipsPlans.model";
 
 
 const add = async ({ user_id, tier, status, expire_date }: IMemberships) => {
   try {
     const data: any = {
       user_id: uuidToBuffer(user_id),
-      tier: tier,
+      tier: uuidToBuffer(tier),
     };
 
     if (status) data.status = status;
@@ -26,18 +27,32 @@ const getAll = async () => {
   try {
     const result = await Membership.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Membership.id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
-        'tier',
+        [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
         'status',
         'expire_date',
         'created_at',
         'updated_at'
       ],
+      include: [
+        {
+          model: MembershipPlan,
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(MembershipPlan.id)'), 'id'],
+            'tier_name',
+            'price',
+            'description',
+            'created_at',
+            'updated_at'
+          ],
+        }
+      ]
     });
 
     return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
+    console.log(error);
     throw new Error("Error al obtener las membresias.");
   };
 };
@@ -48,7 +63,7 @@ const getById = async ({ id }: Pick<IMemberships, "id">) => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
-        'tier',
+        [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
         'status',
         'expire_date',
         'created_at',
@@ -71,7 +86,7 @@ const getAllByFilters = async (filters: Partial<IMemberships>) => {
     const whereConditions: Record<string, any> = {};
 
     if (user_id) whereConditions.user_id = uuidToBuffer(user_id);
-    if (tier) whereConditions.tier = tier;
+    if (tier) whereConditions.tier = uuidToBuffer(tier);
     if (status) whereConditions.status = status;
     if (expire_date) whereConditions.expire_date = expire_date;
 
@@ -79,7 +94,7 @@ const getAllByFilters = async (filters: Partial<IMemberships>) => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
-        'tier',
+        [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
         'status',
         'expire_date',
         'created_at',
@@ -98,7 +113,7 @@ const editById = async ({ id, tier, status, expire_date }: IMemberships) => {
   try {
     const updateData: any = {};
 
-    if (tier) updateData.tier = tier;
+    if (tier) updateData.tier = uuidToBuffer(tier);
     if (status) updateData.status = status;
     if (expire_date) updateData.expire_date = expire_date;
 
