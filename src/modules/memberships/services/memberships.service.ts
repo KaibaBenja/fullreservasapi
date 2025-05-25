@@ -1,8 +1,8 @@
-import { IMemberships } from "../types/memberships.types";
-import Membership from "../models/memberships.model";
 import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
+import Membership from "../models/memberships.model";
 import MembershipPlan from "../models/membershipsPlans.model";
+import { IMemberships } from "../types/memberships.types";
 
 
 const add = async ({ user_id, tier, status, expire_date }: IMemberships) => {
@@ -61,13 +61,26 @@ const getById = async ({ id }: Pick<IMemberships, "id">) => {
   try {
     const result = await Membership.findOne({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Membership.id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
         [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
         'status',
         'expire_date',
         'created_at',
         'updated_at'
+      ],
+      include: [
+        {
+          model: MembershipPlan,
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(MembershipPlan.id)'), 'id'],
+            'tier_name',
+            'price',
+            'description',
+            'created_at',
+            'updated_at'
+          ],
+        }
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -92,13 +105,26 @@ const getAllByFilters = async (filters: Partial<IMemberships>) => {
 
     const result = await Membership.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Membership.id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
         [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
         'status',
         'expire_date',
         'created_at',
         'updated_at'
+      ],
+      include: [
+        {
+          model: MembershipPlan,
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(MembershipPlan.id)'), 'id'],
+            'tier_name',
+            'price',
+            'description',
+            'created_at',
+            'updated_at'
+          ],
+        }
       ],
       where: whereConditions
     });
