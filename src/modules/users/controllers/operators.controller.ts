@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import * as usersServices from "../services";
-import * as shopsServices from "../../shops/services";
+import admin from "../../../config/firebase";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
-import admin from "../../../config/firebase";
+import * as shopsServices from "../../shops/services";
+import * as usersServices from "../services";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -41,13 +41,15 @@ const create = async (req: Request, res: Response): Promise<void> => {
       );
     }
 
-    if (await usersServices.operators.getByShopId({ shop_id })) {
-      return handleErrorResponse(
-        res,
-        400,
-        `El operador del negocio con id: ${shop_id} ya existe.`
-      );
-    }
+    // Un comercio puede tener varios operadores, entonces se omite esta validación
+    
+    // if (await usersServices.operators.getByShopId({ shop_id })) {
+    //   return handleErrorResponse(
+    //     res,
+    //     400,
+    //     `El operador del negocio con id: ${shop_id} ya existe.`
+    //   );
+    // }
 
     let userFirebase = null;
     try {
@@ -82,13 +84,10 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 400, `No se pudo crear el usuario.`);
 
     const user = await usersServices.users.getByEmail({ email });
-    if (!user)
-      return handleErrorResponse(
-        res,
-        404,
-        `No se encontro el usuarió por email.`
-      );
-
+    if (!user) return handleErrorResponse(res, 404, `No se encontro el usuarió por email.`);
+    const userIdBuffer = user[0]?.id;
+    if (!userIdBuffer) return handleErrorResponse(res, 500, `El usuario no tiene un ID válido.`);
+    const userId = userIdBuffer.toString("utf-8");
     // Asignr rol operador
     const operatorRole = await usersServices.roles.getByName({
       name: "OPERATOR",
@@ -98,7 +97,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
     if (
       !(await usersServices.userRoles.add({
-        user_id: user.id.toString("utf-8"),
+        user_id: userId,
         role_id: operatorRole.id.toString("utf-8"),
       }))
     )
@@ -107,14 +106,14 @@ const create = async (req: Request, res: Response): Promise<void> => {
     // Asignar usuario a operators
     if (
       !(await usersServices.operators.add({
-        user_id: user.id.toString("utf-8"),
+        user_id: userId,
         shop_id,
       }))
     )
       return handleErrorResponse(res, 400, `Error al crear el operador.`);
 
     const result = await usersServices.operators.getByUserAndShop({
-      user_id: user.id.toString("utf-8"),
+      user_id: userId,
       shop_id,
     });
 
@@ -165,16 +164,10 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
 const getById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-
     if (!validateUUID(id, res)) return;
 
     const result = await usersServices.operators.getById({ id });
-    if (!result)
-      return handleErrorResponse(
-        res,
-        404,
-        `El operador con el id: ${id} no existe.`
-      );
+    if (!result)return handleErrorResponse(res, 404, `El operador con el id: ${id} no existe.`);
 
     res.status(200).json(result);
   } catch (error) {
@@ -206,7 +199,10 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
         `El usuario con el id: ${id} no existe.`
       );
 
-    const userId = Object.values(result[0])[0];
+    const userIdBuffer = result[0]?.id;
+    if (!userIdBuffer) return handleErrorResponse(res, 500, `El usuario no tiene un ID válido.`);
+
+    const userId = userIdBuffer.toString("utf-8");
 
     if (!(await usersServices.users.deleteById({ id: userId }))) {
       return handleErrorResponse(res, 500, `Error al eliminar el usuario.`);
