@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
 import admin from "../../../config/firebase";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
-import * as usersServices from "../services/";
 import * as membershipsServices from "../../memberships/services/";
+import * as usersServices from "../services/";
 
 export const register: RequestHandler = async (req, res) => {
   try {
@@ -19,18 +19,20 @@ export const register: RequestHandler = async (req, res) => {
       displayName: full_name,
     });
 
-    if(!await usersServices.auth.registerUser({ ...req.body, id: userRecord.uid })){
+    if (!await usersServices.auth.registerUser({ ...req.body, id: userRecord.uid })) {
       return handleErrorResponse(res, 400, `No se pudo crear el usuario.`);
     }
-    
+
     const user = await usersServices.users.getByEmail({ email });
     if (!user) return handleErrorResponse(res, 404, `No se encontro el usuarió por email.`);
-
+    const userIdBuffer = user[0]?.id;
+    if (!userIdBuffer) return handleErrorResponse(res, 500, `El usuario no tiene un ID válido.`);
+    const userId = userIdBuffer.toString("utf-8");
     const clientRole = await usersServices.roles.getByName({ name: "CLIENT" });
     if (!clientRole) return handleErrorResponse(res, 409, `El rol CLIENT no existe.`);
 
     if (!(await usersServices.userRoles.add({
-      user_id: user.id.toString("utf-8"),
+      user_id: userId,
       role_id: clientRole.id.toString("utf-8")
     }))) return handleErrorResponse(res, 404, `Error al asignar el rol CLIENT.`);
 
@@ -39,18 +41,21 @@ export const register: RequestHandler = async (req, res) => {
       if (!merchantRole) return handleErrorResponse(res, 409, `El rol MERCHANT no existe.`);
 
       if (!(await usersServices.userRoles.add({
-        user_id: user.id.toString("utf-8"),
+        user_id: userId,
         role_id: merchantRole.id.toString("utf-8")
       }))) return handleErrorResponse(res, 404, `Error al asignar el rol MERCHANT.`);
 
+      const freePlan = await membershipsServices.membershipsPlans.getAllByFilters({ tier_name: 'FREE' });
+      if (!freePlan) return handleErrorResponse(res, 404, "Plan de membresía no encontrado.")
+
       if (!(await membershipsServices.memberships.add({
-        user_id: user.id.toString("utf-8"),
-        tier: "FREE",
+        user_id: userId,
+        tier: freePlan[0].id.toString('utf-8'),
         status: "EXPIRED"
       }))) return handleErrorResponse(res, 404, `Error al asignar la membresia.`);
     }
 
-    const result = await usersServices.users.getById({ id: user.id.toString("utf-8") });
+    const result = await usersServices.users.getById({ id: userId });
     if (!result) return handleErrorResponse(res, 404, `No se pudo encontrar el usuario después de la creación.`);
 
     res.status(201).json({

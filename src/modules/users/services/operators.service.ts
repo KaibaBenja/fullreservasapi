@@ -1,8 +1,10 @@
-import { IOperator } from "../types/operators.types";
-import Operator from "../models/operators.model";
+import { Op } from "sequelize";
 import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
-import { QueryTypes } from "sequelize";
+import Shop from "../../shops/models/shops.model";
+import Operator from "../models/operators.model";
+import User from "../models/users.model";
+import { IOperator } from "../types/operators.types";
 
 
 const add = async ({ user_id, shop_id }: IOperator) => {
@@ -22,28 +24,36 @@ const add = async ({ user_id, shop_id }: IOperator) => {
 
 const getAll = async () => {
   try {
-    const result = await sequelize.query(
-      `SELECT 
-        BIN_TO_UUID(u.id) AS id,
-        u.full_name,
-        u.email,
-        u.created_at,
-        u.updated_at,
-        JSON_OBJECT(
-          'id', BIN_TO_UUID(o.id),
-          'shop_id', BIN_TO_UUID(o.shop_id),
-          'created_at', o.created_at,
-          'updated_at', o.updated_at
-        ) AS operator
-      FROM users u
-      INNER JOIN operator_settings o ON u.id = o.user_id;`,
-      {
-        type: QueryTypes.SELECT,
-      }
-    );
-
+    const result = await Operator.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(Operator.id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.user_id)'), 'user_id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.shop_id)'), 'shop_id'],
+        'created_at',
+        'updated_at'
+      ],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: [
+            'full_name',
+            'email',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          model: Shop,
+          as: 'shop',
+          attributes: ['name'],
+        },
+      ],
+    });
+    
     return result.length ? result : null;
   } catch (error) {
+    console.log(error);
     throw new Error("Error al obtener los operadores.");
   };
 };
@@ -52,46 +62,73 @@ const getById = async ({ id }: Pick<IOperator, "id">) => {
   try {
     const result = await Operator.findOne({
       attributes: [
-        [sequelize.literal("BIN_TO_UUID(id)"), "id"],
-        [sequelize.literal("BIN_TO_UUID(user_id)"), "user_id"],
-        [sequelize.literal("BIN_TO_UUID(shop_id)"), "shop_id"],
-        "created_at",
-        "updated_at"
+        [sequelize.literal('BIN_TO_UUID(Operator.id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.user_id)'), 'user_id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.shop_id)'), 'shop_id'],
+        'created_at',
+        'updated_at'
       ],
-      where: {
-        id: sequelize.fn("UUID_TO_BIN", id)
-      },
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: [
+            'full_name',
+            'email',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          model: Shop,
+          as: 'shop',
+          attributes: ['name'],
+        },
+      ],
+      where: sequelize.literal(`Operator.id = UUID_TO_BIN(?)`),
+      replacements: [id],
     });
 
     return result ? result.toJSON() : null;
   } catch (error) {
+    console.log(error);
     throw new Error("Error al obtener el operador.");
   };
 };
 
 const getByShopId = async ({ shop_id }: Pick<IOperator, "shop_id">) => {
   try {
-    const result = await sequelize.query(
-      `SELECT 
-          BIN_TO_UUID(u.id) AS id,
-          u.full_name,
-          u.email,
-          u.created_at,
-          u.updated_at,
-          JSON_OBJECT(
-            'id', BIN_TO_UUID(o.id),
-            'shop_id', BIN_TO_UUID(o.shop_id),
-            'created_at', o.created_at,
-            'updated_at', o.updated_at
-          ) AS operator
-       FROM users u
-       INNER JOIN operator_settings o ON u.id = o.user_id
-       WHERE o.shop_id = UUID_TO_BIN(:shop_id);`,
-      {
-        replacements: { shop_id },
-        type: QueryTypes.SELECT,
-      }
-    );
+    const result = await Operator.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(Operator.id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.user_id)'), 'user_id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.shop_id)'), 'shop_id'],
+        'created_at',
+        'updated_at'
+      ],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: [
+            'full_name',
+            'email',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          model: Shop,
+          as: 'shop',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(shop.id)'), 'id'],
+            'name'
+          ],
+        },
+      ],
+      where: sequelize.literal(`shop.id = UUID_TO_BIN(?)`),
+      replacements: [shop_id],
+    });
 
     return result.length ? result : null;
   } catch (error) {
@@ -99,59 +136,52 @@ const getByShopId = async ({ shop_id }: Pick<IOperator, "shop_id">) => {
   };
 };
 
-const getByUserId = async ({ user_id }: Pick<IOperator, "user_id">) => {
-  try {
-    const result = await sequelize.query(
-      `SELECT 
-          BIN_TO_UUID(u.id) AS id,
-          u.full_name,
-          u.email,
-          u.created_at,
-          u.updated_at,
-          JSON_OBJECT(
-            'id', BIN_TO_UUID(o.id),
-            'shop_id', BIN_TO_UUID(o.shop_id),
-            'created_at', o.created_at,
-            'updated_at', o.updated_at
-          ) AS operator
-       FROM users u
-       INNER JOIN operator_settings o ON u.id = o.user_id
-       WHERE u.id = UUID_TO_BIN(:user_id);`,
-      {
-        replacements: { user_id },
-        type: QueryTypes.SELECT,
-      }
-    );
-
-    return result.length ? result : null;
-  } catch (error) {
-    throw new Error('Error al obtener el operador por el id usuario.');
-  };
-};
-
 const getByUserAndShop = async ({ user_id, shop_id }: Pick<IOperator, "user_id" | "shop_id">) => {
   try {
-    const result = await sequelize.query(
-      `SELECT 
-          BIN_TO_UUID(u.id) AS id,
-          u.full_name,
-          u.email,
-          u.created_at,
-          u.updated_at,
-          JSON_OBJECT(
-            'id', BIN_TO_UUID(o.id),
-            'shop_id', BIN_TO_UUID(o.shop_id),
-            'created_at', o.created_at,
-            'updated_at', o.updated_at
-          ) AS operator
-       FROM users u
-       INNER JOIN operator_settings o ON u.id = o.user_id
-       WHERE u.id = UUID_TO_BIN(:user_id) AND o.shop_id = UUID_TO_BIN(:shop_id);`,
-      {
-        replacements: { user_id, shop_id },
-        type: QueryTypes.SELECT,
-      }
-    );
+    const result = await Operator.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(Operator.id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.user_id)'), 'user_id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.shop_id)'), 'shop_id'],
+        'created_at',
+        'updated_at'
+      ],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(user.id)'), 'id'],
+            'full_name',
+            'email',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          model: Shop,
+          as: 'shop',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(shop.id)'), 'id'],
+            'name'
+          ],
+        },
+      ],
+      where: {
+        [Op.and]: [
+          sequelize.where(
+            sequelize.col('user.id'),
+            '=',
+            sequelize.fn('UUID_TO_BIN', user_id)
+          ),
+          sequelize.where(
+            sequelize.col('shop.id'),
+            '=',
+            sequelize.fn('UUID_TO_BIN', shop_id)
+          ),
+        ],
+      },
+    });
 
     return result.length ? result : null;
   } catch (error) {
@@ -172,4 +202,4 @@ const deleteById = async ({ id }: Pick<IOperator, "id">) => {
 };
 
 
-export default { add, getAll, getById, getByShopId, getByUserAndShop, getByUserId, deleteById };
+export default { add, getAll, getById, getByShopId, deleteById, getByUserAndShop };

@@ -1,38 +1,54 @@
 import bcrypt from 'bcrypt';
-import { QueryTypes } from "sequelize";
 import admin from '../../../config/firebase';
 import { sequelize } from "../../../config/sequelize/sequalize.config";
+import Membership from '../../../modules/memberships/models/memberships.model';
+import MembershipPlan from '../../../modules/memberships/models/membershipsPlans.model';
 import { formatName } from "../../../utils/formatName";
+import Role from '../models/roles.model';
 import User from "../models/users.model";
+import { serializeUsers } from '../serializers/user.serializer';
 import { IUser } from "../types/users.types";
+import { IUserWithRelations } from '../types/userWithRelations.types';
 
 const getAll = async () => {
   try {
-    const result = await sequelize.query(
-      `SELECT 
-        BIN_TO_UUID(u.id) AS id,
-        u.full_name,
-        u.email,
-        u.created_at,
-        u.updated_at,
-        JSON_ARRAYAGG(r.name) AS roles,
-        JSON_OBJECT(
-          'tier', m.tier,
-          'status', m.status,
-          'expire_date', m.expire_date,
-          'created_at', m.created_at,
-          'updated_at', m.updated_at
-        ) AS membership
-      FROM users u
-      LEFT JOIN userroles ur ON u.id = ur.user_id
-      LEFT JOIN roles r ON ur.role_id = r.id
-      LEFT JOIN memberships m ON u.id = m.user_id
-      GROUP BY u.id, m.tier, m.status, m.expire_date, m.created_at, m.updated_at`,
-      {
-        type: QueryTypes.SELECT,
-      }
-    );
-
+    const user = await User.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
+        'full_name',
+        'email',
+        'created_at',
+        'updated_at',
+      ],
+      include: [
+        {
+          model: Role,
+          as: 'roles',
+          attributes: ['name'],
+          through: { attributes: [] }, // no queremos info de userroles
+        },
+        {
+          model: Membership,
+          as: 'membership',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
+            'status',
+            'expire_date',
+            'created_at',
+            'updated_at',
+          ],
+          include: [
+            {
+              model: MembershipPlan,
+              as: 'membership_plan',
+              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+            },
+          ],
+        },
+      ],
+    });
+    const plainUsers = user.map(user => user.get({ plain: true }) as IUserWithRelations);
+    const result = serializeUsers(plainUsers);
     return result.length ? result : null;
   } catch (error) {
     throw new Error("Error al obtener los usuarios.");
@@ -41,33 +57,45 @@ const getAll = async () => {
 
 const getById = async ({ id }: Pick<IUser, "id">) => {
   try {
-    const result = await sequelize.query(
-      `SELECT 
-        BIN_TO_UUID(u.id) AS id,
-        u.full_name,
-        u.email,
-        u.created_at,
-        u.updated_at,
-        JSON_ARRAYAGG(r.name) AS roles,
-        JSON_OBJECT(
-          'tier', m.tier,
-          'status', m.status,
-          'expire_date', m.expire_date,
-          'created_at', m.created_at,
-          'updated_at', m.updated_at
-        ) AS membership
-      FROM users u
-      LEFT JOIN userroles ur ON u.id = ur.user_id
-      LEFT JOIN roles r ON ur.role_id = r.id
-      LEFT JOIN memberships m ON u.id = m.user_id
-      WHERE u.id = UUID_TO_BIN(:userId)
-      GROUP BY u.id, m.tier, m.status, m.expire_date, m.created_at, m.updated_at`,
-      {
-        type: QueryTypes.SELECT,
-        replacements: { userId: id },
-      }
-    );
-
+    const user = await User.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
+        'full_name',
+        'email',
+        'created_at',
+        'updated_at',
+      ],
+      include: [
+        {
+          model: Role,
+          as: 'roles',
+          attributes: ['name'],
+          through: { attributes: [] }, // no queremos info de userroles
+        },
+        {
+          model: Membership,
+          as: 'membership',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
+            'status',
+            'expire_date',
+            'created_at',
+            'updated_at',
+          ],
+          include: [
+            {
+              model: MembershipPlan,
+              as: 'membership_plan',
+              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+            },
+          ],
+        },
+      ],
+      where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+      replacements: [id],
+    });
+    const plainUsers = user.map(user => user.get({ plain: true }) as IUserWithRelations);
+    const result = serializeUsers(plainUsers);
     return result.length ? result : null;
   } catch (error) {
     throw new Error('Error al obtener el usuario por id');
@@ -76,22 +104,49 @@ const getById = async ({ id }: Pick<IUser, "id">) => {
 
 const getByEmail = async ({ email }: Pick<IUser, "email">) => {
   try {
-    const result = await User.findOne({
+    const user = await User.findAll({
       attributes: [
-        [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
         'full_name',
         'email',
         'created_at',
         'updated_at',
       ],
+      include: [
+        {
+          model: Role,
+          as: 'roles',
+          attributes: ['name'],
+          through: { attributes: [] }, // no queremos info de userroles
+        },
+        {
+          model: Membership,
+          as: 'membership',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
+            'status',
+            'expire_date',
+            'created_at',
+            'updated_at',
+          ],
+          include: [
+            {
+              model: MembershipPlan,
+              as: 'membership_plan',
+              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+            },
+          ],
+        },
+      ],
       where: sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("email")),
+        sequelize.fn("LOWER", sequelize.col('email')),
         "=",
         email.toLowerCase()
       ),
     });
-
-    return result ? result.toJSON() : null;
+    const plainUsers = user.map(user => user.get({ plain: true }) as IUserWithRelations);
+    const result = serializeUsers(plainUsers);
+    return result.length ? result : null;
   } catch (error) {
     throw new Error('Error al obtener el usuario por email.');
   };
@@ -99,37 +154,48 @@ const getByEmail = async ({ email }: Pick<IUser, "email">) => {
 
 const getByRole = async (roleId: string) => {
   try {
-    const result = await sequelize.query(
-      `SELECT 
-        BIN_TO_UUID(u.id) AS id,
-        u.full_name,
-        u.email,
-        u.created_at,
-        u.updated_at,
-        JSON_ARRAYAGG(r.name) AS roles,
-        JSON_OBJECT(
-          'tier', m.tier,
-          'status', m.status,
-          'expire_date', m.expire_date,
-          'created_at', m.created_at,
-          'updated_at', m.updated_at
-        ) AS membership
-      FROM users u
-      LEFT JOIN userroles ur ON u.id = ur.user_id
-      LEFT JOIN roles r ON ur.role_id = r.id
-      LEFT JOIN memberships m ON u.id = m.user_id
-      WHERE u.id IN (
-        SELECT ur2.user_id 
-        FROM userroles ur2 
-        WHERE ur2.role_id = UUID_TO_BIN(:roleId)
-      ) 
-      GROUP BY u.id, m.tier, m.status, m.expire_date, m.created_at, m.updated_at`,
-      {
-        type: QueryTypes.SELECT,
-        replacements: { roleId: roleId },
-      }
-    );
-
+    const user = await User.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
+        'full_name',
+        'email',
+        'created_at',
+        'updated_at',
+      ],
+      include: [
+        {
+          model: Role,
+          as: 'roles',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(roles.id)'), 'id'],
+            'name'
+          ],
+          through: { attributes: [] }, // no queremos info de userroles
+        },
+        {
+          model: Membership,
+          as: 'membership',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
+            'status',
+            'expire_date',
+            'created_at',
+            'updated_at',
+          ],
+          include: [
+            {
+              model: MembershipPlan,
+              as: 'membership_plan',
+              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+            },
+          ],
+        },
+      ],
+      where: sequelize.literal(`roles.id = UUID_TO_BIN(?)`),
+      replacements: [roleId],
+    });
+    const plainUsers = user.map(user => user.get({ plain: true }) as IUserWithRelations);
+    const result = serializeUsers(plainUsers);
     return result.length ? result : null;
   } catch (error) {
     throw new Error('Error al obtener los usuarios por el id de rol.');
@@ -137,27 +203,22 @@ const getByRole = async (roleId: string) => {
 };
 
 const verifyPassword = async ({ id }: Pick<IUser, "id">, current_password: string) => {
-    try {
-      const result = await sequelize.query(
-        `SELECT 
-          u.password
-        FROM users u
-        WHERE u.id = UUID_TO_BIN(:userId)`,
-        {
-          type: QueryTypes.SELECT,
-          replacements: { userId: id },
-        }
-      );
+  try {
+    const user = await User.findOne({
+      attributes: [
+      'password',
+    ],
+    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+    replacements: [id],
+    });
 
-      if (!result.length) return false;
+    if (!user || !user.password) return false;
 
-      const user = result[0] as { password: string };
-      const isMatch = await bcrypt.compare(current_password, user.password);
-      return isMatch;
-    } catch (error) {
-      console.error(error);
-      throw new Error('Error al verificar la contraseña del usuario');
-  }
+    const isMatch = await bcrypt.compare(current_password, user.password);
+    return isMatch;
+  } catch (error) {
+    throw new Error('Error al verificar la contraseña del usuario');
+  };
 };
 
 const editById = async ({ id, full_name, password, email }: IUser) => {
@@ -179,23 +240,19 @@ const editById = async ({ id, full_name, password, email }: IUser) => {
       firebaseUpdate.password = password;
     }
 
-    const result = await sequelize.query(
-      `SELECT 
-        u.firebase_uid
-      FROM users u
-      WHERE u.id = UUID_TO_BIN(:userId)`,
-      {
-        type: QueryTypes.SELECT,
-        replacements: { userId: id },
-      }
-    );
-    if (!result.length) {
+    const user = await User.findOne({
+      attributes: [
+      'firebase_uid',
+    ],
+    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+    replacements: [id],
+    });
+    
+    if (!user || !user.firebase_uid) {
       throw new Error('Usuario no encontrado en FB.');
     }
 
-    const fb_uid = result[0] as { firebase_uid: string };
-
-    await admin.auth().updateUser(fb_uid.firebase_uid, firebaseUpdate);
+    await admin.auth().updateUser(user.firebase_uid, firebaseUpdate);
 
     const [updatedRowsCount] = await User.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
@@ -209,23 +266,19 @@ const editById = async ({ id, full_name, password, email }: IUser) => {
 
 const deleteById = async ({ id }: Pick<IUser, "id">) => {
   try {
-    const user = await sequelize.query(
-      `SELECT 
-        u.firebase_uid
-      FROM users u
-      WHERE u.id = UUID_TO_BIN(:userId)`,
-      {
-        type: QueryTypes.SELECT,
-        replacements: { userId: id },
-      }
-    );
-    if (!user.length) {
+    const user = await User.findOne({
+      attributes: [
+      'firebase_uid',
+    ],
+    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+    replacements: [id],
+    });
+
+    if (!user || !user.firebase_uid) {
       throw new Error('Usuario no encontrado en FB.');
     }
 
-    const fb_uid = user[0] as { firebase_uid: string };
-
-    await admin.auth().deleteUser(fb_uid.firebase_uid);
+    await admin.auth().deleteUser(user.firebase_uid);
 
     const result = await User.destroy({
       where: { id: sequelize.fn('UUID_TO_BIN', id) }

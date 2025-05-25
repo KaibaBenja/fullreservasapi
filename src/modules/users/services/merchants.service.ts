@@ -1,8 +1,8 @@
-import { IMerchant } from "../types/merchants.types";
-import Merchant from "../models/merchants.model";
 import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
-import { QueryTypes } from "sequelize";
+import Merchant from "../models/merchants.model";
+import User from "../models/users.model";
+import { IMerchant } from "../types/merchants.types";
 
 
 const add = async ({ user_id, main_category, logo_url }: IMerchant) => {
@@ -24,27 +24,29 @@ const add = async ({ user_id, main_category, logo_url }: IMerchant) => {
 
 const getAll = async () => {
   try {
-    const result = await sequelize.query(
-      `SELECT 
-        BIN_TO_UUID(u.id) AS id,
-        u.full_name,
-        u.email,
-        u.created_at,
-        u.updated_at,
-        JSON_OBJECT(
-          'id', BIN_TO_UUID(m.id),
-          'logo_url', m.logo_url,
-          'main_category', m.main_category,
-          'created_at', m.created_at,
-          'updated_at', m.updated_at
-        ) AS merchant
-      FROM users u
-      INNER JOIN merchant_settings m ON u.id = m.user_id;`,
-      {
-        type: QueryTypes.SELECT,
-      }
-    );
-
+    const result = await User.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
+        'full_name',
+        'email',
+        'created_at',
+        'updated_at',
+      ],
+      include: [
+        {
+          model: Merchant,
+          as: 'merchant',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(merchant.id)'), 'id'],
+            'logo_url',
+            'main_category',
+            'created_at',
+            'updated_at',
+          ],
+        },
+      ],
+      where: sequelize.literal(`merchant.user_id = User.id`),
+    });
     return result.length ? result : null;
   } catch (error) {
     throw new Error("Error al obtener los comerciantes.");
@@ -75,30 +77,32 @@ const getById = async ({ id }: Pick<IMerchant, "id">) => {
 
 const getByUserId = async ({ user_id }: Pick<IMerchant, "user_id">) => {
   try {
-    const result = await sequelize.query(
-      `SELECT 
-          BIN_TO_UUID(u.id) AS id,
-          u.full_name,
-          u.email,
-          u.created_at,
-          u.updated_at,
-        JSON_OBJECT(
-          'id', BIN_TO_UUID(m.id),
-          'logo_url', m.logo_url,
-          'main_category', m.main_category,
-          'created_at', m.created_at,
-          'updated_at', m.updated_at
-        ) AS merchant
-        FROM users u
-        LEFT JOIN merchant_settings m ON u.id = m.user_id
-        WHERE u.id = UUID_TO_BIN(:user_id);`,
-      {
-        replacements: { user_id },
-        type: QueryTypes.SELECT,
-      }
-    );
+    const result = await User.findOne({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
+        'full_name',
+        'email',
+        'created_at',
+        'updated_at',
+      ],
+      include: [
+        {
+          model: Merchant,
+          as: 'merchant',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(merchant.id)'), 'id'],
+            'logo_url',
+            'main_category',
+            'created_at',
+            'updated_at',
+          ],
+        },
+      ],
+      where: sequelize.literal(`merchant.user_id = UUID_TO_BIN(?)`),
+      replacements: [user_id],
+    });
 
-    return result.length ? result : null;
+    return result ? result.toJSON() : null;
   } catch (error) {
     throw new Error('Error al obtener el comerciante por id.');
   };
