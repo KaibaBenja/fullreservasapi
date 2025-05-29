@@ -16,6 +16,13 @@ export const membershipsPlansSchema = z.object({
     .min(0, { message: "El campo 'price' debe ser como mínimo 0." })
     .max(100000000, { message: "El campo 'price' debe ser como máximo 100000000." }),
 
+  quantity: z.number({
+    invalid_type_error: "El campo 'quantity' debe ser de tipo number.",
+    required_error: "El campo 'quantity' es requerido."
+  })
+    .min(0, { message: "El campo 'quantity' debe ser como mínimo 0." })
+    .max(10, { message: "El campo 'quantity' debe ser como máximo 10." }),
+
   description: z.string({
     invalid_type_error: "El campo 'description' debe ser de tipo string.",
     required_error: "El campo 'description' es requerido."

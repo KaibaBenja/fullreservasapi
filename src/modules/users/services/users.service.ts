@@ -41,7 +41,7 @@ const getAll = async () => {
             {
               model: MembershipPlan,
               as: 'membership_plan',
-              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+              attributes: ['tier_name', 'price', 'description', 'quantity', 'created_at', 'updated_at'],
             },
           ],
         },
@@ -86,7 +86,7 @@ const getById = async ({ id }: Pick<IUser, "id">) => {
             {
               model: MembershipPlan,
               as: 'membership_plan',
-              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+              attributes: ['tier_name', 'price', 'description', 'quantity', 'created_at', 'updated_at'],
             },
           ],
         },
@@ -133,7 +133,7 @@ const getByEmail = async ({ email }: Pick<IUser, "email">) => {
             {
               model: MembershipPlan,
               as: 'membership_plan',
-              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+              attributes: ['tier_name', 'price', 'description', 'quantity', 'created_at', 'updated_at'],
             },
           ],
         },
@@ -186,7 +186,7 @@ const getByRole = async (roleId: string) => {
             {
               model: MembershipPlan,
               as: 'membership_plan',
-              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+              attributes: ['tier_name', 'price', 'description', 'quantity', 'created_at', 'updated_at'],
             },
           ],
         },
@@ -206,10 +206,10 @@ const verifyPassword = async ({ id }: Pick<IUser, "id">, current_password: strin
   try {
     const user = await User.findOne({
       attributes: [
-      'password',
-    ],
-    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
-    replacements: [id],
+        'password',
+      ],
+      where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+      replacements: [id],
     });
 
     if (!user || !user.password) return false;
@@ -242,12 +242,12 @@ const editById = async ({ id, full_name, password, email }: IUser) => {
 
     const user = await User.findOne({
       attributes: [
-      'firebase_uid',
-    ],
-    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
-    replacements: [id],
+        'firebase_uid',
+      ],
+      where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+      replacements: [id],
     });
-    
+
     if (!user || !user.firebase_uid) {
       throw new Error('Usuario no encontrado en FB.');
     }
@@ -268,10 +268,10 @@ const deleteById = async ({ id }: Pick<IUser, "id">) => {
   try {
     const user = await User.findOne({
       attributes: [
-      'firebase_uid',
-    ],
-    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
-    replacements: [id],
+        'firebase_uid',
+      ],
+      where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+      replacements: [id],
     });
 
     if (!user || !user.firebase_uid) {
