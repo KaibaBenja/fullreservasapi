@@ -9,17 +9,21 @@ import { IBookings } from "../types/bookings.types";
 
 const add = async (data: IBookings) => {
   try {
+    const dataOptional: any = {};
+
+    if (data.location_type) dataOptional.location_type = data.location_type;
+    if (data.floor) dataOptional.floor = data.floor;
+    if (data.roof_type) dataOptional.roof_type = data.roof_type;
+    if (data.comment) dataOptional.comment = data.comment;
+
     const result = await Booking.create({
       user_id: uuidToBuffer(data.user_id),
       shop_id: uuidToBuffer(data.shop_id),
       booked_slot_id: uuidToBuffer(data.booked_slot_id),
       date: data.date,
       guests: data.guests,
-      location_type: data.location_type,
-      floor: data.floor,
-      roof_type: data.roof_type,
       booking_code: data.booking_code,
-      comment: data.comment
+      ...dataOptional,
     });
 
     return result ? result.toJSON() : null;
