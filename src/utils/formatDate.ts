@@ -22,22 +22,12 @@ export function isBeforeNow(dateString: string): boolean {
 
 // Verifica si una fecha (en formato 'yyyy-dd-MM HH:mm') está dentro del rango actual y dos meses hacia adelante.
 export function isWithinValidRange(dateString: string): boolean {
-  console.log("Input string:", dateString);
-
   const inputDate = DateTime.fromFormat(dateString, FORMAT, { zone: TIMEZONE });
-
-  console.log("Parsed inputDate:", inputDate.toISO());
 
   if (!inputDate.isValid) return false;
 
   const now = DateTime.now().setZone(TIMEZONE);
   const maxAllowed = now.plus({ months: 2 });
-
-  console.log({
-    now: now.toISO(),
-    maxAllowed: maxAllowed.toISO(),
-    inputDate: inputDate.toISO()
-  });
 
   return inputDate >= now && inputDate <= maxAllowed;
 }
