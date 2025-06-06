@@ -48,7 +48,15 @@ export const bookingSchema = z.object({
     z.enum(["COVERED", "UNCOVERED"], {
       errorMap: () => ({ message: "El campo 'roof_type' solo puede ser 'COVERED' ó 'UNCOVERED'." })
     })
-  ).optional()
+  ).optional(),
+
+  comment: z.string({
+    invalid_type_error: "El campo 'comment' debe ser de tipo string.",
+    required_error: "El campo 'comment' es requerido."
+  })
+    .min(1, { message: "El campo 'comment' debe tener al menos 1 caracteres." })
+    .max(200, { message: "El campo 'comment' no puede tener más de 200 caracteres." })
+    .optional(),
 }).strict();
 
 
