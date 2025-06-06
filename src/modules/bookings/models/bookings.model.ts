@@ -16,11 +16,12 @@ interface BookingsAttributes {
   roof_type?: "COVERED" | "UNCOVERED";
   status: "PENDING" | "CONFIRMED" | "CANCELLED";
   booking_code: string;
+  comment?: string;
   createdAt?: Date;
   updatedAt?: Date;
 };
 
-type BookingsCreationAttributes = Optional<BookingsAttributes, 'id' | 'status' | 'location_type' | 'floor' | 'roof_type' | 'createdAt' | 'updatedAt'>;
+type BookingsCreationAttributes = Optional<BookingsAttributes, 'id' | 'status' | 'location_type' | 'floor' | 'roof_type' | 'comment' | 'createdAt' | 'updatedAt'>;
 
 class Booking extends Model<BookingsAttributes, BookingsCreationAttributes> implements BookingsAttributes {
   public id!: Buffer;
@@ -34,6 +35,7 @@ class Booking extends Model<BookingsAttributes, BookingsCreationAttributes> impl
   public roof_type!: "COVERED" | "UNCOVERED";
   public status!: "PENDING" | "CONFIRMED" | "CANCELLED";
   public booking_code!: string;
+  public comment!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 };
@@ -101,6 +103,10 @@ Booking.init(
     booking_code: {
       type: DataTypes.CHAR(4),
       allowNull: false,
+    },
+    comment: {
+      type: DataTypes.STRING(200),
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,

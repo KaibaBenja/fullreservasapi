@@ -7,18 +7,19 @@ import Booking from "../models/bookings.model";
 import { IBookings } from "../types/bookings.types";
 
 
-const add = async ({ user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type, status, booking_code }: IBookings) => {
+const add = async (data: IBookings) => {
   try {
     const result = await Booking.create({
-      user_id: uuidToBuffer(user_id),
-      shop_id: uuidToBuffer(shop_id),
-      booked_slot_id: uuidToBuffer(booked_slot_id),
-      date: date,
-      guests: guests,
-      location_type: location_type,
-      floor: floor,
-      roof_type: roof_type,
-      booking_code: booking_code
+      user_id: uuidToBuffer(data.user_id),
+      shop_id: uuidToBuffer(data.shop_id),
+      booked_slot_id: uuidToBuffer(data.booked_slot_id),
+      date: data.date,
+      guests: data.guests,
+      location_type: data.location_type,
+      floor: data.floor,
+      roof_type: data.roof_type,
+      booking_code: data.booking_code,
+      comment: data.comment
     });
 
     return result ? result.toJSON() : null;
@@ -41,7 +42,8 @@ const getAll = async () => {
         'floor',
         'roof_type',
         'status',
-        'booking_code'
+        'booking_code',
+        'comment'
       ],
     });
 
@@ -65,7 +67,8 @@ const getById = async ({ id }: Pick<IBookings, "id">) => {
         'floor',
         'roof_type',
         'status',
-        'booking_code'
+        'booking_code',
+        'comment'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -107,7 +110,8 @@ const getAllByFiltersShopId = async ({
         'floor',
         'roof_type',
         'status',
-        'booking_code'
+        'booking_code',
+        'comment'
       ],
       where: whereConditions
     });
@@ -148,7 +152,8 @@ const getAllByFiltersUserId = async ({
         'floor',
         'roof_type',
         'status',
-        'booking_code'
+        'booking_code',
+        'comment'
       ],
       where: whereConditions,
       include: [
@@ -212,7 +217,8 @@ const getAllByFilters = async (filters: Partial<IBookings>) => {
         'floor',
         'roof_type',
         'status',
-        'booking_code'
+        'booking_code',
+        'comment'
       ],
       where: whereConditions
     });
@@ -225,7 +231,7 @@ const getAllByFilters = async (filters: Partial<IBookings>) => {
 
 const editById = async (data: Partial<IBookings>) => {
   try {
-    const { id, date, guests, location_type, floor, roof_type, status } = data;
+    const { id, date, guests, location_type, floor, roof_type, status, comment } = data;
     const updateData: any = {};
 
     if (date) updateData.date = date;
@@ -234,6 +240,7 @@ const editById = async (data: Partial<IBookings>) => {
     if (floor) updateData.floor = floor;
     if (roof_type) updateData.roof_type = roof_type;
     if (status) updateData.status = status;
+    if (comment) updateData.comment = comment;
 
     // Si el nuevo status es CONFIRMED, obtenemos la reserva
     let bookingData: any = null;
