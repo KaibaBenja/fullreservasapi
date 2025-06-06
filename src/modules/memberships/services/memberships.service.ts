@@ -39,20 +39,20 @@ const getAll = async () => {
         {
           model: MembershipPlan,
           attributes: [
-            [sequelize.literal('BIN_TO_UUID(MembershipPlan.id)'), 'id'],
+            [sequelize.literal('BIN_TO_UUID(membership_plan.id)'), 'id'],
             'tier_name',
             'price',
             'description',
             'created_at',
             'updated_at'
           ],
+          as: 'membership_plan'
         }
       ]
     });
 
     return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al obtener las membresias.");
   };
 };

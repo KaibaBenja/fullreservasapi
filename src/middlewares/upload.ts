@@ -146,7 +146,6 @@ const deleteFileR2 = async (fileUrl: string): Promise<boolean> => {
     const fileName = fileUrl.split(`${R2.CLOUDFLARE_R2_PUBLIC_URL}/`)[1];
     
     if (!fileName) {
-      console.error("URL del archivo inválida");
       return false;
     }
     
@@ -163,7 +162,6 @@ const deleteFileR2 = async (fileUrl: string): Promise<boolean> => {
     
     return true;
   } catch (error) {
-    console.error("Error in deleteFileR2.", error);
     return false;
   }
 };

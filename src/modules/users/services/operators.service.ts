@@ -16,8 +16,6 @@ const add = async ({ user_id, shop_id }: IOperator) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
-
     throw new Error("Error al crear un nuevo operador.");
   };
 };
@@ -53,7 +51,6 @@ const getAll = async () => {
     
     return result.length ? result : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al obtener los operadores.");
   };
 };
@@ -91,7 +88,6 @@ const getById = async ({ id }: Pick<IOperator, "id">) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al obtener el operador.");
   };
 };

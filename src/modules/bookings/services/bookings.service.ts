@@ -268,7 +268,6 @@ const editById = async (data: Partial<IBookings>) => {
 
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    console.log({ error: error });
     throw new Error('Error al editar la reserva.');
   };
 };

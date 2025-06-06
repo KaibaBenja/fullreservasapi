@@ -106,7 +106,6 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json(result ?? []);
   } catch (error) {
-    console.log(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 };
@@ -332,7 +331,6 @@ const getAllPublic = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json(shopsWithRatings);
   } catch (error) {
-    console.error(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 };
