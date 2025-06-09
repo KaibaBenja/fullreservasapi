@@ -10,4 +10,5 @@ export interface IBookings {
   roof_type: "COVERED" | "UNCOVERED";
   status: "PENDING" | "CONFIRMED" | "CANCELLED";
   booking_code: string;
+  comment?: string
 };

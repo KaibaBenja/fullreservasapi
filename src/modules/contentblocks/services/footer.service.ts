@@ -11,7 +11,6 @@ const add = async (data: IFooter) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al agregar el contenido del sitio.");
   }
 };

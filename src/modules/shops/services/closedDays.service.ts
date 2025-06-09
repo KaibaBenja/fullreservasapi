@@ -88,12 +88,11 @@ const editById = async ({ id, day_of_week }: IClosedDays) => {
   try {
     const updateData: any = {};
 
-    if (day_of_week) updateData.location_type = day_of_week;
+    if (day_of_week) updateData.day_of_week = day_of_week;
 
     const [updatedRowsCount] = await ClosedDay.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`)
     });
-
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
     throw new Error('Error al editar el día cerrado.');
