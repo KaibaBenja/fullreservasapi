@@ -23,8 +23,8 @@ export function initAssociations() {
     Province.belongsTo(Country, { foreignKey: "country_id", onDelete: "CASCADE" });
     Country.hasMany(Province, { foreignKey: "country_id" });
 
-    ShopAddress.belongsTo(Address, { foreignKey: 'address_id' });
     Address.hasMany(ShopAddress, { foreignKey: 'address_id' });
+    ShopAddress.belongsTo(Address, { foreignKey: 'address_id' });
 
     Shop.belongsTo(Subcategory, { foreignKey: "subcategory_id", as: "subcategory", });
 

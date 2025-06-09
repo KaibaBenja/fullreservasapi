@@ -141,7 +141,7 @@ const editById = async ({ id, street, street_number, extra, description, latitud
 
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    throw new Error('Error al editar la dirreción.');
+    throw new Error('Error al editar la dirección.');
   };
 };
 

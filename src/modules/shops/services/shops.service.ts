@@ -12,7 +12,13 @@ import Subcategories from "../models/subcategories.model";
 import { IShops } from "../types/shops.types";
 
 const dayNames = [
-  "Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
 ];
 
 const add = async (data: IShops) => {
@@ -55,18 +61,14 @@ const getAll = async () => {
     const result = await Shops.findAll({
       attributes: [
         [sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"],
-        [sequelize.literal("BIN_TO_UUID(Shops.user_id)"), "user_id"],
         "name",
         "phone_number",
         "shift_type",
         "average_stay_time",
         "capacity",
-        "legal_info",
-        "bank_info",
         "description",
         "price_range",
         "created_at",
-        "updated_at",
       ],
       include: [
         {
@@ -80,20 +82,63 @@ const getAll = async () => {
         },
         {
           model: Schedules,
-          attributes: ["open_time", "close_time"],
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(schedules.id)"), "id"],
+            "open_time",
+            "close_time",
+          ],
           as: "schedules",
         },
         {
+          model: shopsAddresseses,
+          include: [
+            {
+              model: Addresses,
+              attributes: [
+                [
+                  sequelize.literal(
+                    "BIN_TO_UUID(`shopsAddresseses->Address`.`id`)"
+                  ),
+                  "id",
+                ],
+                "street",
+                "street_number",
+                "latitude",
+                "longitude",
+              ],
+            },
+          ],
+        },
+        {
+          model: Images,
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(Images.id)"), "id"],
+            "image_url",
+          ],
+        },
+        {
           model: Menus,
-          attributes: ["file_url"],
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(Menu.id)"), "id"],
+            "file_url",
+          ],
           as: "Menu",
+        },
+        {
+          model: ClosedDays,
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(closed_days.id)"), "id"],
+            "day_of_week",
+          ],
+          as: "closed_days",
         },
       ],
     });
 
     return result.length ? result.map((res) => res.toJSON()) : null;
-  } catch (error) {
-    throw new Error("Error al obtener los negocios.");
+  } catch (error: any) {
+    console.log({ error: error });
+    throw new Error(error.message);
   }
 };
 
@@ -101,15 +146,12 @@ const getById = async ({ id }: Pick<IShops, "id">) => {
   try {
     const result = await Shops.findOne({
       attributes: [
-        [sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"],
-        [sequelize.literal("BIN_TO_UUID(Shops.user_id)"), "user_id"],
+        [sequelize.literal("BIN_TO_UUID(Shops.id)"), "shop_id"],
         "name",
         "phone_number",
         "shift_type",
         "average_stay_time",
         "capacity",
-        "legal_info",
-        "bank_info",
         "description",
         "price_range",
         "created_at",
@@ -119,16 +161,66 @@ const getById = async ({ id }: Pick<IShops, "id">) => {
         {
           model: Subcategories,
           attributes: [
-            [sequelize.literal("BIN_TO_UUID(subcategory.id)"), "id"],
+            [
+              sequelize.literal("BIN_TO_UUID(subcategory.id)"),
+              "subcategory_id",
+            ],
             "name",
             "main_category",
           ],
           as: "subcategory",
         },
         {
+          model: Schedules,
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(schedules.id)"), "schedule_id"],
+            "open_time",
+            "close_time",
+          ],
+          as: "schedules",
+        },
+        {
+          model: shopsAddresseses,
+          include: [
+            {
+              model: Addresses,
+              attributes: [
+                [
+                  sequelize.literal(
+                    "BIN_TO_UUID(`shopsAddresseses->Address`.`id`)"
+                  ),
+                  "address_id",
+                ],
+                "street",
+                "street_number",
+                "latitude",
+                "longitude",
+              ],
+            },
+          ],
+        },
+        {
+          model: Images,
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(Images.id)"), "image_id"],
+            "image_url",
+          ],
+        },
+        {
           model: Menus,
-          attributes: ["file_url"],
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(Menu.id)"), "menu_id"],
+            "file_url",
+          ],
           as: "Menu",
+        },
+        {
+          model: ClosedDays,
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(closed_days.id)"), "closed_day_id"],
+            "day_of_week",
+          ],
+          as: "closed_days",
         },
       ],
       where: sequelize.literal(`Shops.id = UUID_TO_BIN(?)`),
@@ -136,8 +228,9 @@ const getById = async ({ id }: Pick<IShops, "id">) => {
     });
 
     return result ? result.toJSON() : null;
-  } catch (error) {
-    throw new Error("Error al obtener el negocio por id.");
+  } catch (error: any) {
+    console.log({ error: error });
+    throw new Error(error.message);
   }
 };
 
@@ -171,11 +264,13 @@ const getAllByFilters = async (
     const shopsWhereConditions: Record<string, any> = {};
     if (id) shopsWhereConditions.id = uuidToBuffer(id);
     if (user_id) shopsWhereConditions.user_id = uuidToBuffer(user_id);
-    if (subcategory_id) shopsWhereConditions.subcategory_id = uuidToBuffer(subcategory_id);
+    if (subcategory_id)
+      shopsWhereConditions.subcategory_id = uuidToBuffer(subcategory_id);
     if (name) shopsWhereConditions.name = name;
     if (phone_number) shopsWhereConditions.phone_number = phone_number;
     if (shift_type) shopsWhereConditions.shift_type = shift_type;
-    if (average_stay_time) shopsWhereConditions.average_stay_time = average_stay_time;
+    if (average_stay_time)
+      shopsWhereConditions.average_stay_time = average_stay_time;
     if (capacity) shopsWhereConditions.capacity = capacity;
     if (legal_info) shopsWhereConditions.legal_info = legal_info;
     if (bank_info) shopsWhereConditions.bank_info = bank_info;
@@ -200,7 +295,7 @@ const getAllByFilters = async (
     // Añadir condiciones WHERE para Subcategories si existen filtros
     if (Object.keys(subcategoryWhereConditions).length > 0) {
       includeSubcategory.where = subcategoryWhereConditions;
-    };
+    }
 
     // Realizar la consulta con todos los filtros
     const result = await Shops.findAll({
@@ -273,7 +368,8 @@ const getAllByFiltersUser = async (
     if (id) shopsWhereConditions.id = uuidToBuffer(id);
     if (name) shopsWhereConditions.name = name;
     if (shift_type) shopsWhereConditions.shift_type = shift_type;
-    if (average_stay_time) shopsWhereConditions.average_stay_time = average_stay_time;
+    if (average_stay_time)
+      shopsWhereConditions.average_stay_time = average_stay_time;
     if (capacity) shopsWhereConditions.capacity = capacity;
     if (price_range) shopsWhereConditions.price_range = price_range;
 
@@ -346,7 +442,6 @@ const getAllByFiltersUser = async (
 
     if (!result.length) return null;
 
-
     const shops = result.map((res) => {
       const shop = res.toJSON();
 
@@ -373,11 +468,12 @@ const getAllByFiltersUser = async (
       delete shop.Images;
 
       // ClosedDays ➜ calcular open_days
-      const closedDays: number[] = shop.closed_days?.map((d: any) => d.day_of_week) || [];
+      const closedDays: number[] =
+        shop.closed_days?.map((d: any) => d.day_of_week) || [];
       const allDays = [0, 1, 2, 3, 4, 5, 6];
-      const openDays = allDays.filter(d => !closedDays.includes(d));
+      const openDays = allDays.filter((d) => !closedDays.includes(d));
 
-      shop.open_days = openDays.map(day => dayNames[day]);
+      shop.open_days = openDays.map((day) => dayNames[day]);
       delete shop.closed_days;
 
       return shop;
@@ -388,16 +484,16 @@ const getAllByFiltersUser = async (
 
     return shops;
   } catch (error) {
-    throw new Error("Error al obtener los negocios con los filtros proporcionados.");
+    throw new Error(
+      "Error al obtener los negocios con los filtros proporcionados."
+    );
   }
 };
 
 const getMainCategoryByShopId = async ({ id }: Pick<IShops, "id">) => {
   try {
     const result = await Shops.findOne({
-      attributes: [
-        [sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"],
-      ],
+      attributes: [[sequelize.literal("BIN_TO_UUID(Shops.id)"), "id"]],
       include: [
         {
           model: Subcategories,
@@ -471,4 +567,13 @@ const deleteById = async ({ id }: Pick<IShops, "id">) => {
   }
 };
 
-export default { add, getAll, getById, getAllByFilters, getAllByFiltersUser, getMainCategoryByShopId, editById, deleteById };
+export default {
+  add,
+  getAll,
+  getById,
+  getAllByFilters,
+  getAllByFiltersUser,
+  getMainCategoryByShopId,
+  editById,
+  deleteById,
+};
