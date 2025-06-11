@@ -10,14 +10,15 @@ import { getAllCombinations } from "../utils/generateAllCombinations";
 import { generateBookingCode } from "../utils/generateBookingCode";
 import { getDayName } from "../utils/getDayName";
 import { mapComboToTables, TableMapCombo } from "../utils/mapComboToTables";
+import { sendEmail } from "../../../config/nodemailer.config";
+import { generateHtml } from "../utils/email.template";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { user_id, shop_id, booked_slot_id, date, guests, location_type, floor, roof_type } = req.body;
 
-    if (!await usersServices.users.getById({ id: user_id })) {
-      return handleErrorResponse(res, 400, `El usuario con el id: ${user_id} no existe.`);
-    };
+    const user = await usersServices.users.getById({ id: user_id });
+    if (!user) return handleErrorResponse(res, 400, `El usuario con el id: ${user_id} no existe.`);
 
     // ✅✅
     const shop = await shopsServices.shops.getById({ id: shop_id })
@@ -33,14 +34,14 @@ const create = async (req: Request, res: Response): Promise<void> => {
     };
 
     const daysClosed = await shopsServices.closedDays.getByShopId({ shop_id });
-    if (daysClosed){
+    if (daysClosed) {
       const localDateString = date.replace(" ", "T");
       const bookingDay = new Date(localDateString).getDay();
       const isClosed = daysClosed.some(day => day.day_of_week === bookingDay);
       if (isClosed) return handleErrorResponse(res, 403, `El comercio no abre los días ${getDayName(bookingDay)}.`);
-    } 
+    }
 
-    
+
 
     // Validar si el date no anterior a la fecha y hora actual y que no sea mayor a 2 meses
     if (!isWithinValidRange(date)) {
@@ -292,6 +293,21 @@ const create = async (req: Request, res: Response): Promise<void> => {
       booking: bookingCreated
     };
     if (resTables) result.bookedTables = resTables;
+
+
+    const html = generateHtml({
+      code: result.booking[0].booking_code,
+      date: result.booking[0].date,
+      place: result.booking[0].Shop.name,
+    });
+
+    await sendEmail({
+      name: "Fullreservas Codigos",
+      context: "bookings-noreply",
+      to: user[0].email,
+      subject: "¡Aquí está tu código! ¡Gracias por reservar en Fullreservas!",
+      htmlContent: html
+    });
 
     res.status(201).json({ message: "Reserva creado exitosamente", result });
   } catch (error) {
