@@ -8,6 +8,7 @@ export function serializeUser(user: IUserWithRelations) {
     ... (user.password && {
       password: user.password,
     }),
+    passwordChanged: user.passwordChanged,
     created_at: user.created_at,
     updated_at: user.updated_at,
     roles: user.roles?.map(role => role.name),
