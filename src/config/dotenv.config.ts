@@ -37,3 +37,32 @@ export const R2 = {
     process.env.CLOUDFLARE_R2_PUBLIC_URL
   ),
 };
+
+export const emailService = {
+  transporter: {
+    host: validateEnv(
+      "EMAIL_SERVICE_TRANSPORTER_HOST",
+      process.env.EMAIL_SERVICE_TRANSPORTER_HOST
+    ),
+    port: Number(validateEnv(
+      "EMAIL_SERVICE_TRANSPORTER_PORT",
+      process.env.EMAIL_SERVICE_TRANSPORTER_PORT
+    )),
+    auth: {
+      user: validateEnv(
+        "EMAIL_SERVICE_TRANSPORTER_AUTH_USER",
+        process.env.EMAIL_SERVICE_TRANSPORTER_AUTH_USER
+      ),
+      pass: validateEnv(
+        "EMAIL_SERVICE_TRANSPORTER_AUTH_PASS",
+        process.env.EMAIL_SERVICE_TRANSPORTER_AUTH_PASS
+      ),
+    }
+  },
+  options: {
+    from: validateEnv(
+      "EMAIL_SERVICE_MAIL_OPTIONS_FROM",
+      process.env.EMAIL_SERVICE_MAIL_OPTIONS_FROM
+    ),
+  }
+}
