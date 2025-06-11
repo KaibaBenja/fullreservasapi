@@ -6,7 +6,7 @@ import * as usersServices from "../services/";
 import { generatePassword } from "../utils/randomPassword";
 import { validateUUID } from "../../../utils/uuidValidator";
 import { sendEmail } from "../../../config/nodemailer.config";
-import { generateHtml } from "../utils/email.template";
+import { generateHtml } from "../utils/email-password.template";
 
 export const register: RequestHandler = async (req, res) => {
   try {

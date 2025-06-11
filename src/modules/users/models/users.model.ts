@@ -54,7 +54,8 @@ User.init(
     passwordChanged: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false
+      defaultValue: false,
+      field: 'password_changed',
     },
     createdAt: {
       type: DataTypes.DATE,
