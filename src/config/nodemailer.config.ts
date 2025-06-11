@@ -1,6 +1,14 @@
 import { createTransport } from "nodemailer";
 import { emailService } from "./dotenv.config";
 
+interface sendEmailData {
+  name: string;
+  context: string;
+  to: string;
+  subject: string;
+  htmlContent: string;
+}
+
 const transporter = createTransport({
   host: emailService.transporter.host,
   port: emailService.transporter.port,
@@ -11,7 +19,8 @@ const transporter = createTransport({
   secure: false,
 });
 
-export async function sendEmail(name: string, context: string, to: string, subject: string, htmlContent: string) {
+export async function sendEmail(data: sendEmailData) {
+  const { name, context, to, subject, htmlContent } = data;
   const mailOptions = {
     from: `${name} <${context}@${emailService.options.from}>`,
     to,
