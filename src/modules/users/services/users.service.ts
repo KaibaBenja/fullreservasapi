@@ -17,6 +17,7 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
         'full_name',
         'email',
+        'passwordChanged',
         'created_at',
         'updated_at',
       ],
@@ -62,6 +63,7 @@ const getById = async ({ id }: Pick<IUser, "id">) => {
         [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
         'full_name',
         'email',
+        'passwordChanged',
         'created_at',
         'updated_at',
       ],
@@ -109,6 +111,7 @@ const getByEmail = async ({ email }: Pick<IUser, "email">) => {
         [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
         'full_name',
         'email',
+        'passwordChanged',
         'created_at',
         'updated_at',
       ],
@@ -159,6 +162,7 @@ const getByRole = async (roleId: string) => {
         [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
         'full_name',
         'email',
+        'passwordChanged',
         'created_at',
         'updated_at',
       ],
@@ -206,10 +210,10 @@ const verifyPassword = async ({ id }: Pick<IUser, "id">, current_password: strin
   try {
     const user = await User.findOne({
       attributes: [
-      'password',
-    ],
-    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
-    replacements: [id],
+        'password',
+      ],
+      where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+      replacements: [id],
     });
 
     if (!user || !user.password) return false;
@@ -221,7 +225,8 @@ const verifyPassword = async ({ id }: Pick<IUser, "id">, current_password: strin
   };
 };
 
-const editById = async ({ id, full_name, password, email }: IUser) => {
+const editById = async (data: Partial<IUser> & { id: string }) => {
+  const { id, full_name, password, email, passwordChanged } = data;
   try {
     const updateData: any = {};
     const firebaseUpdate: admin.auth.UpdateRequest = {};
@@ -240,14 +245,16 @@ const editById = async ({ id, full_name, password, email }: IUser) => {
       firebaseUpdate.password = password;
     }
 
+    if (passwordChanged  !== undefined) updateData.passwordChanged = passwordChanged;
+
     const user = await User.findOne({
       attributes: [
-      'firebase_uid',
-    ],
-    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
-    replacements: [id],
+        'firebase_uid',
+      ],
+      where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+      replacements: [id],
     });
-    
+
     if (!user || !user.firebase_uid) {
       throw new Error('Usuario no encontrado en FB.');
     }
@@ -268,10 +275,10 @@ const deleteById = async ({ id }: Pick<IUser, "id">) => {
   try {
     const user = await User.findOne({
       attributes: [
-      'firebase_uid',
-    ],
-    where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
-    replacements: [id],
+        'firebase_uid',
+      ],
+      where: sequelize.literal(`User.id = UUID_TO_BIN(?)`),
+      replacements: [id],
     });
 
     if (!user || !user.firebase_uid) {

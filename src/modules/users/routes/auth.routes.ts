@@ -1,6 +1,6 @@
 import express from "express";
 import { validateSchema, } from "../../../middlewares/validateSchema";
-import { login, logout, register } from "../controllers/auth.controller";
+import { login, logout, register, resetPassword } from "../controllers/auth.controller";
 import { loginSchema, userSchema } from "../schemas/users.schema";
 
 export const authRoutes = express.Router();
@@ -264,3 +264,5 @@ authRoutes.post("/login", validateSchema(loginSchema), login);
  * 
  */
 authRoutes.post("/logout", logout);
+
+authRoutes.get("/reset-password/:id",resetPassword);

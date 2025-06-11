@@ -1,8 +1,12 @@
-import { RequestHandler } from "express";
+import { RequestHandler, Request, Response } from "express";
 import admin from "../../../config/firebase";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import * as membershipsServices from "../../memberships/services/";
 import * as usersServices from "../services/";
+import { generatePassword } from "../utils/randomPassword";
+import { validateUUID } from "../../../utils/uuidValidator";
+import { sendEmail } from "../../../config/nodemailer.config";
+import { generateHtml } from "../utils/email.template";
 
 export const register: RequestHandler = async (req, res) => {
   try {
@@ -85,4 +89,36 @@ export const logout: RequestHandler = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error logging out" });
   }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    if (!validateUUID(id, res)) return;
+
+    const user = await usersServices.users.getById({ id });
+    if (!user) return handleErrorResponse(res, 400, `El usuario con el id: ${id} no existe.`);
+
+    const password = generatePassword();
+    if (!(await usersServices.users.editById({ id, password, passwordChanged: true }))) {
+      return handleErrorResponse(res, 400, `Error al editar el usuario.`);
+    };
+
+    const html = generateHtml(password);
+
+    await sendEmail({
+      name: "Fullreservas Soporte",
+      context: "recovery-noreply",
+      to: user[0].email,
+      subject: "¡Tu contraseña fue restablecida con éxito!",
+      htmlContent: html
+    });
+
+    res.status(201).json({
+      message: "Contraseña reseteada.",
+      password: password
+    });
+  } catch (error) {
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  };
 };
