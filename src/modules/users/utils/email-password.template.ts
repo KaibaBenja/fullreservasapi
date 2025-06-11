@@ -41,7 +41,7 @@ export function generateHtml(password: string) {
                 opacity: 0.1;
               "></div>
               
-              <!-- Lock icon -->
+              <!-- Lock icon using Unicode -->
               <div style="margin-bottom: 32px;">
                 <div style="
                   width: 96px;
@@ -52,16 +52,14 @@ export function generateHtml(password: string) {
                   position: relative;
                   vertical-align: middle;
                   box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
+                  line-height: 96px;
                 ">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style="
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                  ">
-                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
+                  <span style="
+                    color: white;
+                    font-size: 48px;
+                    font-weight: bold;
+                    vertical-align: middle;
+                  ">🔒</span>
                 </div>
               </div>
               
@@ -69,10 +67,7 @@ export function generateHtml(password: string) {
               <h1 style="
                 font-size: 32px;
                 font-weight: 800;
-                background: linear-gradient(135deg, #0c4a6e, #0284c7);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                color: #0c4a6e;
                 margin: 0 0 20px 0;
                 line-height: 1.2;
               ">Contraseña Restablecida</h1>
@@ -111,9 +106,12 @@ export function generateHtml(password: string) {
                 
                 <!-- Password header -->
                 <div style="margin-bottom: 20px; position: relative;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style="vertical-align: middle; margin-right: 12px;">
-                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                  </svg>
+                  <span style="
+                    color: #0c4a6e;
+                    font-size: 24px;
+                    vertical-align: middle;
+                    margin-right: 12px;
+                  ">🔑</span>
                   <span style="
                     font-weight: 700;
                     color: #0c4a6e;
@@ -148,6 +146,7 @@ export function generateHtml(password: string) {
                 margin-bottom: 32px;
                 border-left: 6px solid #0ea5e9;
                 box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+                text-align: left;
               ">
                 <p style="
                   font-weight: 700;
@@ -155,36 +154,44 @@ export function generateHtml(password: string) {
                   color: #1e293b;
                   font-size: 18px;
                   line-height: 1.5;
-                ">Utiliza esta contraseña para iniciar sesión en tu cuenta.</p>
+                "><span style="color: #0ea5e9; font-size: 20px; margin-right: 8px;">ℹ️</span>Utiliza esta contraseña para iniciar sesión en tu cuenta.</p>
                 
                 <p style="
                   font-size: 16px;
                   color: #64748b;
                   margin: 0;
                   line-height: 1.6;
+                  margin-left: 28px;
                 ">Por seguridad, te recomendamos cambiar esta contraseña temporal después de iniciar sesión desde tu perfil de usuario.</p>
               </div>
 
               <!-- CTA Button -->
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 40px;">
                 <tr>
                   <td align="center">
-                    <a href="#" style="
-                      display: inline-block;
-                      background: linear-gradient(135deg, #0ea5e9, #0284c7);
-                      color: white;
-                      text-decoration: none;
-                      border-radius: 12px;
-                      padding: 18px 40px;
-                      font-size: 18px;
-                      font-weight: 700;
-                      min-width: 220px;
-                      text-align: center;
-                      box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
-                      transition: all 0.3s ease;
-                      border: none;
-                      letter-spacing: 0.5px;
-                    ">Iniciar Sesión</a>
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="
+                          background: linear-gradient(135deg, #0ea5e9, #0284c7);
+                          border-radius: 12px;
+                          box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+                        ">
+                          <a href="https://full-reservas-web.vercel.app/auth/login" style="
+                            display: inline-block;
+                            color: white;
+                            text-decoration: none;
+                            padding: 18px 40px;
+                            font-size: 18px;
+                            font-weight: 700;
+                            text-align: center;
+                            letter-spacing: 0.5px;
+                            border: none;
+                          ">
+                            <span style="margin-right: 8px;">🚀</span>Iniciar Sesión
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
@@ -198,45 +205,41 @@ export function generateHtml(password: string) {
                 border-left: 6px solid #ef4444;
                 box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
               ">
-                <div style="display: flex; align-items: flex-start; text-align: left;">
-                  <div style="
-                    width: 32px;
-                    height: 32px;
-                    background: #ef4444;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-right: 16px;
-                    margin-top: 2px;
-                    flex-shrink: 0;
-                  ">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                      <line x1="12" y1="9" x2="12" y2="13"></line>
-                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                  </div>
-                  <div>
-                    <p style="
-                      font-size: 16px;
-                      color: #b91c1c;
-                      margin: 0 0 8px 0;
-                      line-height: 1.5;
-                      font-weight: 700;
-                    ">
-                      <strong>Aviso de seguridad:</strong>
-                    </p>
-                    <p style="
-                      font-size: 15px;
-                      color: #dc2626;
-                      margin: 0;
-                      line-height: 1.6;
-                    ">
-                      Nunca compartas esta contraseña con nadie. Si no solicitaste este cambio, contacta inmediatamente con nuestro equipo de soporte.
-                    </p>
-                  </div>
-                </div>
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td style="width: 40px; vertical-align: top; padding-right: 16px;">
+                      <div style="
+                        width: 32px;
+                        height: 32px;
+                        background: #ef4444;
+                        border-radius: 50%;
+                        text-align: center;
+                        line-height: 32px;
+                      ">
+                        <span style="color: white; font-size: 18px;">⚠️</span>
+                      </div>
+                    </td>
+                    <td style="vertical-align: top; text-align: left;">
+                      <p style="
+                        font-size: 16px;
+                        color: #b91c1c;
+                        margin: 0 0 8px 0;
+                        line-height: 1.5;
+                        font-weight: 700;
+                      ">
+                        <strong>Aviso de seguridad:</strong>
+                      </p>
+                      <p style="
+                        font-size: 15px;
+                        color: #dc2626;
+                        margin: 0;
+                        line-height: 1.6;
+                      ">
+                        Nunca compartas esta contraseña con nadie. Si no solicitaste este cambio, contacta inmediatamente con nuestro equipo de soporte.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
               </div>
 
               <!-- Footer -->
@@ -260,7 +263,7 @@ export function generateHtml(password: string) {
                   color: #94a3b8;
                   margin: 0;
                   line-height: 1.6;
-                ">Este es un email automático, por favor no respondas a este mensaje.<br>
+                "><span style="margin-right: 8px;">📬</span>Este es un email automático, por favor no respondas a este mensaje.<br>
                 Si tienes alguna consulta, contacta con nuestro equipo de soporte.</p>
               </div>
             </div>
