@@ -11,9 +11,9 @@ const transporter = createTransport({
   secure: false,
 });
 
-export async function sendEmail(context: string, to: string, subject: string, htmlContent: string) {
+export async function sendEmail(name: string, context: string, to: string, subject: string, htmlContent: string) {
   const mailOptions = {
-    from: `${context}@${emailService.options.from}`,
+    from: `${name} <${context}@${emailService.options.from}>`,
     to,
     subject,
     html: htmlContent,
