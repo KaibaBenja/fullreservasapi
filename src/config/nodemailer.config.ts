@@ -30,8 +30,10 @@ export async function sendEmail(data: sendEmailData) {
 
   try {
     const info = await transporter.sendMail(mailOptions);
+    console.log("mensaje enviado");
     return info;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 }

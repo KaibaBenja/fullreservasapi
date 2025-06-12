@@ -58,3 +58,10 @@ export const editUserSchema = userSchema.extend({
     }),
 })
 
+export const userEmailSchema = userSchema.pick({
+  email: true
+})
+
+export const userPasswordSchema = userSchema.pick({
+  password: true
+})

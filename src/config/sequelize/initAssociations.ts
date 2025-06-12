@@ -18,6 +18,8 @@ import OperatorSetting from "../../modules/users/models/operators.model";
 import Role from "../../modules/users/models/roles.model";
 import UserRole from "../../modules/users/models/userroles.model";
 import User from "../../modules/users/models/users.model";
+import ResetToken from "../../modules/users/models/resetToken.model";
+
 
 export function initAssociations() {
     Province.belongsTo(Country, { foreignKey: "country_id", onDelete: "CASCADE" });
@@ -61,24 +63,27 @@ export function initAssociations() {
     User.hasMany(Rating, { foreignKey: 'user_id', as: 'rating' });
     Rating.belongsTo(User, { foreignKey: 'user_id' });
 
-    User.hasOne(Membership, {foreignKey: 'user_id', as: 'membership' });
-    Membership.belongsTo(User, {foreignKey: 'user_id'});
+    User.hasOne(Membership, { foreignKey: 'user_id', as: 'membership' });
+    Membership.belongsTo(User, { foreignKey: 'user_id' });
 
     MembershipPlan.hasMany(Membership, { foreignKey: 'tier', sourceKey: 'id' });
-    Membership.belongsTo(MembershipPlan, {foreignKey: 'tier', targetKey: 'id', as: 'membership_plan'});
-    
-    User.belongsToMany(Role, { through: UserRole, foreignKey: 'user_id', otherKey: 'role_id', as: 'roles'});
-    Role.belongsToMany(User, { through: UserRole, foreignKey: 'role_id', otherKey: 'user_id'});
+    Membership.belongsTo(MembershipPlan, { foreignKey: 'tier', targetKey: 'id', as: 'membership_plan' });
 
-    User.hasOne(OperatorSetting, {  foreignKey: 'user_id',  as: 'operator'});
-    OperatorSetting.belongsTo(User, {  foreignKey: 'user_id',  as: 'user'});
+    User.belongsToMany(Role, { through: UserRole, foreignKey: 'user_id', otherKey: 'role_id', as: 'roles' });
+    Role.belongsToMany(User, { through: UserRole, foreignKey: 'role_id', otherKey: 'user_id' });
 
-    Shop.hasMany(OperatorSetting, {  foreignKey: 'shop_id',  as: 'operator'});
-    OperatorSetting.belongsTo(Shop, {  foreignKey: 'shop_id',  as: 'shop'});
+    User.hasOne(OperatorSetting, { foreignKey: 'user_id', as: 'operator' });
+    OperatorSetting.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
-    User.hasMany(Shop, {foreignKey: 'user_id', as: 'shop'});
-    Shop.belongsTo(User, {foreignKey: 'user_id', as: 'user'});
+    Shop.hasMany(OperatorSetting, { foreignKey: 'shop_id', as: 'operator' });
+    OperatorSetting.belongsTo(Shop, { foreignKey: 'shop_id', as: 'shop' });
 
-    User.hasOne(MerchantSetting, {foreignKey: 'user_id', as: 'merchant'});
-    MerchantSetting.belongsTo(User, {foreignKey: 'user_id', as: 'user'});
+    User.hasMany(Shop, { foreignKey: 'user_id', as: 'shop' });
+    Shop.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+    User.hasOne(MerchantSetting, { foreignKey: 'user_id', as: 'merchant' });
+    MerchantSetting.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+    User.hasMany(ResetToken, { foreignKey: 'user_id', as: 'reset_token' });
+    ResetToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 }
