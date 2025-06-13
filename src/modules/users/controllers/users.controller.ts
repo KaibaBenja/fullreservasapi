@@ -92,10 +92,16 @@ const editById = async (req: Request, res: Response): Promise<void> => {
 
     const bodyKeys = Object.keys(req.body);
     if (!(bodyKeys.length === 1 && bodyKeys[0] === "merchant")) {
-      if (!(await usersServices.users.editById({ id, ...req.body }))) {
+      const updateData = { ...req.body };
+
+      if (password) {
+        updateData.passwordChanged = false;
+      }
+
+      if (!(await usersServices.users.editById({ id, ...updateData }))) {
         return handleErrorResponse(res, 400, `Error al editar el usuario.`);
-      };
-    };
+      }
+    }
 
     const result = await usersServices.users.getById({ id });
     if (!result) return handleErrorResponse(res, 404, `Error al encontrar el usuario actualizado.`);

@@ -1,7 +1,7 @@
 import express from "express";
 import { validateSchema, } from "../../../middlewares/validateSchema";
-import { login, logout, register } from "../controllers/auth.controller";
-import { loginSchema, userSchema } from "../schemas/users.schema";
+import { login, logout, register, requestPasswordReset, resetPassword } from "../controllers/auth.controller";
+import { loginSchema, userSchema, userEmailSchema, userPasswordSchema } from "../schemas/users.schema";
 
 export const authRoutes = express.Router();
 /**
@@ -264,3 +264,6 @@ authRoutes.post("/login", validateSchema(loginSchema), login);
  * 
  */
 authRoutes.post("/logout", logout);
+
+authRoutes.post("/request-password-reset", validateSchema(userEmailSchema), requestPasswordReset);
+authRoutes.post("/reset-password", validateSchema(userPasswordSchema), resetPassword);
