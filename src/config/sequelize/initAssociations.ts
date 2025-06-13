@@ -66,7 +66,7 @@ export function initAssociations() {
     User.hasOne(Membership, { foreignKey: 'user_id', as: 'membership' });
     Membership.belongsTo(User, { foreignKey: 'user_id' });
 
-    MembershipPlan.hasMany(Membership, { foreignKey: 'tier', sourceKey: 'id' });
+    MembershipPlan.hasMany(Membership, { foreignKey: 'tier', sourceKey: 'id', as: 'membership' });
     Membership.belongsTo(MembershipPlan, { foreignKey: 'tier', targetKey: 'id', as: 'membership_plan' });
 
     User.belongsToMany(Role, { through: UserRole, foreignKey: 'user_id', otherKey: 'role_id', as: 'roles' });
