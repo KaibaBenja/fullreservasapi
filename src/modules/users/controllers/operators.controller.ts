@@ -135,21 +135,26 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { shop_id } = req.query;
+    const { shop_id, user_id } = req.query;
     let result;
-
-    if (shop_id && typeof shop_id === "string") {
+    if (shop_id && user_id) {
+      return handleErrorResponse(res, 400, "No se pueden enviar ambos parametros (shop_id y user_id) al mismo tiempo.");
+    } else if (shop_id && typeof shop_id === "string") {
       if (!validateUUID(shop_id, res)) return;
 
       if (!(await shopsServices.shops.getById({ id: shop_id }))) {
-        return handleErrorResponse(
-          res,
-          404,
-          `No existe el negocio con el id: ${shop_id}`
-        );
+        return handleErrorResponse(res, 404, `No existe el negocio con el id: ${shop_id}`);
       }
 
       result = await usersServices.operators.getByShopId({ shop_id });
+    } else if (user_id && typeof user_id === "string") {
+      if (!validateUUID(user_id, res)) return;
+
+      if (!(await usersServices.users.getById({ id: user_id }))) {
+        return handleErrorResponse(res, 404, `No existe el usuario con el id: ${user_id}`);
+      }
+
+      result = await usersServices.operators.getByUserId({ user_id });
     } else {
       result = await usersServices.operators.getAll();
     }

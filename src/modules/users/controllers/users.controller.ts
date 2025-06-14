@@ -2,15 +2,17 @@ import { Request, Response } from "express";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
 import * as usersServices from "../services";
+import * as shopsServices from "../../shops/services";
 import * as membershipsServices from "../../memberships/services";
 
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { role_id } = req.query;
+    const { role_id, shop_id } = req.query;
     let result;
-
-    if (role_id && typeof role_id === "string") {
+    if (role_id && shop_id) {
+      return handleErrorResponse(res, 400, "No se pueden enviar ambos parametros (role_id y shop_id) al mismo tiempo.");
+    } else if (role_id && typeof role_id === "string") {
       if (!validateUUID(role_id, res)) return;
 
       if (!(await usersServices.roles.getById({ id: role_id }))) {
@@ -18,6 +20,14 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
       };
 
       result = await usersServices.users.getByRole(role_id);
+    } else if (shop_id && typeof shop_id === "string") {
+      if (!validateUUID(shop_id, res)) return;
+
+      if (!(await shopsServices.shops.getById({ id: shop_id }))) {
+        return handleErrorResponse(res, 404, `La tienda con el id: ${shop_id} no existe.`);
+      };
+
+      result = await usersServices.users.getByShopId(shop_id);
     } else {
       result = await usersServices.users.getAll();
     };
