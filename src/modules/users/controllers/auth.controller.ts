@@ -6,6 +6,7 @@ import * as usersServices from "../services/";
 import { sendEmail } from "../../../config/nodemailer.config";
 import { htmlResetPassword } from "../utils/emails-templates/reset-password.template";
 import { htmlPasswordChanged } from "../utils/emails-templates/password-changed.template";
+import { DateTime } from "luxon";
 
 export const register: RequestHandler = async (req, res) => {
   try {
@@ -100,7 +101,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     const result = await usersServices.resetToken.add({ user_id });
     if (!result) return handleErrorResponse(res, 409, "Error al crear el token.");
 
-    const url = `https://full-reservas-web.vercel.app/auth/reset-password/token?=${result.token}`;
+    const url = `https://full-reservas-web.vercel.app/auth/reset-password?token=${result.token}`;
     const html = htmlResetPassword(url);
 
     await sendEmail({
@@ -132,9 +133,23 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     const tokenFound = await usersServices.resetToken.getByToken({ token });
     if (!tokenFound) return handleErrorResponse(res, 404, `El token no existe.`);
 
-    if (tokenFound.expiresAt < new Date()) {
-      throw new Error('Token inválido o expirado');
+    if (tokenFound.used) {
+       return handleErrorResponse(res, 400, `El token ya fue utilizado.`);
     };
+
+    const expires = DateTime.fromJSDate(new Date(tokenFound.expires_at));
+    const now = DateTime.now();
+
+    if (expires < now) {
+      return handleErrorResponse(res, 404, `El token ha expirado.`);
+    };
+
+    if (!(await usersServices.resetToken.editById({
+        id: tokenFound.id.toString("utf-8"),
+        used: true,
+      }))) {
+      return handleErrorResponse(res, 404, `Error al marcar el token como usado.`);
+    }; 
 
     if (!(await usersServices.users.editById({
       id: tokenFound.user_id.toString("utf-8"),
@@ -142,7 +157,6 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     }))) {
       return handleErrorResponse(res, 404, `Error al cambiar la contraseña.`);
     };
-    console.log(tokenFound.user!.email)
     const html = htmlPasswordChanged();
     await sendEmail({
       name: "Fullreservas Soporte",
@@ -151,12 +165,11 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       subject: "¡Tu contraseña fue restablecida con éxito!",
       htmlContent: html
     });
-
+       
     res.status(201).json({
-      message: "Token creado exitosamente.",
+      message: "Contraseña restablecida exitosamente.",
     });
   } catch (error) {
-    console.log(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 }

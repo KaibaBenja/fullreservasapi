@@ -3,7 +3,7 @@ export interface IResetToken {
   user_id: string;
   token: string;
   used: boolean;
-  expiresAt: Date;
+  expires_at: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }

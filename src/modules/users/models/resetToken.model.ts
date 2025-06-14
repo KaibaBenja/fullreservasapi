@@ -7,7 +7,7 @@ interface ResetTokenAttributes {
   user_id: Buffer;
   token: string;
   used?: boolean;
-  expiresAt: Date;
+  expires_at: Date;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -19,7 +19,7 @@ class ResetToken extends Model<ResetTokenAttributes, ResetTokenCreationAttribute
   public user_id!: Buffer;
   public token!: string;
   public used!: boolean;
-  public expiresAt!: Date;
+  public expires_at!: Date;
   public createdAt?: Date;
   public updatedAt?: Date;
   public user?: User;
@@ -50,7 +50,7 @@ ResetToken.init({
     allowNull: false,
     defaultValue: false
   },
-  expiresAt: {
+  expires_at: {
     type: DataTypes.DATE,
     allowNull: false,
     field: 'expires_at',
