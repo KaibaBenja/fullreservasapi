@@ -137,7 +137,7 @@ merchantsRoutes.post("/", upload("merchants").single("logo_url"), validateSchema
  * @swagger
  * /api/users/merchants:
  *   get:
- *     summary: Obtiene todos los comerciantes o uno específico por user_id
+ *     summary: Obtiene todos los comerciantes o uno específico por user_id o shop_id
  *     tags: [Merchant]
  *     parameters:
  *       - in: query
@@ -145,7 +145,15 @@ merchantsRoutes.post("/", upload("merchants").single("logo_url"), validateSchema
  *         schema:
  *           type: string
  *           format: uuid
+ *           required: false
  *           description: El id del usuario
+ *       - in: query
+ *         name: shop_id
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *           required: false
+ *           description: El id de la tienda
  *     responses:
  *       200:
  *         description: Lista de comerciantes

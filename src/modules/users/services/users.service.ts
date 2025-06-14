@@ -206,6 +206,57 @@ const getByRole = async (roleId: string) => {
   };
 };
 
+const getByShopId = async (shopId: string) => {
+  try {
+    const user = await User.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(User.id)'), 'id'],
+        'full_name',
+        'email',
+        'passwordChanged',
+        'created_at',
+        'updated_at',
+      ],
+      include: [
+        {
+          model: Role,
+          as: 'roles',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(roles.id)'), 'id'],
+            'name'
+          ],
+          through: { attributes: [] }, // no queremos info de userroles
+        },
+        {
+          model: Membership,
+          as: 'membership',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(tier)'), 'tier'],
+            'status',
+            'expire_date',
+            'created_at',
+            'updated_at',
+          ],
+          include: [
+            {
+              model: MembershipPlan,
+              as: 'membership_plan',
+              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+            },
+          ],
+        },
+      ],
+      where: sequelize.literal(`User.id = (SELECT user_id FROM shops WHERE id = UUID_TO_BIN(?))`),
+      replacements: [shopId],
+    });
+    const plainUsers = user.map(user => user.get({ plain: true }) as IUserWithRelations);
+    const result = serializeUsers(plainUsers);
+    return result.length ? result : null;
+  } catch (error) {
+    throw new Error('Error al obtener el usuario por el id de tienda.');
+  }
+};
+
 const verifyPassword = async ({ id }: Pick<IUser, "id">, current_password: string) => {
   try {
     const user = await User.findOne({
@@ -299,4 +350,4 @@ const deleteById = async ({ id }: Pick<IUser, "id">) => {
 };
 
 
-export default { getAll, getById, getByEmail, getByRole, editById, deleteById, verifyPassword };
+export default { getAll, getById, getByEmail, getByRole, getByShopId, editById, deleteById, verifyPassword };
