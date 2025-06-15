@@ -4,6 +4,7 @@ import ResetToken from "../models/resetToken.model";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import crypto from "crypto";
 import User from "../models/users.model";
+import { Op } from "sequelize";
 
 
 const add = async ({ user_id }: Pick<IResetToken, "user_id">) => {
@@ -14,12 +15,11 @@ const add = async ({ user_id }: Pick<IResetToken, "user_id">) => {
     const result = await ResetToken.create({
       user_id: uuidToBuffer(user_id),
       token: token,
-      expiresAt: expiresAt
+      expires_at: expiresAt
     });
 
     return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al crear el token.");
   };
 };
@@ -32,7 +32,7 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
         'token',
         'used',
-        'expiresAt',
+        'expires_at',
         'createdAt',
         'updatedAt',
       ],
@@ -52,7 +52,7 @@ const getById = async ({ id }: Pick<IResetToken, "id">) => {
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
         'token',
         'used',
-        'expiresAt',
+        'expires_at',
         'createdAt',
         'updatedAt',
       ],
@@ -68,29 +68,44 @@ const getById = async ({ id }: Pick<IResetToken, "id">) => {
 const getByToken = async ({ token }: Pick<IResetToken, "token">) => {
   try {
     const result = await ResetToken.findOne({
-      where: { token },
       attributes: [
         [sequelize.literal('BIN_TO_UUID(`ResetToken`.`id`)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(`ResetToken`.`user_id`)'), 'user_id'],
-        'token', 'used', 'expires_at', 'created_at', 'updated_at'
+        'token',
+        'used',
+        'expires_at',
+        'created_at',
+        'updated_at'
       ],
-      include: [{
-        model: User,
-        as: 'user',
-        attributes: [
-          [sequelize.literal('BIN_TO_UUID(`user`.`id`)'), 'user_id'],
-          'full_name', 'email', 'firebase_uid', 'password_changed', 'created_at', 'updated_at'
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(`user`.`id`)'), 'user_id'],
+            'full_name',
+            'email',
+            'firebase_uid',
+            'password_changed',
+            'created_at',
+            'updated_at'
+          ],
+        }
+      ],
+      where: {
+        [Op.and]: 
+        [
+          sequelize.where(sequelize.fn('BINARY', sequelize.col('ResetToken.token')), token),
         ]
-      }]
+      },
     });
     return result || null;
   } catch (error) {
-    console.log(error);
     throw new Error('Error al obtener el token por token');
   };
 };
 
-const editById = async ({ id, used }: IResetToken) => {
+const editById = async ({ id, used }: Pick<IResetToken, "id" | "used">) => {
   try {
     const updateData: any = {};
 
