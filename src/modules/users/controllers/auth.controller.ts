@@ -98,11 +98,12 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     if (!user) return handleErrorResponse(res, 404, `El usuario con el email: ${email} no existe.`);
 
     const user_id = user[0].id.toString("utf-8");
+    const user_mail = user[0].email;
     const result = await usersServices.resetToken.add({ user_id });
     if (!result) return handleErrorResponse(res, 409, "Error al crear el token.");
 
     const url = `https://full-reservas-web.vercel.app/auth/reset-password?token=${result.token}`;
-    const html = htmlResetPassword(url);
+    const html = htmlResetPassword(url, user_mail);
 
     await sendEmail({
       name: "Fullreservas Soporte",
@@ -157,7 +158,13 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     }))) {
       return handleErrorResponse(res, 404, `Error al cambiar la contraseña.`);
     };
-    const html = htmlPasswordChanged();
+    const local_now = now.setLocale("es");
+    const rawMonth = local_now.toFormat("LLLL");
+    const capitalizedMonth = rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1);
+
+    let formatted = `${local_now.toFormat("d")} de ${capitalizedMonth}, ${local_now.toFormat("yyyy - hh:mm a")}`;
+    formatted = formatted.replace("a. m.", "AM").replace("p. m.", "PM").replace("a.m.", "AM").replace("p.m.", "PM");
+    const html = htmlPasswordChanged(tokenFound.user!.email, formatted);
     await sendEmail({
       name: "Fullreservas Soporte",
       context: "recovery-noreply",
