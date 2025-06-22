@@ -9,9 +9,11 @@ interface BookedTablesAttributes {
   table_id: Buffer;
   tables_booked: number;
   guests: number;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
-type BookedTablesCreationAttributes = Optional<BookedTablesAttributes, 'id'>;
+type BookedTablesCreationAttributes = Optional<BookedTablesAttributes, 'id' | 'created_at' | 'updated_at'>;
 
 class BookedTable extends Model<BookedTablesAttributes, BookedTablesCreationAttributes> implements BookedTablesAttributes {
   public id!: Buffer;
@@ -19,6 +21,8 @@ class BookedTable extends Model<BookedTablesAttributes, BookedTablesCreationAttr
   public table_id!: Buffer;
   public tables_booked!: number;
   public guests!: number;
+  public created_at!: Date;
+  public updated_at!: Date;
 };
 
 BookedTable.init({
@@ -52,6 +56,16 @@ BookedTable.init({
   guests: {
     type: DataTypes.INTEGER,
     allowNull: false,
+  },
+  created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+  updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
   },
 }, {
   sequelize,

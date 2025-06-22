@@ -6,14 +6,18 @@ interface MenusAttributes {
   id: Buffer;
   shop_id: Buffer;
   file_url: string;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-interface MenusCreationAttributes extends Optional<MenusAttributes, 'id'> { }
+interface MenusCreationAttributes extends Optional<MenusAttributes, 'id' | 'created_at' | 'updated_at'> { }
 
 class Menus extends Model<MenusAttributes, MenusCreationAttributes> implements MenusAttributes {
   public id!: Buffer;
   public shop_id!: Buffer;
   public file_url!: string;
+  public created_at!: Date;
+  public updated_at!: Date;
 }
 
 Menus.init(
@@ -37,7 +41,17 @@ Menus.init(
     file_url: {
       type: DataTypes.TEXT,
       allowNull: false
-    }
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,

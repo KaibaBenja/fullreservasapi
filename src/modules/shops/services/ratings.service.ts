@@ -33,7 +33,8 @@ const getAll = async () => {
         'rating',
         'status',
         'comment',
-        'created_at'
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -54,7 +55,8 @@ const getById = async ({ id }: Pick<IRatings, "id">) => {
         'rating',
         'status',
         'comment',
-        'created_at'
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -89,7 +91,8 @@ const getAllByFiltersShopId = async ({
         'rating',
         'status',
         'comment',
-        'created_at'
+        'created_at',
+        'updated_at'
       ],
       include: [
         {
@@ -131,7 +134,8 @@ const getAllByFiltersUserId = async ({
         'rating',
         'status',
         'comment',
-        'created_at'
+        'created_at',
+        'updated_at'
       ],
       where: whereConditions
     });
@@ -165,7 +169,8 @@ const getAllByFilters = async (filters: Partial<IRatings>) => {
         'rating',
         'status',
         'comment',
-        'created_at'
+        'created_at',
+        'updated_at'
       ],
       where: whereConditions
     });

@@ -31,7 +31,9 @@ const getAll = async () => {
         'floor',
         'roof_type',
         'capacity',
-        'quantity'
+        'quantity',
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -51,7 +53,9 @@ const getById = async ({ id }: Pick<ITables, "id">) => {
         'floor',
         'roof_type',
         'capacity',
-        'quantity'
+        'quantity',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -82,7 +86,9 @@ const getAllByFilters = async (filters: Partial<ITables>) => {
         'floor',
         'roof_type',
         'capacity',
-        'quantity'
+        'quantity',
+        'created_at',
+        'updated_at'
       ],
       where: whereConditions
     });
@@ -111,7 +117,9 @@ const getAllByFiltersShopId = async ({ shop_id, location_type, floor, roof_type 
         'floor',
         'roof_type',
         'capacity',
-        'quantity'
+        'quantity',
+        'created_at',
+        'updated_at'
       ],
       where: whereConditions
     });

@@ -7,15 +7,19 @@ interface SchedulesAttributes {
   shop_id: Buffer;
   open_time : string;
   close_time: string;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-interface SchedulesCreationAttributes extends Optional<SchedulesAttributes, 'id'> { }
+interface SchedulesCreationAttributes extends Optional<SchedulesAttributes, 'id' | 'created_at' | 'updated_at'> { }
 
 class Schedules extends Model<SchedulesAttributes, SchedulesCreationAttributes> implements SchedulesAttributes {
   public id!: Buffer;
   public shop_id!: Buffer;
   public open_time!: string;
   public close_time!: string;
+  public created_at!: Date;
+  public updated_at!: Date;
 }
 
 Schedules.init(
@@ -42,6 +46,16 @@ Schedules.init(
     close_time: {
       type: DataTypes.TIME,
       allowNull: false,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {

@@ -13,9 +13,10 @@ interface RatingAttributes {
   status: "PENDING" | "COMPLETED";
   comment?: string;
   created_at?: Date;
+  updated_at?: Date;
 };
 
-interface RatingCreationAttributes extends Optional<RatingAttributes, "id" | "created_at" | "comment"> { };
+interface RatingCreationAttributes extends Optional<RatingAttributes, "id" | "created_at" | "comment" | "updated_at"> { };
 
 class Rating extends Model<RatingAttributes, RatingCreationAttributes> implements RatingAttributes {
   public id!: Buffer;
@@ -26,6 +27,7 @@ class Rating extends Model<RatingAttributes, RatingCreationAttributes> implement
   public status!: "PENDING" | "COMPLETED";
   public comment?: string;
   public created_at!: Date;
+  public updated_at!: Date;
 };
 
 Rating.init(
@@ -80,6 +82,11 @@ Rating.init(
       allowNull: true,
     },
     created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,

@@ -24,7 +24,9 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
         'open_time',
-        'close_time'
+        'close_time',
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -41,7 +43,9 @@ const getById = async ({ id }: Pick<ISchedules, "id">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
         'open_time',
-        'close_time'
+        'close_time',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -60,7 +64,9 @@ const getAllByShopId = async ({ shop_id }: Pick<ISchedules, "shop_id">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
         'open_time',
-        'close_time'
+        'close_time',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`shop_id = UUID_TO_BIN(?)`),
       replacements: [shop_id],

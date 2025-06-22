@@ -23,7 +23,9 @@ const getAll = async () => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        [sequelize.literal('BIN_TO_UUID(address_id)'), 'address_id']
+        [sequelize.literal('BIN_TO_UUID(address_id)'), 'address_id'],
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -39,7 +41,9 @@ const getById = async ({ id }: Pick<IShopsAddresses, "id">) => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        [sequelize.literal('BIN_TO_UUID(address_id)'), 'address_id']
+        [sequelize.literal('BIN_TO_UUID(address_id)'), 'address_id'],
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -61,7 +65,9 @@ const getByShopAndAddress = async ({ shop_id, address_id }: IShopsAddresses) => 
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        [sequelize.literal('BIN_TO_UUID(address_id)'), 'address_id']
+        [sequelize.literal('BIN_TO_UUID(address_id)'), 'address_id'],
+        'created_at',
+        'updated_at'
       ]
     });
 

@@ -55,6 +55,8 @@ const getAll = async () => {
         'start_time',
         'end_time',
         'capacity',
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -73,6 +75,8 @@ const getById = async ({ id }: Pick<IAvailableSlots, "id">) => {
         'start_time',
         'end_time',
         'capacity',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -101,6 +105,8 @@ const getAllByFilters = async ({ shop_id, start_time, end_time, capacity }: Pick
         'start_time',
         'end_time',
         'capacity',
+        'created_at',
+        'updated_at'
       ],
       where: whereConditions
     });
@@ -120,6 +126,8 @@ const getAllByShopId = async ({ shop_id }: Pick<IAvailableSlots, 'shop_id'>) => 
         'start_time',
         'end_time',
         'capacity',
+        'created_at',
+        'updated_at'
       ],
       where: {
         shop_id: sequelize.fn('UUID_TO_BIN', shop_id)

@@ -10,9 +10,11 @@ interface TablesAttributes {
   roof_type: "COVERED" | "UNCOVERED";
   capacity: number;
   quantity: number;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-interface TablesCreationAttributes extends Optional<TablesAttributes, 'id'> { }
+interface TablesCreationAttributes extends Optional<TablesAttributes, 'id' | 'created_at' | 'updated_at'> { }
 
 class Tables extends Model<TablesAttributes, TablesCreationAttributes> implements TablesAttributes {
   public id!: Buffer;
@@ -22,6 +24,8 @@ class Tables extends Model<TablesAttributes, TablesCreationAttributes> implement
   public roof_type!: "COVERED" | "UNCOVERED";
   public capacity!: number;
   public quantity!: number;
+  public created_at!: Date;
+  public updated_at!: Date;
 }
 
 Tables.init(
@@ -62,6 +66,16 @@ Tables.init(
     }, quantity: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
