@@ -5,14 +5,18 @@ interface RoleAttributes {
   id: Buffer;
   name: string;
   description: string;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
-type RoleCreationAttributes = Optional<RoleAttributes, 'id' | 'description'>;
+type RoleCreationAttributes = Optional<RoleAttributes, 'id' | 'description' | 'created_at' | 'updated_at'>;
 
 class Role extends Model<RoleAttributes, RoleCreationAttributes> implements RoleAttributes {
   public id!: Buffer;
   public name!: string;
   public description!: string;
+  public created_at!: Date;
+  public updated_at!: Date;
 };
 
 Role.init({
@@ -30,6 +34,16 @@ Role.init({
     type: DataTypes.STRING(250),
     allowNull: true,
   },
+  created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
 }, {
   sequelize,
   tableName: 'roles',

@@ -7,14 +7,18 @@ interface UserRoleAttributes {
   id: Buffer;
   user_id: Buffer;
   role_id: Buffer;
+  created_at?: Date;
+  updated_at?: Date;
 };
 
-type UserRoleCreationAttributes = Optional<UserRoleAttributes, 'id'>;
+type UserRoleCreationAttributes = Optional<UserRoleAttributes, 'id' | 'created_at' | 'updated_at'>;
 
 class UserRole extends Model<UserRoleAttributes, UserRoleCreationAttributes> implements UserRoleAttributes {
   public id!: Buffer;
   public user_id!: Buffer;
   public role_id!: Buffer;
+  public created_at!: Date;
+  public updated_at!: Date;
 };
 
 UserRole.init({
@@ -41,6 +45,16 @@ UserRole.init({
     },
     onDelete: "CASCADE",
   },
+  created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
 }, {
   sequelize,
   tableName: 'userroles',
