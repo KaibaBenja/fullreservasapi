@@ -5,12 +5,13 @@ import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import crypto from "crypto";
 import User from "../models/users.model";
 import { Op } from "sequelize";
+import { DateTime } from "luxon";
 
 
 const add = async ({ user_id }: Pick<IResetToken, "user_id">) => {
   try {
     const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+    const expiresAt = DateTime.utc().plus({ minutes: 15 }).toJSDate(); // 15 minutos
 
     const result = await ResetToken.create({
       user_id: uuidToBuffer(user_id),

@@ -3,11 +3,12 @@ import MembershipsPlan from "../models/membershipsPlans.model";
 import { sequelize } from "../../../config/sequelize/sequalize.config";
 
 
-const add = async ({ tier_name, price, description }: IMembershipsPlans) => {
+const add = async ({ tier_name, price, quantity, description }: IMembershipsPlans) => {
   try {
     const data: any = {
       tier_name: tier_name,
       price: price,
+      quantity: quantity,
     };
 
     if (description) data.description = description;
@@ -27,6 +28,7 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'tier_name',
         'price',
+        'quantity',
         'description',
         'created_at',
         'updated_at'
@@ -46,6 +48,7 @@ const getById = async ({ id }: Pick<IMembershipsPlans, "id">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'tier_name',
         'price',
+        'quantity',
         'description',
         'created_at',
         'updated_at'
@@ -62,19 +65,21 @@ const getById = async ({ id }: Pick<IMembershipsPlans, "id">) => {
 
 const getAllByFilters = async (filters: Partial<IMembershipsPlans>) => {
   try {
-    const { tier_name, price, description } = filters;
+    const { tier_name, price, description, quantity } = filters;
 
     const whereConditions: Record<string, any> = {};
 
     if (tier_name) whereConditions.tier_name = tier_name;
     if (price) whereConditions.price = price;
     if (description) whereConditions.description = description;
+    if (quantity) whereConditions.quantity = quantity;
 
     const result = await MembershipsPlan.findAll({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'tier_name',
         'price',
+        'quantity',
         'description',
         'created_at',
         'updated_at'
@@ -88,13 +93,14 @@ const getAllByFilters = async (filters: Partial<IMembershipsPlans>) => {
   }
 };
 
-const editById = async ({ id, tier_name, price, description }: IMembershipsPlans) => {
+const editById = async ({ id, tier_name, price, quantity, description }: IMembershipsPlans) => {
   try {
     const updateData: any = {};
 
     if (tier_name) updateData.tier_name = tier_name;
     if (price) updateData.status = price;
     if (description) updateData.description = description;
+    if (quantity) updateData.quantity = quantity;
 
     const [updatedRowsCount] = await MembershipsPlan.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`),

@@ -42,7 +42,7 @@ const getAll = async () => {
             {
               model: MembershipPlan,
               as: 'membership_plan',
-              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+              attributes: ['tier_name', 'price', 'description', 'quantity', 'created_at', 'updated_at'],
             },
           ],
         },
@@ -88,7 +88,7 @@ const getById = async ({ id }: Pick<IUser, "id">) => {
             {
               model: MembershipPlan,
               as: 'membership_plan',
-              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+              attributes: ['tier_name', 'price', 'description', 'quantity', 'created_at', 'updated_at'],
             },
           ],
         },
@@ -136,7 +136,7 @@ const getByEmail = async ({ email }: Pick<IUser, "email">) => {
             {
               model: MembershipPlan,
               as: 'membership_plan',
-              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+              attributes: ['tier_name', 'price', 'description', 'quantity', 'created_at', 'updated_at'],
             },
           ],
         },
@@ -190,7 +190,7 @@ const getByRole = async (roleId: string) => {
             {
               model: MembershipPlan,
               as: 'membership_plan',
-              attributes: ['tier_name', 'price', 'description', 'created_at', 'updated_at'],
+              attributes: ['tier_name', 'price', 'description', 'quantity', 'created_at', 'updated_at'],
             },
           ],
         },

@@ -9,9 +9,8 @@ const create = async (req: Request, res: Response): Promise<void> => {
   try {
     const { user_id, subcategory_id, shift_type, average_stay_time, capacity, open_time1, close_time1, open_time2, close_time2 } = req.body;
 
-    if (!(await usersServices.users.getById({ id: user_id }))) {
-      return handleErrorResponse(res, 404, `El usuario con el id: ${user_id} no existe.`);
-    };
+    const user = (await usersServices.users.getById({ id: user_id }));
+    if (!user) return handleErrorResponse(res, 404, `El usuario con el id: ${user_id} no existe.`);
 
     const role = await usersServices.roles.getByName({ name: "MERCHANT" });
     if (!role) return handleErrorResponse(res, 409, `El rol MERCHANT no existe.`);
@@ -24,8 +23,22 @@ const create = async (req: Request, res: Response): Promise<void> => {
       return handleErrorResponse(res, 404, `La subcategoría con el id: ${subcategory_id} no existe.`);
     };
 
-    if (await shopsServices.shops.getAllByFilters({ user_id })) {
-      return handleErrorResponse(res, 409, `El negocio ya existe.`);
+    // Validamos por las dudas que el user tenga estos campos
+    if (!(user[0].membership) || !(user[0].membership.membership_plan)) {
+      return handleErrorResponse(res, 404, "Error inesperado.");
+    };
+
+    // Los asignamos a una variable para mayor legibilidad
+    const membershipPlan = user[0].membership.membership_plan;
+
+    // Buscamos si existe el shop
+    const shopsExists = await shopsServices.shops.getAllByFilters({ user_id });
+
+    // Validamos que no haya superado el límite de shops permitidos
+    const shopCount = shopsExists?.length || 0;
+
+    if (shopCount >= membershipPlan.quantity) {
+      return handleErrorResponse(res, 409, `Debido a la membresía: ${membershipPlan.tier_name}, no puedes tener más de ${membershipPlan.quantity} negocios.`);
     };
 
     if (shift_type === "DOUBLESHIFT" && (!open_time1 || !close_time1 || !open_time2 || !close_time2)) {

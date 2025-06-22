@@ -5,6 +5,7 @@ interface MembershipsPlansAttributes {
   id: Buffer;
   tier_name: string;
   price: number;
+  quantity: number;
   description: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -16,6 +17,7 @@ class MembershipPlan extends Model<MembershipsPlansAttributes, MembershipsPlansC
   public id!: Buffer;
   public tier_name!: string;
   public price!: number;
+  public quantity!: number;
   public description!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -35,6 +37,10 @@ MembershipPlan.init(
     },
     price: {
       type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    quantity: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     description: {
