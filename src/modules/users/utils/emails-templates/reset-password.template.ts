@@ -37,25 +37,6 @@ export function htmlResetPassword(utl: string, userEmail: string, expirationTime
                   text-align: center;
                   position: relative;
                 ">
-                  <!-- Decorative elements -->
-                  <div style="
-                    position: absolute;
-                    top: -25px;
-                    right: -25px;
-                    width: 90px;
-                    height: 90px;
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 50%;
-                  "></div>
-                  <div style="
-                    position: absolute;
-                    bottom: -35px;
-                    left: -35px;
-                    width: 130px;
-                    height: 130px;
-                    background: rgba(255, 255, 255, 0.05);
-                    border-radius: 50%;
-                  "></div>
                   
                   <!-- Key Icon -->
                   <div style="
@@ -106,7 +87,7 @@ export function htmlResetPassword(utl: string, userEmail: string, expirationTime
                     padding: 32px;
                     padding-bottom: 10px;
                     text-align: center;
-                    margin: -30px 0 32px 0;
+                    margin: 32px 0 32px 0;
                     position: relative;
                     box-shadow: 0 8px 25px rgba(3, 105, 161, 0.15);
                   ">

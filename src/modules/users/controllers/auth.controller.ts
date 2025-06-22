@@ -138,7 +138,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
        return handleErrorResponse(res, 400, `El token ya fue utilizado.`);
     };
 
-    const expires = DateTime.fromJSDate(new Date(tokenFound.expires_at), { zone: 'utc' });
+    const expires = DateTime.fromJSDate(tokenFound.expires_at, { zone: 'America/Argentina/Buenos_Aires' }).toUTC();
     const now = DateTime.utc();
 
     if (expires < now) {
