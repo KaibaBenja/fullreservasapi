@@ -3,6 +3,7 @@ export interface IUser {
   full_name: string;
   password: string;
   email: string;
+  passwordChanged?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

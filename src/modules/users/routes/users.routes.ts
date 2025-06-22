@@ -56,8 +56,23 @@ export const userRoutes = express.Router();
  * @swagger
  * /api/users/details:
  *   get:
- *     summary: Retorna una lista de todos los usuarios
+ *     summary: Retorna una lista de todos los usuarios, opcional por role_id o shop_id
  *     tags: [User]
+ *     parameters:
+ *        - in: query
+ *          name: role_id
+ *          schema:
+ *              type: string
+ *              format: uuid
+ *          required: false
+ *          description: El id del rol
+ *        - in: query
+ *          name: shop_id
+ *          schema:
+ *              type: string
+ *              format: uuid
+ *          required: false
+ *          description: El id de la tienda
  *     responses:
  *       200:
  *         description: Todos los usuarios.

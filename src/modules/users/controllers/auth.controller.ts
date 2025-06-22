@@ -1,8 +1,12 @@
-import { RequestHandler } from "express";
+import { RequestHandler, Request, Response } from "express";
 import admin from "../../../config/firebase";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import * as membershipsServices from "../../memberships/services/";
 import * as usersServices from "../services/";
+import { sendEmail } from "../../../config/nodemailer.config";
+import { htmlResetPassword } from "../utils/emails-templates/reset-password.template";
+import { htmlPasswordChanged } from "../utils/emails-templates/password-changed.template";
+import { DateTime } from "luxon";
 
 export const register: RequestHandler = async (req, res) => {
   try {
@@ -86,3 +90,93 @@ export const logout: RequestHandler = async (req, res) => {
     res.status(500).json({ message: "Error logging out" });
   }
 };
+
+export const requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+    const user = await usersServices.users.getByEmail({ email });
+    if (!user) return handleErrorResponse(res, 404, `El usuario con el email: ${email} no existe.`);
+
+    const user_id = user[0].id.toString("utf-8");
+    const user_mail = user[0].email;
+    const result = await usersServices.resetToken.add({ user_id });
+    if (!result) return handleErrorResponse(res, 409, "Error al crear el token.");
+
+    const url = `https://full-reservas-web.vercel.app/auth/reset-password?token=${result.token}`;
+    const html = htmlResetPassword(url, user_mail);
+
+    await sendEmail({
+      name: "Fullreservas Soporte",
+      context: "recovery-noreply",
+      to: user[0].email,
+      subject: "Restablecimiento de contraseña de tu cuenta en Fullreservas",
+      htmlContent: html
+    });
+
+    res.status(201).json({
+      message: "Token creado exitosamente.",
+      token: result,
+    });
+  } catch (error) {
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  }
+}
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token } = req.query;
+    const { password } = req.body;
+
+    if (!token || typeof token !== 'string') {
+      return handleErrorResponse(res, 400, 'El token es requerido en el query.');
+    };
+
+    const tokenFound = await usersServices.resetToken.getByToken({ token });
+    if (!tokenFound) return handleErrorResponse(res, 404, `El token no existe.`);
+
+    if (tokenFound.used) {
+       return handleErrorResponse(res, 400, `El token ya fue utilizado.`);
+    };
+
+    const expires = DateTime.fromJSDate(new Date(tokenFound.expires_at));
+    const now = DateTime.now();
+
+    if (expires < now) {
+      return handleErrorResponse(res, 404, `El token ha expirado.`);
+    };
+
+    if (!(await usersServices.resetToken.editById({
+        id: tokenFound.id.toString("utf-8"),
+        used: true,
+      }))) {
+      return handleErrorResponse(res, 404, `Error al marcar el token como usado.`);
+    }; 
+
+    if (!(await usersServices.users.editById({
+      id: tokenFound.user_id.toString("utf-8"),
+      password
+    }))) {
+      return handleErrorResponse(res, 404, `Error al cambiar la contraseña.`);
+    };
+    const local_now = now.setLocale("es");
+    const rawMonth = local_now.toFormat("LLLL");
+    const capitalizedMonth = rawMonth.charAt(0).toUpperCase() + rawMonth.slice(1);
+
+    let formatted = `${local_now.toFormat("d")} de ${capitalizedMonth}, ${local_now.toFormat("yyyy - hh:mm a")}`;
+    formatted = formatted.replace("a. m.", "AM").replace("p. m.", "PM").replace("a.m.", "AM").replace("p.m.", "PM");
+    const html = htmlPasswordChanged(tokenFound.user!.email, formatted);
+    await sendEmail({
+      name: "Fullreservas Soporte",
+      context: "recovery-noreply",
+      to: tokenFound.user!.email,
+      subject: "¡Tu contraseña fue restablecida con éxito!",
+      htmlContent: html
+    });
+       
+    res.status(201).json({
+      message: "Contraseña restablecida exitosamente.",
+    });
+  } catch (error) {
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  }
+}

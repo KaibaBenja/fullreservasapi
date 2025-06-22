@@ -7,11 +7,12 @@ interface UserAttributes {
   password: string;
   email: string;
   firebase_uid: string;
+  passwordChanged: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-type UserCreationAttributes = Optional<UserAttributes, 'id' | 'firebase_uid'  | 'createdAt' | 'updatedAt'>;
+type UserCreationAttributes = Optional<UserAttributes, 'id' | 'firebase_uid' | 'passwordChanged' | 'createdAt' | 'updatedAt'>;
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
   public id!: Buffer;
@@ -19,6 +20,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public password!: string;
   public email!: string;
   public firebase_uid!: string;
+  public passwordChanged!: boolean;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
@@ -48,6 +50,12 @@ User.init(
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
+    },
+    passwordChanged: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'password_changed',
     },
     createdAt: {
       type: DataTypes.DATE,

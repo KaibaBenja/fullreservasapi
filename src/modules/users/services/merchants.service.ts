@@ -1,3 +1,4 @@
+import Shop from "../../shops/models/shops.model";
 import { sequelize } from "../../../config/sequelize/sequalize.config";
 import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import Merchant from "../models/merchants.model";
@@ -108,6 +109,51 @@ const getByUserId = async ({ user_id }: Pick<IMerchant, "user_id">) => {
   };
 };
 
+const getByShopId = async (shopId: string) => {
+  try {
+    const result = await Merchant.findOne({
+      subQuery: false,
+      attributes: [
+        [sequelize.literal("BIN_TO_UUID(Merchant.id)"), "id"],
+        [sequelize.literal("BIN_TO_UUID(Merchant.user_id)"), "user_id"],
+        "logo_url",
+        "main_category",
+        "created_at",
+        "updated_at"
+      ],
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: [
+            [sequelize.literal("BIN_TO_UUID(user.id)"), "id"],
+            "full_name",
+          ],
+          include: [
+            {
+              model: Shop,
+              as: "shop",
+              attributes: [
+                [sequelize.literal("BIN_TO_UUID(`user->shop`.`id`)"), "id"],
+                "name",
+              ],
+              where: sequelize.where(
+                sequelize.col("user->shop.id"),
+                "=",
+                sequelize.literal(`UUID_TO_BIN('${shopId}')`)
+              ),
+              required: true,
+            },
+          ],
+        },
+      ],
+    });
+    return result ? result.toJSON() : null;
+  } catch (error) {
+    throw new Error("Error al obtener el comerciante por id de tienda.");
+  }
+};
+
 const getByUserAndCategory = async ({ user_id, main_category }: IMerchant) => {
   try {
     const result = await Merchant.findOne({
@@ -161,4 +207,4 @@ const deleteById = async ({ id }: Pick<IMerchant, "id">) => {
 };
 
 
-export default { add, getAll, getById, getByUserId, getByUserAndCategory, editById, deleteById };
+export default { add, getAll, getById, getByUserId, getByShopId, getByUserAndCategory, editById, deleteById };

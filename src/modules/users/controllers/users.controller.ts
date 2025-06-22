@@ -2,14 +2,17 @@ import { Request, Response } from "express";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
 import * as usersServices from "../services";
+import * as shopsServices from "../../shops/services";
+import * as membershipsServices from "../../memberships/services";
 
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { role_id } = req.query;
+    const { role_id, shop_id } = req.query;
     let result;
-
-    if (role_id && typeof role_id === "string") {
+    if (role_id && shop_id) {
+      return handleErrorResponse(res, 400, "No se pueden enviar ambos parametros (role_id y shop_id) al mismo tiempo.");
+    } else if (role_id && typeof role_id === "string") {
       if (!validateUUID(role_id, res)) return;
 
       if (!(await usersServices.roles.getById({ id: role_id }))) {
@@ -17,6 +20,14 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
       };
 
       result = await usersServices.users.getByRole(role_id);
+    } else if (shop_id && typeof shop_id === "string") {
+      if (!validateUUID(shop_id, res)) return;
+
+      if (!(await shopsServices.shops.getById({ id: shop_id }))) {
+        return handleErrorResponse(res, 404, `La tienda con el id: ${shop_id} no existe.`);
+      };
+
+      result = await usersServices.users.getByShopId(shop_id);
     } else {
       result = await usersServices.users.getAll();
     };
@@ -45,7 +56,7 @@ const getById = async (req: Request, res: Response): Promise<void> => {
 const editById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { full_name, email, password, current_password } = req.body;
+    const { email, password, current_password, merchant } = req.body;
 
     if (!validateUUID(id, res)) return;
 
@@ -67,13 +78,40 @@ const editById = async (req: Request, res: Response): Promise<void> => {
       }
       if (!(await usersServices.users.verifyPassword({ id }, current_password))) {
         return handleErrorResponse(res, 401, "La contraseña actual es incorrecta.");
+      }
+    };
+
+    if (merchant) {
+      const merchantRole = await usersServices.roles.getByName({ name: "MERCHANT" });
+      if (!merchantRole) return handleErrorResponse(res, 409, `El rol MERCHANT no existe.`);
+
+      if (!(await usersServices.userRoles.add({
+        user_id: id,
+        role_id: merchantRole.id.toString("utf-8")
+      }))) return handleErrorResponse(res, 404, `Error al asignar el rol MERCHANT.`);
+
+      const freePlan = await membershipsServices.membershipsPlans.getAllByFilters({ tier_name: 'FREE' });
+      if (!freePlan) return handleErrorResponse(res, 404, "Plan de membresía no encontrado.")
+
+      if (!(await membershipsServices.memberships.add({
+        user_id: id,
+        tier: freePlan[0].id.toString('utf-8'),
+        status: "EXPIRED"
+      }))) return handleErrorResponse(res, 404, `Error al asignar la membresia.`);
     }
-    };
 
-    if (!(await usersServices.users.editById({ id, ...req.body }))) {
-      return handleErrorResponse(res, 400, `Error al editar el usuario.`);
-    };
+    const bodyKeys = Object.keys(req.body);
+    if (!(bodyKeys.length === 1 && bodyKeys[0] === "merchant")) {
+      const updateData = { ...req.body };
 
+      if (password) {
+        updateData.passwordChanged = false;
+      }
+
+      if (!(await usersServices.users.editById({ id, ...updateData }))) {
+        return handleErrorResponse(res, 400, `Error al editar el usuario.`);
+      }
+    }
 
     const result = await usersServices.users.getById({ id });
     if (!result) return handleErrorResponse(res, 404, `Error al encontrar el usuario actualizado.`);

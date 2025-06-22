@@ -37,7 +37,6 @@ const getAll = async () => {
 
     return result.length ? result.map(res => res.toJSON()) : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al obtener los planes de membresias.");
   };
 };

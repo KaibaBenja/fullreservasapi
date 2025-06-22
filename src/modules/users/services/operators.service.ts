@@ -16,8 +16,6 @@ const add = async ({ user_id, shop_id }: IOperator) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
-
     throw new Error("Error al crear un nuevo operador.");
   };
 };
@@ -53,7 +51,6 @@ const getAll = async () => {
     
     return result.length ? result : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al obtener los operadores.");
   };
 };
@@ -91,7 +88,6 @@ const getById = async ({ id }: Pick<IOperator, "id">) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
-    console.log(error);
     throw new Error("Error al obtener el operador.");
   };
 };
@@ -134,6 +130,47 @@ const getByShopId = async ({ shop_id }: Pick<IOperator, "shop_id">) => {
   } catch (error) {
     throw new Error('Error al obtener el operador por el id de negocio.');
   };
+};
+
+const getByUserId = async ({ user_id }: Pick<IOperator, "user_id">) => {
+  try {
+    const result = await Operator.findAll({
+      attributes: [
+        [sequelize.literal('BIN_TO_UUID(Operator.id)'), 'id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.user_id)'), 'user_id'],
+        [sequelize.literal('BIN_TO_UUID(Operator.shop_id)'), 'shop_id'],
+        'created_at',
+        'updated_at'
+      ],
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(user.id)'), 'id'],
+            'full_name',
+            'email',
+            'created_at',
+            'updated_at',
+          ],
+        },
+        {
+          model: Shop,
+          as: 'shop',
+          attributes: [
+            [sequelize.literal('BIN_TO_UUID(shop.id)'), 'id'],
+            'name'
+          ],
+        },
+      ],
+      where: sequelize.literal(`user.id = UUID_TO_BIN(?)`),
+      replacements: [user_id],
+    });
+
+    return result.length ? result : null;
+  } catch (error) {
+    throw new Error("Error al obtener el operador por el id de usuario.");
+  }
 };
 
 const getByUserAndShop = async ({ user_id, shop_id }: Pick<IOperator, "user_id" | "shop_id">) => {
@@ -202,4 +239,4 @@ const deleteById = async ({ id }: Pick<IOperator, "id">) => {
 };
 
 
-export default { add, getAll, getById, getByShopId, deleteById, getByUserAndShop };
+export default { add, getAll, getById, getByShopId, getByUserId, deleteById, getByUserAndShop };

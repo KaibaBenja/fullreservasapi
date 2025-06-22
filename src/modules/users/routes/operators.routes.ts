@@ -168,7 +168,7 @@ operatorsRoutes.post("/", validateSchema(operatorsSchema), operatorsController.c
  * @swagger
  * /api/users/operators:
  *   get:
- *     summary: Retorna todos los operadores, opcional por shop_id
+ *     summary: Retorna todos los operadores, opcional por shop_id o user_id
  *     tags: [Operator]
  *     parameters:
  *        - in: query
@@ -178,9 +178,16 @@ operatorsRoutes.post("/", validateSchema(operatorsSchema), operatorsController.c
  *              format: uuid
  *          required: false
  *          description: El id del shop
+ *        - in: query
+ *          name: user_id
+ *          schema:
+ *              type: string
+ *              format: uuid
+ *          required: false
+ *          description: El id del usuario
  *     responses:
  *          200:
- *              description: Relación usuario-rol
+ *              description: Todos los operadores.
  *              content:
  *                  application/json:
  *                      schema:
@@ -188,8 +195,8 @@ operatorsRoutes.post("/", validateSchema(operatorsSchema), operatorsController.c
  *                          properties:
  *                              message:
  *                                  type: string
- *                                  example: Usuario creado exitosamente.
- *                              user:
+ *                                  example: Operadores obtenidos exitosamente.
+ *                              operators:
  *                                  type: array
  *                                  items:
  *                                      type: object
@@ -230,8 +237,8 @@ operatorsRoutes.post("/", validateSchema(operatorsSchema), operatorsController.c
  *                                                  type: date-time
  *                                                  example: 2025-05-09T19:39:48.000Z
  *                          example:
- *                              message: Operador creado exitosamente
- *                              user:
+ *                              message: Operador encontrado exitosamente
+ *                              operators:
  *                                  id: ca77dc38-bd60-5da7-b428-f7bdc22525f5
  *                                  full_name: "John Doe"
  *                                  email: johndoe@domain.com

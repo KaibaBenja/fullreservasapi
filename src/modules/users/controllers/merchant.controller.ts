@@ -4,6 +4,7 @@ import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
 import { R2 } from "../../../config/dotenv.config";
 import { deleteFileR2 } from "../../../middlewares/upload";
+import * as shopsServices from "../../shops/services";
 
 
 const create = async (req: Request, res: Response): Promise<void> => {
@@ -49,10 +50,11 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_id } = req.query;
+    const { user_id, shop_id } = req.query;
     let result;
-
-    if (user_id && typeof user_id === "string") {
+    if (user_id && shop_id) {
+      return handleErrorResponse(res, 400, "No se pueden enviar ambos parametros (user_id y shop_id) al mismo tiempo.");
+    } else if (user_id && typeof user_id === "string") {
       if (!validateUUID(user_id, res)) return;
 
       if (!(await usersServices.users.getById({ id: user_id }))) {
@@ -60,6 +62,14 @@ const getAll = async (req: Request, res: Response): Promise<void> => {
       };
 
       result = await usersServices.merchants.getByUserId({ user_id });
+    } else if (shop_id && typeof shop_id === "string") {
+      if (!validateUUID(shop_id, res)) return;
+
+      if (!(await shopsServices.shops.getById({ id: shop_id }))) {
+        return handleErrorResponse(res, 404, `La tienda con el id: ${shop_id} no existe.`);
+      };
+
+      result = await usersServices.merchants.getByShopId(shop_id);
     } else {
       result = await usersServices.merchants.getAll();
     };
