@@ -24,7 +24,9 @@ const getAll = async () => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
-        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id']
+        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id'],
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -40,7 +42,9 @@ const getById = async ({ id }: Pick<IProvinces, "id">) => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
-        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id']
+        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id'],
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -63,7 +67,9 @@ const getByName = async ({ name }: Pick<IProvinces, "name">) => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
-        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id']
+        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id'],
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -79,7 +85,9 @@ const getByCountryId = async ({ country_id }: Pick<IProvinces, "country_id">) =>
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
-        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id']
+        [sequelize.literal('BIN_TO_UUID(country_id)'), 'country_id'],
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`country_id = UUID_TO_BIN(?)`),
       replacements: [country_id],
