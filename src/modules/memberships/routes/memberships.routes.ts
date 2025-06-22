@@ -1,7 +1,7 @@
 import express from "express";
 import { validateSchema, validateSchemaPartial } from "../../../middlewares/validateSchema";
 import membershipsController from "../controllers/memberships.controller";
-import { membershipsSchema } from "../schemas/memberships.schema";
+import { membershipsSchema, membershipUserSchema } from "../schemas/memberships.schema";
 
 export const membershipRoutes = express.Router();
 /**
@@ -62,7 +62,7 @@ membershipRoutes.get("/", membershipsController.getAll);
 membershipRoutes.post("/filtered", validateSchemaPartial(membershipsSchema), membershipsController.getAllByFilters);
 membershipRoutes.get("/:id", membershipsController.getById);
 //patch membership status by userId
-membershipRoutes.patch("/status", validateSchemaPartial(membershipsSchema), membershipsController.editStatusByUserId);
+membershipRoutes.patch("/status", validateSchema(membershipUserSchema), membershipsController.editStatusByUserId);
 membershipRoutes.patch("/:id", validateSchemaPartial(membershipsSchema), membershipsController.editById);
 membershipRoutes.delete("/:id", membershipsController.deleteById);
 

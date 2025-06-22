@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const membershipsPlansSchema = z.object({
-  tierName: z.string({
+  tier_name: z.string({
     invalid_type_error: "El campo 'tierName' debe ser de tipo string.",
     required_error: "El campo 'tierName' es requerido."
   })

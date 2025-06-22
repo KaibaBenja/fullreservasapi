@@ -3,5 +3,5 @@ export interface IMemberships {
   user_id: string;
   tier: string;
   status: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'EXPIRED' | 'DELAYED';
-  expire_date?: string | undefined | null;
+  expire_date?: Date | undefined | null;
 }
