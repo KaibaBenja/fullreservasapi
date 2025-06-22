@@ -128,7 +128,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     const { password } = req.body;
 
     if (!token || typeof token !== 'string') {
-      return handleErrorResponse(res, 400, 'El token es requerido en el query.');
+      return handleErrorResponse(res, 400, 'El token es requerido en la query.');
     };
 
     const tokenFound = await usersServices.resetToken.getByToken({ token });
@@ -138,8 +138,8 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
        return handleErrorResponse(res, 400, `El token ya fue utilizado.`);
     };
 
-    const expires = DateTime.fromJSDate(new Date(tokenFound.expires_at));
-    const now = DateTime.now();
+    const expires = DateTime.fromJSDate(new Date(tokenFound.expires_at), { zone: 'utc' });
+    const now = DateTime.utc();
 
     if (expires < now) {
       return handleErrorResponse(res, 404, `El token ha expirado.`);
