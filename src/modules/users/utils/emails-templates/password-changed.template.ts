@@ -37,25 +37,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                   text-align: center;
                   position: relative;
                 ">
-                  <!-- Decorative elements -->
-                  <div style="
-                    position: absolute;
-                    top: -30px;
-                    right: -30px;
-                    width: 100px;
-                    height: 100px;
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 50%;
-                  "></div>
-                  <div style="
-                    position: absolute;
-                    bottom: -40px;
-                    left: -40px;
-                    width: 140px;
-                    height: 140px;
-                    background: rgba(255, 255, 255, 0.05);
-                    border-radius: 50%;
-                  "></div>
                   
                   <!-- Shield Icon -->
                   <div style="
