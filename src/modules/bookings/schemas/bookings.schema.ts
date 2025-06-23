@@ -54,7 +54,6 @@ export const bookingSchema = z.object({
     invalid_type_error: "El campo 'comment' debe ser de tipo string.",
     required_error: "El campo 'comment' es requerido."
   })
-    .min(1, { message: "El campo 'comment' debe tener al menos 1 caracteres." })
     .max(200, { message: "El campo 'comment' no puede tener más de 200 caracteres." })
     .optional(),
 }).strict();
