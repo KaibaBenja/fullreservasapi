@@ -3,9 +3,6 @@ import * as membershipsServices from "../services";
 import * as usersServices from "../../users/services";
 import { validateUUID } from "../../../utils/uuidValidator";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
-import { IMemberships } from "../types/memberships.types";
-import { buffer } from "stream/consumers";
-
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -16,7 +13,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
     };
 
     if (await membershipsServices.memberships.getAllByFilters({ user_id })) {
-      return handleErrorResponse(res, 409, `La membresia con el id de usuario: ${user_id} ya existe.`);
+      return handleErrorResponse(res, 409, `El usuario con el id: ${user_id} ya posee una membresia.`);
     };
 
     if (!(await membershipsServices.memberships.add(req.body))) {

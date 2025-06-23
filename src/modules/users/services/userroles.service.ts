@@ -24,6 +24,8 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(id)'), '_id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
         [sequelize.literal('BIN_TO_UUID(role_id)'), 'role_id'],
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -40,6 +42,8 @@ const getById = async ({ id }: Pick<IUserRoles, "id">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), '_id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
         [sequelize.literal('BIN_TO_UUID(role_id)'), 'role_id'],
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -65,6 +69,8 @@ const getAllByFilters = async (filters: Partial<IUserRoles>) => {
         [sequelize.literal('BIN_TO_UUID(id)'), '_id'],
         [sequelize.literal('BIN_TO_UUID(user_id)'), 'user_id'],
         [sequelize.literal('BIN_TO_UUID(role_id)'), 'role_id'],
+        'created_at',
+        'updated_at'
       ],
       where: whereConditions
     });

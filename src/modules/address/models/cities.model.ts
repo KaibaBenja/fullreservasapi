@@ -7,15 +7,19 @@ interface CityAttributes {
   name: string;
   zip_code: string;
   province_id: Buffer;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-interface CityCreationAttributes extends Optional<CityAttributes, "id"> { }
+interface CityCreationAttributes extends Optional<CityAttributes, "id" | "created_at" | "updated_at"> { }
 
 class City extends Model<CityAttributes, CityCreationAttributes> implements CityAttributes {
   public id!: Buffer;
   public name!: string;
   public zip_code!: string;
   public province_id!: Buffer;
+  public created_at!: Date;
+  public updated_at!: Date;
 }
 
 City.init(
@@ -42,6 +46,16 @@ City.init(
         key: "id",
       },
       onDelete: "CASCADE",
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {

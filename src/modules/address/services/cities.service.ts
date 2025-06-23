@@ -25,7 +25,9 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'zip_code',
-        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id']
+        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id'],
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -42,7 +44,9 @@ const getById = async ({ id }: Pick<ICities, "id">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'zip_code',
-        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id']
+        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id'],
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -66,7 +70,9 @@ const getByName = async ({ name }: Pick<ICities, "name">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'zip_code',
-        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id']
+        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id'],
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -88,7 +94,9 @@ const getByZipCode = async ({ zip_code }: Pick<ICities, "zip_code">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'zip_code',
-        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id']
+        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id'],
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -105,7 +113,9 @@ const getByProvinceId = async ({ province_id }: Pick<ICities, "province_id">) =>
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'zip_code',
-        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id']
+        [sequelize.literal('BIN_TO_UUID(province_id)'), 'province_id'],
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`province_id = UUID_TO_BIN(?)`),
       replacements: [province_id],

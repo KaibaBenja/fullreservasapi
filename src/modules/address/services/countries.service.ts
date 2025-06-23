@@ -22,6 +22,8 @@ const getAll = async () => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -36,7 +38,9 @@ const getById = async ({ id }: Pick<ICountries, "id">) => {
     const result = await Country.findOne({
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
-        'name'
+        'name',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -56,7 +60,12 @@ const getByName = async ({ name }: Pick<ICountries, "name">) => {
         "=",
         name.toLowerCase()
       ),
-      attributes: [[sequelize.literal("BIN_TO_UUID(id)"), "id"], "name"],
+      attributes: [
+        [sequelize.literal("BIN_TO_UUID(id)"), "id"],
+        "name",
+        "created_at",
+        "updated_at"
+      ],
     });
 
     return result ? result.toJSON() : null;

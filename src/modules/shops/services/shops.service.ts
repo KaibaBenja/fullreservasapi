@@ -69,6 +69,7 @@ const getAll = async () => {
         "description",
         "price_range",
         "created_at",
+        "updated_at",
       ],
       include: [
         {
@@ -402,6 +403,7 @@ const getAllByFiltersUser = async (
         "description",
         "price_range",
         "created_at",
+        "updated_at",
       ],
       include: [
         includeSubcategory,

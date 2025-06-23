@@ -3,6 +3,7 @@ import { uuidToBuffer } from "../../../utils/uuidToBuffer";
 import Membership from "../models/memberships.model";
 import MembershipPlan from "../models/membershipsPlans.model";
 import { IMemberships } from "../types/memberships.types";
+import { DateTime } from "luxon";
 
 
 const add = async ({ user_id, tier, status, expire_date }: IMemberships) => {
@@ -13,8 +14,11 @@ const add = async ({ user_id, tier, status, expire_date }: IMemberships) => {
     };
 
     if (status) data.status = status;
-    if (expire_date) data.expire_date = expire_date;
-
+    if (expire_date) {
+      data.expire_date = expire_date;
+    } else {
+      data.expire_date = DateTime.utc().plus({ days: 31 }).toJSDate();
+    }
     const result = await Membership.create(data);
 
     return result ? result.toJSON() : null;

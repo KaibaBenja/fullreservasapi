@@ -7,15 +7,17 @@ interface ClosedDaysAttributes {
   shop_id: Buffer;
   day_of_week: number;
   created_at?: Date;
+  updated_at?: Date;
 };
 
-interface ClosedDaysCreationAttributes extends Optional<ClosedDaysAttributes, "id" | "created_at" > { };
+interface ClosedDaysCreationAttributes extends Optional<ClosedDaysAttributes, "id" | "created_at" | "updated_at"> { };
 
 class ClosedDays extends Model<ClosedDaysAttributes, ClosedDaysCreationAttributes> implements ClosedDaysAttributes {
   public id!: Buffer;
   public shop_id!: Buffer;
   public day_of_week!: number;
   public created_at!: Date;
+  public updated_at!: Date;
 };
 
 ClosedDays.init(
@@ -43,6 +45,11 @@ ClosedDays.init(
       },
     },
     created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: DataTypes.NOW,

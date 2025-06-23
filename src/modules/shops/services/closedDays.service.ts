@@ -38,7 +38,9 @@ const getAll = async () => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        'day_of_week'
+        'day_of_week',
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -54,7 +56,9 @@ const getByShopId = async ({ shop_id }: Pick<IClosedDays, "shop_id">) => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        'day_of_week'
+        'day_of_week',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`shop_id = UUID_TO_BIN(?)`),
       replacements: [shop_id],
@@ -72,7 +76,9 @@ const getById = async ({ id }: Pick<IClosedDays, "id">) => {
       attributes: [
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         [sequelize.literal('BIN_TO_UUID(shop_id)'), 'shop_id'],
-        'day_of_week'
+        'day_of_week',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],

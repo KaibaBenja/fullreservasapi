@@ -8,9 +8,11 @@ interface AvailableSlotsAttributes {
   start_time: string;
   end_time: string;
   capacity: number;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-interface AvailableSlotsCreationAttributes extends Optional<AvailableSlotsAttributes, 'id'> { }
+interface AvailableSlotsCreationAttributes extends Optional<AvailableSlotsAttributes, 'id' | 'created_at' | 'updated_at'> { }
 
 class AvailableSlots extends Model<AvailableSlotsAttributes, AvailableSlotsCreationAttributes> implements AvailableSlotsAttributes {
   public id!: Buffer;
@@ -18,6 +20,8 @@ class AvailableSlots extends Model<AvailableSlotsAttributes, AvailableSlotsCreat
   public start_time!: string;
   public end_time!: string;
   public capacity!: number;
+  public created_at!: Date;
+  public updated_at!: Date;
 }
 
 AvailableSlots.init(
@@ -48,7 +52,17 @@ AvailableSlots.init(
     capacity: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    }
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   {
     sequelize,

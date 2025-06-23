@@ -28,6 +28,8 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(table_id)'), 'table_id'],
         'tables_booked',
         'guests',
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -46,6 +48,8 @@ const getById = async ({ id }: Pick<IBookedTables, "id">) => {
         [sequelize.literal('BIN_TO_UUID(table_id)'), 'table_id'],
         'tables_booked',
         'guests',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -76,6 +80,8 @@ const getAllByFiltersBookingId = async ({
         [sequelize.literal('BIN_TO_UUID(table_id)'), 'table_id'],
         'tables_booked',
         'guests',
+        'created_at',
+        'updated_at'
       ],
       where: whereConditions
     });
@@ -104,6 +110,8 @@ const getAllByFilters = async (filters: Partial<IBookedTables>) => {
         [sequelize.literal('BIN_TO_UUID(table_id)'), 'table_id'],
         'tables_booked',
         'guests',
+        'created_at',
+        'updated_at'
       ],
       where: whereConditions
     });

@@ -7,14 +7,18 @@ interface ProvinceAttributes {
   id: Buffer; 
   name: string;
   country_id: Buffer; 
+  created_at?: Date;
+  updated_at?: Date;
 }
 
-interface ProvinceCreationAttributes extends Optional<ProvinceAttributes, "id"> { }
+interface ProvinceCreationAttributes extends Optional<ProvinceAttributes, "id" | "created_at" | "updated_at"> { }
 
 class Province extends Model<ProvinceAttributes, ProvinceCreationAttributes> implements ProvinceAttributes {
   public id!: Buffer;
   public name!: string;
   public country_id!: Buffer;
+  public created_at!: Date;
+  public updated_at!: Date;
 }
 
 
@@ -38,6 +42,16 @@ Province.init(
         key: "id",
       },
       onDelete: "CASCADE",
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {

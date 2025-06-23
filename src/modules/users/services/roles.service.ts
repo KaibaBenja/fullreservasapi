@@ -10,6 +10,8 @@ const getAll = async () => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'description',
+        'created_at',
+        'updated_at'
       ],
     });
 
@@ -26,6 +28,8 @@ const getById = async ({ id }: Pick<IRole, "id">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'description',
+        'created_at',
+        'updated_at'
       ],
       where: sequelize.literal(`id = UUID_TO_BIN(?)`),
       replacements: [id],
@@ -44,6 +48,8 @@ const getByName = async ({ name }: Pick<IRole, "name">) => {
         [sequelize.literal('BIN_TO_UUID(id)'), 'id'],
         'name',
         'description',
+        'created_at',
+        'updated_at'
       ],
       where: { 'name': name }
     });

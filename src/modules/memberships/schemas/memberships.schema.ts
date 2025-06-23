@@ -7,9 +7,9 @@ export const membershipsSchema = z.object({
   }).uuid({ message: "El campo 'user_id' debe ser un UUID válido." }),
 
   tier: z.string({
-    invalid_type_error: "El campo 'user_id' debe ser de tipo string.",
-    required_error: "El campo 'user_id' es requerido."
-  }).uuid({ message: "El campo 'user_id' debe ser un UUID válido." }),
+    invalid_type_error: "El campo 'tier' debe ser de tipo string.",
+    required_error: "El campo 'tier' es requerido."
+  }).uuid({ message: "El campo 'tier' debe ser un UUID válido." }),
 
 
   status: z.preprocess(
@@ -19,12 +19,14 @@ export const membershipsSchema = z.object({
     })
   ).optional(),
 
-  expire_date: z
-    .string()
-    .datetime({ message: "El campo 'expire_date' debe ser una fecha válida en formato ISO." })
-    .optional(),
+  expire_date: z.coerce.date({
+    invalid_type_error: "El campo 'date' debe ser una fecha válida.",
+    required_error: "El campo 'date' es requerido."
+  }).optional(),
+
 }).strict();
 
+export const membershipUserSchema = membershipsSchema.pick({ user_id: true });
 export const tierSchema = membershipsSchema.pick({ tier: true });
 export const statusSchema = membershipsSchema.pick({ status: true });
 
