@@ -20,7 +20,8 @@ export const addressesSchema = z.object({
     required_error: "El campo 'extra' es requerido."
   })
     .min(1, { message: "El campo 'extra' debe tener al menos 1 carácter." })
-    .max(10, { message: "El campo 'extra' no puede tener más de 10 caracteres." }),
+    .max(100, { message: "El campo 'extra' no puede tener más de 10 caracteres." })
+    .optional(),
 
   city_id: z.string({
     invalid_type_error: "El campo 'city_id' debe ser de tipo string.",
