@@ -37,10 +37,46 @@ export const userSchema = z.object({
   }).default(false)
 }).strict();
 
+export const userGoogleSchema = z.object({
+  full_name: z.string({
+    invalid_type_error: "El campo 'full_name' debe ser de tipo string.",
+    required_error: "El campo 'full_name' es requerido."
+  })
+    .min(1, { message: "El campo 'full_name' debe tener al menos 1 caracteres." })
+    .max(255, { message: "El campo 'full_name' no puede tener más de 255 caracteres." }),
+
+  email: z.string({
+    invalid_type_error: "El campo 'email' debe ser de tipo string.",
+    required_error: "El campo 'email' es requerido."
+  })
+    .trim()
+    .toLowerCase()
+    .email({ message: "El correo electrónico no es válido" })
+    .max(255, { message: "El campo 'email' no puede tener más de 255 caracteres." }),
+
+  merchant: z.boolean({
+    invalid_type_error: "El campo 'merchant' debe ser de tipo booleano.",
+    required_error: "El campo 'merchant' es requerido."
+  }).default(false),
+
+  idToken: z.string({
+    invalid_type_error: "El campo 'idToken' es requerido para usuarios de Google."
+  })
+    .min(10, "El idToken debe ser válido.")
+});
+
 export const loginSchema = userSchema.pick({
   email: true,
   password: true
 })
+
+export const loginGoogleSchema = z.object({
+  idToken: z.string({
+    required_error: "El token de Google es requerido.",
+    invalid_type_error: "El token debe ser una cadena."
+  }).min(10, { message: "El token proporcionado no es válido." })
+});
+
 
 export const editUserSchema = userSchema.extend({
   current_password: z.string({
