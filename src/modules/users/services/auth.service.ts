@@ -25,6 +25,32 @@ export const registerUser = async ({
       password: hashedPassword,
       email: email,
       firebase_uid: id,
+      auth_provider: 'local',
+    });
+
+    return result ? result.toJSON() : null;
+  } catch (error) {
+    throw error instanceof Error
+      ? error.message
+      : "Error al crear un nuevo usuario";
+  }
+};
+
+export const registerUserWithGoogle = async ({
+  full_name,
+  email,
+  id,
+}: IUser) => {
+  try {
+    const uuid = uuidv5(id!, NAMESPACE);
+
+    const result = await User.create({
+      id: uuidToBuffer(uuid),
+      full_name: formatName(full_name),
+      email: email,
+      password: 'GOOGLE_PASSWORD',
+      firebase_uid: id,
+      auth_provider: 'google',
     });
 
     return result ? result.toJSON() : null;
@@ -78,6 +104,33 @@ export const loginUser = async ({
   }
 };
 
+export const loginUserWithGoogle = async ({
+  idToken,
+}: {
+  idToken: string;
+}) => {
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    const uid = decodedToken.uid;
+
+    const uuid = uuidv5(uid, NAMESPACE);
+
+    const result = await usersService.getById({ id: uuid });
+    if (!result) throw new Error("User not found or UID mismatch");
+
+    const user = result[0];
+
+    const token = await admin.auth().createCustomToken(uid);
+
+    return { user, idToken };
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "Error al iniciar sesión con Google"
+    );
+  }
+};
+
 export const logoutUser = async ({ idToken }: { idToken: string }) => {
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -91,6 +144,8 @@ export const logoutUser = async ({ idToken }: { idToken: string }) => {
 
 export default {
   registerUser,
+  registerUserWithGoogle,
   loginUser,
+  loginUserWithGoogle,
   logoutUser,
 };
