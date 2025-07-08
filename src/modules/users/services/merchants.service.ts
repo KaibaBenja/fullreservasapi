@@ -129,6 +129,11 @@ const getByShopId = async (shopId: string) => {
             [sequelize.literal("BIN_TO_UUID(user.id)"), "id"],
             "full_name",
           ],
+          where: sequelize.where(
+            sequelize.col("user.id"),
+            "IN",
+            sequelize.literal(`(SELECT user_id FROM shops WHERE id = UUID_TO_BIN('${shopId}'))`)
+          ),
           include: [
             {
               model: Shop,
@@ -142,7 +147,7 @@ const getByShopId = async (shopId: string) => {
                 "=",
                 sequelize.literal(`UUID_TO_BIN('${shopId}')`)
               ),
-              required: true,
+              required: false, 
             },
           ],
         },
@@ -205,6 +210,5 @@ const deleteById = async ({ id }: Pick<IMerchant, "id">) => {
     throw new Error("Error al eliminar el comerciante.");
   };
 };
-
 
 export default { add, getAll, getById, getByUserId, getByShopId, getByUserAndCategory, editById, deleteById };
