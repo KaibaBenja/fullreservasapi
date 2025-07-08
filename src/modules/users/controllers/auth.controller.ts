@@ -225,6 +225,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
       token: result,
     });
   } catch (error) {
+    console.log({error: error});
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 }
@@ -284,6 +285,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
       message: "Contraseña restablecida exitosamente.",
     });
   } catch (error) {
+    console.log({error: error});
     handleErrorResponse(res, 500, "Error interno del servidor.");
   }
 }
