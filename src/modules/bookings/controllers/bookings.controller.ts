@@ -296,7 +296,6 @@ const create = async (req: Request, res: Response): Promise<void> => {
     };
     if (resTables) result.bookedTables = resTables;
 
-
     const infoBooking = {
       name: result.booking[0].Shop.name,
       code: result.booking[0].booking_code,
@@ -308,9 +307,8 @@ const create = async (req: Request, res: Response): Promise<void> => {
       shopName: infoBooking.name,
       bookingCode: infoBooking.code,
       bookingDate: infoBooking.date,
-      bookingTime: infoBooking.time
     })
-
+    console.log(googleCalendarUrl);
     const html = bookingMail({
       code: infoBooking.code,
       date: infoBooking.date,
@@ -328,7 +326,7 @@ const create = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({ message: "Reserva creado exitosamente", result });
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };

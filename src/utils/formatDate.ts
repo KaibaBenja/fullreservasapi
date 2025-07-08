@@ -33,5 +33,6 @@ export function isWithinValidRange(dateString: string): boolean {
 }
 
 export function getTimeFromDatetime(datetime: string, timezone = TIMEZONE): string {
-  return DateTime.fromISO(datetime).setZone(timezone).toFormat("HH:mm");
+  const fixedDatetime = datetime.replace(" ", "T");
+  return DateTime.fromISO(fixedDatetime).setZone(timezone).toFormat("HH:mm");
 }

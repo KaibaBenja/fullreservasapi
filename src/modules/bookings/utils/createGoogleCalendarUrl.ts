@@ -1,28 +1,33 @@
+import { DateTime } from "luxon";
+
 interface GoogleCalendarParams {
   shopName: string;
   bookingCode: string;
   bookingDate: string;
-  bookingTime: string;
 }
+
+const TIMEZONE = "America/Argentina/Buenos_Aires";
 
 export const createGoogleCalendarUrl = ({
   shopName,
   bookingCode,
-  bookingDate,
-  bookingTime
+  bookingDate
 }: GoogleCalendarParams): string => {
   const title = encodeURIComponent(`Reserva en ${shopName}`);
   const details = encodeURIComponent(`Código de reserva: ${bookingCode}`);
   const location = encodeURIComponent(shopName);
 
-  const [hour, minute] = bookingTime.split(":");
-  const startDate = new Date(`${bookingDate}T${hour}:${minute}:00`);
-  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hora después
+  const fixedDate = bookingDate.replace(" ", "T");
 
-  const formatDate = (date: Date) =>
-    date.toISOString().replace(/[-:]|.\d{3}/g, "");
+  const startDate = DateTime.fromISO(fixedDate, { zone: TIMEZONE });
+  const endDate = startDate.plus({ hours: 1 });
+
+  const formatDate = (date: DateTime) =>
+    date.toFormat("yyyyLLdd'T'HHmmss");
 
   const dates = `${formatDate(startDate)}/${formatDate(endDate)}`;
+
+  console.log({ title, dates, details, location });
 
   return `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
 };
