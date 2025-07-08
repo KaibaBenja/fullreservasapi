@@ -318,7 +318,6 @@ const editById = async (data: Partial<IUser> & { id: string }) => {
 
     return updatedRowsCount > 0 ? { success: true } : null;
   } catch (error) {
-    console.log(error);
     throw new Error('Error al editar el usuario.');
   };
 };

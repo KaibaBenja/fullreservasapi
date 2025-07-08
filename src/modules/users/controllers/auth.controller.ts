@@ -5,8 +5,10 @@ import * as membershipsServices from "../../memberships/services/";
 import * as usersServices from "../services/";
 import { sendEmail } from "../../../config/nodemailer.config";
 import { htmlResetPassword } from "../utils/emails-templates/reset-password.template";
-import { htmlPasswordChanged } from "../utils/emails-templates/password-changed.template";
+import { htmlPasswordChanged } from "../utils/emails-templates/password-changed-email.template";
 import { DateTime } from "luxon";
+import authService from "../services/auth.service";
+import { loginGoogleSchema } from "../schemas/users.schema";
 
 export const register: RequestHandler = async (req, res) => {
   try {
@@ -70,6 +72,111 @@ export const register: RequestHandler = async (req, res) => {
     handleErrorResponse(res, 500, "Error interno del servidor.");
   };
 };
+
+export const registerWithGoogle: RequestHandler = async (req, res) => {
+  try {
+    const { idToken, merchant } = req.body;
+
+    if (!idToken) {
+      return handleErrorResponse(res, 400, "Falta el token de autenticación de Google.");
+    }
+
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const { uid, email, name: full_name } = decoded;
+
+    if (!email || !uid || !full_name) {
+      return handleErrorResponse(res, 400, "El token de Google no contiene información suficiente.");
+    }
+
+    if (await usersServices.users.getByEmail({ email })) {
+      return handleErrorResponse(res, 409, `El usuario con el email: ${email} ya está registrado.`);
+    }
+
+    const registered = await usersServices.auth.registerUser({
+      id: uid,
+      email,
+      full_name,
+      password: 'GOOGLE_PASSWORD'
+    });
+
+    if (!registered) {
+      return handleErrorResponse(res, 400, "No se pudo registrar el usuario en la base de datos.");
+    }
+
+    const user = await usersServices.users.getByEmail({ email });
+    if (!user) return handleErrorResponse(res, 404, "Usuario no encontrado después de registrarse.");
+
+    const userIdBuffer = user[0]?.id;
+    if (!userIdBuffer) return handleErrorResponse(res, 500, "El usuario no tiene un ID válido.");
+    const userId = userIdBuffer.toString("utf-8");
+
+    const clientRole = await usersServices.roles.getByName({ name: "CLIENT" });
+    if (!clientRole) return handleErrorResponse(res, 409, "El rol CLIENT no existe.");
+
+    const addedClient = await usersServices.userRoles.add({
+      user_id: userId,
+      role_id: clientRole.id.toString("utf-8")
+    });
+    if (!addedClient) return handleErrorResponse(res, 404, "No se pudo asignar el rol CLIENT.");
+
+    if (merchant) {
+      const merchantRole = await usersServices.roles.getByName({ name: "MERCHANT" });
+      if (!merchantRole) return handleErrorResponse(res, 409, "El rol MERCHANT no existe.");
+
+      const addedMerchant = await usersServices.userRoles.add({
+        user_id: userId,
+        role_id: merchantRole.id.toString("utf-8")
+      });
+      if (!addedMerchant) return handleErrorResponse(res, 404, "No se pudo asignar el rol MERCHANT.");
+
+      const freePlan = await membershipsServices.membershipsPlans.getAllByFilters({ tier_name: 'FREE' });
+      if (!freePlan || !freePlan[0]) return handleErrorResponse(res, 404, "Plan de membresía FREE no encontrado.");
+
+      const addedMembership = await membershipsServices.memberships.add({
+        user_id: userId,
+        tier: freePlan[0].id.toString("utf-8"),
+        status: "EXPIRED"
+      });
+      if (!addedMembership) return handleErrorResponse(res, 404, "No se pudo asignar la membresía.");
+    }
+
+    const result = await usersServices.users.getById({ id: userId });
+    if (!result) return handleErrorResponse(res, 404, "No se pudo obtener el usuario luego de crear.");
+
+    res.status(201).json({
+      message: "Usuario creado exitosamente con Google.",
+      user: result
+    });
+
+  } catch (error) {
+    console.error("Error en registro con Google:", error);
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  }
+};
+
+export const loginWithGoogle: RequestHandler = async (req, res) => {
+  try {
+    const parsed = loginGoogleSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return handleErrorResponse(res, 400, parsed.error.errors[0].message);
+    }
+
+    const { idToken } = parsed.data;
+
+    const user = await usersServices.auth.loginUserWithGoogle({ idToken });
+
+    if (!user) {
+      return handleErrorResponse(res, 404, "Usuario no registrado.");
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error en login con Google:", error);
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  }
+};
+
+
 
 export const login: RequestHandler = async (req, res) => {
   try {
