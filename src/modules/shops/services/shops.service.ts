@@ -138,7 +138,6 @@ const getAll = async () => {
 
     return result.length ? result.map((res) => res.toJSON()) : null;
   } catch (error: any) {
-    console.log({ error: error });
     throw new Error(error.message);
   }
 };
@@ -230,7 +229,6 @@ const getById = async ({ id }: Pick<IShops, "id">) => {
 
     return result ? result.toJSON() : null;
   } catch (error: any) {
-    console.log({ error: error });
     throw new Error(error.message);
   }
 };

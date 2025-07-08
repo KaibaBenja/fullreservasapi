@@ -5,7 +5,7 @@ import * as membershipsServices from "../../memberships/services/";
 import * as usersServices from "../services/";
 import { sendEmail } from "../../../config/nodemailer.config";
 import { htmlResetPassword } from "../utils/emails-templates/reset-password.template";
-import { htmlPasswordChanged } from "../utils/emails-templates/password-changed.template";
+import { htmlPasswordChanged } from "../utils/emails-templates/password-changed-email.template";
 import { DateTime } from "luxon";
 
 export const register: RequestHandler = async (req, res) => {
