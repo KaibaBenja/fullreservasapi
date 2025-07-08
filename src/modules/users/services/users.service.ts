@@ -151,7 +151,6 @@ const getByEmail = async ({ email }: Pick<IUser, "email">) => {
     const result = serializeUsers(plainUsers);
     return result.length ? result : null;
   } catch (error) {
-    console.log({error: error});
     throw new Error('Error al obtener el usuario por email.');
   };
 };
