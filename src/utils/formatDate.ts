@@ -31,3 +31,7 @@ export function isWithinValidRange(dateString: string): boolean {
 
   return inputDate >= now && inputDate <= maxAllowed;
 }
+
+export function getTimeFromDatetime(datetime: string, timezone = TIMEZONE): string {
+  return DateTime.fromISO(datetime).setZone(timezone).toFormat("HH:mm");
+}

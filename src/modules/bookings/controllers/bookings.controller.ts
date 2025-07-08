@@ -11,7 +11,9 @@ import { generateBookingCode } from "../utils/generateBookingCode";
 import { getDayName } from "../utils/getDayName";
 import { mapComboToTables, TableMapCombo } from "../utils/mapComboToTables";
 import { sendEmail } from "../../../config/nodemailer.config";
-import { generateHtml } from "../utils/email.template";
+import { bookingMail } from "../utils/booking-email.template";
+import { createGoogleCalendarUrl } from "../utils/createGoogleCalendarUrl";
+import { getTimeFromDatetime } from "../../../utils/formatDate";
 
 const create = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -295,10 +297,25 @@ const create = async (req: Request, res: Response): Promise<void> => {
     if (resTables) result.bookedTables = resTables;
 
 
-    const html = generateHtml({
+    const infoBooking = {
+      name: result.booking[0].Shop.name,
       code: result.booking[0].booking_code,
       date: result.booking[0].date,
-      place: result.booking[0].Shop.name,
+      time: getTimeFromDatetime(result.booking[0].date)
+    }
+
+    const googleCalendarUrl = createGoogleCalendarUrl({
+      shopName: infoBooking.name,
+      bookingCode: infoBooking.code,
+      bookingDate: infoBooking.date,
+      bookingTime: infoBooking.time
+    })
+
+    const html = bookingMail({
+      code: infoBooking.code,
+      date: infoBooking.date,
+      place: infoBooking.name,
+      googleCalendarUrl: googleCalendarUrl
     });
 
     await sendEmail({
