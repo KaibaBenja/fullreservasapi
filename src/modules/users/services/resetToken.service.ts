@@ -21,6 +21,7 @@ const add = async ({ user_id }: Pick<IResetToken, "user_id">) => {
 
     return result ? result.toJSON() : null;
   } catch (error) {
+    console.log({error: error});
     throw new Error("Error al crear el token.");
   };
 };
