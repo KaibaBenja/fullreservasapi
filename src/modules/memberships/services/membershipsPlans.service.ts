@@ -98,9 +98,9 @@ const editById = async ({ id, tier_name, price, quantity, description }: IMember
     const updateData: any = {};
 
     if (tier_name) updateData.tier_name = tier_name;
-    if (price) updateData.status = price;
-    if (description) updateData.description = description;
+    if (price) updateData.price = price;
     if (quantity) updateData.quantity = quantity;
+    if (description) updateData.description = description;
 
     const [updatedRowsCount] = await MembershipsPlan.update(updateData, {
       where: sequelize.literal(`id = UUID_TO_BIN(${sequelize.escape(id!)})`),
