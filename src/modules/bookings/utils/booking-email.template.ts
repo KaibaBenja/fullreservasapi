@@ -8,7 +8,7 @@ interface Data {
 
 export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data): string => {
     return `
-  <!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -39,25 +39,26 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
 
                     <!-- Contenedor del icono/logo -->
                     <div style="
-                        width: 80px;
-                        height: 80px;
-                        background: rgba(255, 255, 255, 0.2);
-                        border: 3px solid rgba(255, 255, 255, 0.3);
-                        border-radius: 50%;
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                        position: relative;
-                        vertical-align: middle;
-                        backdrop-filter: blur(10px);
-                        overflow: hidden;
-                    ">
-                        <!-- Aquí va tu logo -->
-                        <img src="https://full-reservas-web.vercel.app/ico/logo_solo.png" alt="Logo" style="
-                            max-width: 40px;
-                            max-height: 40px;
-                            object-fit: contain;
+                            width: 100%;
+                            height: 100%;
+                            margin-bottom: 24px;
+                            /* background: white;
+                            border-radius: 50%; */
+                            overflow: hidden;
+                            margin: 12px auto;
+                            display: flex;
+                            items: center;
+                            justify-content: center;
+                            
+                            /* box-shadow: 0 0 10px rgba(0,0,0,0.1); */
                         ">
+                            <!-- Aquí va tu logo -->
+                            <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" alt="Full Reservas" style="
+                                width: 80%;
+                                height: 80%;
+                                object-fit: contain;
+                                display: block;
+                            ">
                     </div>
 
 
@@ -127,17 +128,6 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                         position: relative;
                         overflow: hidden;
                     ">
-                        <!-- Decorative corner -->
-                        <div style="
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 0;
-                            height: 0;
-                            border-left: 40px solid transparent;
-                            border-top: 40px solid #0284c7;
-                        "></div>
-
                         <!-- Reservation code header -->
                         <div style="margin-bottom: 20px; text-align: center;">
                             <div style="
@@ -276,6 +266,7 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                                             width: 24px;
                                             height: 24px;
                                             object-fit: contain;
+                                            margin-right: 8px;
                                             display: block;
                                         ">
                                         <span>
