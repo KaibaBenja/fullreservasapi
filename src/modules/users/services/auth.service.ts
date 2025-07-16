@@ -75,6 +75,7 @@ export const loginUser = async ({
         email,
         password,
         returnSecureToken: true,
+        auth_provider: 'local',
       }
     );
 
@@ -96,7 +97,7 @@ export const loginUser = async ({
 
     const token = await admin.auth().createCustomToken(uid);
 
-    return { user , idToken };
+    return { user , idToken, auth_provider: 'local' };
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Error al iniciar sesión"
@@ -123,7 +124,7 @@ export const loginUserWithGoogle = async ({
 
     const token = await admin.auth().createCustomToken(uid);
 
-    return { user, idToken };
+    return { user, idToken, auth_provider: 'google' };
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "Error al iniciar sesión con Google"
