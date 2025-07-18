@@ -1,26 +1,22 @@
 export function htmlPasswordChanged(mail: string, changeTime: string) {
     return `
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contraseña Actualizada</title>
 </head>
-
 <body style="
   margin: 0;
   padding: 0;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
-  min-height: 100vh;
-">
+  min-height: 100vh;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="min-height: 100vh;">
         <tr>
             <td align="center" valign="top" style="padding: 40px 20px;">
-
                 <table cellpadding="0" cellspacing="0" border="0" style="
           max-width: 600px;
           width: 100%;
@@ -36,12 +32,23 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
               text-align: center;
               position: relative;
             ">
-                            <!-- Logo en lugar de ícono -->
-                            <td align="center" style="padding: 24px 0;">
-                                <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" alt="Full Reservas" width="120" style="display: block;">
-                            </td>
-
-
+                            <!-- LOGO FIXED - Using table instead of flexbox -->
+                            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
+                                <tr>
+                                    <td align="center" style="text-align: center;">
+                                        <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" 
+                                             alt="Full Reservas" 
+                                             style="
+                                                width: 120px;
+                                                height: auto;
+                                                max-width: 120px;
+                                                display: block;
+                                                margin: 0 auto;
+                                             ">
+                                    </td>
+                                </tr>
+                            </table>
+                            
                             <h1 style="
                 color: white;
                 font-size: 32px;
@@ -49,7 +56,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                 margin: 0 0 12px 0;
                 text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
               ">Contraseña Actualizada</h1>
-
                             <p style="
                 color: rgba(255, 255, 255, 0.9);
                 font-size: 18px;
@@ -58,7 +64,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
               ">Tu cuenta está segura</p>
                         </td>
                     </tr>
-
                     <tr>
                         <td style="padding: 0 40px 40px 40px;">
                             <div style="
@@ -94,7 +99,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                   ">Tu contraseña fue actualizada correctamente</div>
                                 </div>
                             </div>
-
                             <div style="margin-bottom: 32px;">
                                 <h2 style="
                   color: #075985;
@@ -103,7 +107,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                   margin: 0 0 20px 0;
                   text-align: center;
                 ">Detalles de la Cuenta</h2>
-
                                 <table cellpadding="0" cellspacing="0" border="0" width="100%"
                                     style="margin-bottom: 12px;">
                                     <tr>
@@ -148,7 +151,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                                         </td>
                                     </tr>
                                 </table>
-
                                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                                     <tr>
                                         <td style="
@@ -193,7 +195,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                                     </tr>
                                 </table>
                             </div>
-
                             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
                                 <tr>
                                     <td align="center">
@@ -222,7 +223,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                                     </td>
                                 </tr>
                             </table>
-
                             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
                                 <tr>
                                     <td style="
@@ -256,7 +256,6 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                                                         Si no realizaste este cambio, tu cuenta podría estar
                                                         comprometida. Actuá inmediatamente para proteger tu información.
                                                     </p>
-
                                                     <table cellpadding="0" cellspacing="0" border="0">
                                                         <tr>
                                                             <td style="
@@ -287,10 +286,8 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                                     </td>
                                 </tr>
                             </table>
-
                         </td>
                     </tr>
-
                     <tr>
                         <td style="
               background: #f8fafc;
@@ -313,13 +310,11 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
               ">Para soporte: soporte@fullreservas.com.ar</p>
                         </td>
                     </tr>
-
                 </table>
             </td>
         </tr>
     </table>
 </body>
-
 </html>
-  `;
+  `
 }

@@ -1,30 +1,22 @@
-export const htmlResetPassword = (
-  url: string,
-  userEmail: string,
-  expirationTime = "15 minutos"
-) => {
+export const htmlResetPassword = (url: string, userEmail: string, expirationTime = "15 minutos") => {
   return `
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recuperación de Contraseña</title>
 </head>
-
 <body style="
   margin: 0;
   padding: 0;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.6;
-  min-height: 100vh;
-">
+  min-height: 100vh;">
   <table cellpadding="0" cellspacing="0" border="0" width="100%" style="min-height: 100vh;">
     <tr>
       <td align="center" valign="top" style="padding: 40px 20px;">
-
         <table cellpadding="0" cellspacing="0" border="0" style="
           max-width: 600px;
           width: 100%;
@@ -33,7 +25,6 @@ export const htmlResetPassword = (
           box-shadow: 0 20px 40px rgba(3, 105, 161, 0.1);
           overflow: hidden;
         ">
-
           <tr>
             <td style="
               background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
@@ -41,12 +32,23 @@ export const htmlResetPassword = (
               text-align: center;
               position: relative;
             ">
-              <!-- Logo en lugar de ícono -->
-             <td align="center" style="padding: 24px 0;">
-                                <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" alt="Full Reservas" width="120" style="display: block;">
-                            </td>
-
-
+              <!-- LOGO FIXED - Using table instead of flexbox -->
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
+                <tr>
+                  <td align="center" style="text-align: center;">
+                    <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" 
+                         alt="Full Reservas" 
+                         style="
+                            width: 120px;
+                            height: auto;
+                            max-width: 120px;
+                            display: block;
+                            margin: 0 auto;
+                         ">
+                  </td>
+                </tr>
+              </table>
+              
               <h1 style="
                 color: white;
                 font-size: 32px;
@@ -54,7 +56,6 @@ export const htmlResetPassword = (
                 margin: 0 0 12px 0;
                 text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
               ">Recuperación de Contraseña</h1>
-
               <p style="
                 color: rgba(255, 255, 255, 0.9);
                 font-size: 18px;
@@ -63,10 +64,8 @@ export const htmlResetPassword = (
               ">Restablece tu acceso de forma segura</p>
             </td>
           </tr>
-
           <tr>
             <td style="padding: 0 40px 40px 40px;">
-
               <div style="
                 background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
                 border: 2px solid #0369a1;
@@ -93,7 +92,6 @@ export const htmlResetPassword = (
                     letter-spacing: 1px;
                     margin: 0 0 12px 0;
                   "><span style="margin-right: 8px;">📧</span>Solicitud Recibida</p>
-
                   <div style="
                     font-size: 18px;
                     font-weight: 600;
@@ -101,7 +99,6 @@ export const htmlResetPassword = (
                     margin: 0;
                   ">Hemos recibido tu solicitud de restablecimiento</div>
                 </div>
-
                 <p style="
                   color: #0369a1;
                   font-size: 14px;
@@ -109,7 +106,6 @@ export const htmlResetPassword = (
                   font-weight: 500;
                 ">Para la cuenta: <strong>${userEmail}</strong></p>
               </div>
-
               <div style="margin-bottom: 32px;">
                 <h2 style="
                   color: #075985;
@@ -118,7 +114,6 @@ export const htmlResetPassword = (
                   margin: 0 0 20px 0;
                   text-align: center;
                 ">¿Cómo continuar?</h2>
-
                 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 16px;">
                   <tr>
                     <td style="
@@ -161,7 +156,6 @@ export const htmlResetPassword = (
                     </td>
                   </tr>
                 </table>
-
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
                     <td style="
@@ -205,7 +199,6 @@ export const htmlResetPassword = (
                     </td>
                   </tr>
                 </table>
-
                 <!-- Security notice -->
                   <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px; margin-top: 20px">
                     <tr>
@@ -246,7 +239,6 @@ export const htmlResetPassword = (
                     </tr>
                   </table>
               </div>
-
               <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
                 <tr>
                   <td align="center">
@@ -266,7 +258,6 @@ export const htmlResetPassword = (
                   </td>
                 </tr>
               </table>
-
               <div style="
                 background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
                 border: 1px solid #e2e8f0;
@@ -299,10 +290,8 @@ export const htmlResetPassword = (
                   ${url}
                 </div>
               </div>
-
             </td>
           </tr>
-
           <tr>
             <td style="
               background: #f8fafc;
@@ -323,14 +312,11 @@ export const htmlResetPassword = (
               ">Para soporte: soporte@fullreservas.com.ar</p>
             </td>
           </tr>
-
         </table>
-
       </td>
     </tr>
   </table>
 </body>
-
 </html>
-  `;
-};
+  `
+}
