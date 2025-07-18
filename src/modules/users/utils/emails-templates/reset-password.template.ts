@@ -33,21 +33,21 @@ export const htmlResetPassword = (url: string, userEmail: string, expirationTime
               position: relative;
             ">
               <!-- LOGO FIXED - Using table instead of flexbox -->
-                            <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
-                                <tr>
-                                    <td align="center" style="text-align: center;">
-                                        <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" 
-                                             alt="Full Reservas" 
-                                             style="
-                                                width: 120px;
-                                                height: auto;
-                                                max-width: 120px;
-                                                display: block;
-                                                margin: 0 auto;
-                                             ">
-                                    </td>
-                                </tr>
-                            </table>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
+                <tr>
+                  <td align="center" style="text-align: center;">
+                    <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" 
+                         alt="Full Reservas" 
+                         style="
+                            width: 120px;
+                            height: auto;
+                            max-width: 120px;
+                            display: block;
+                            margin: 0 auto;
+                         ">
+                  </td>
+                </tr>
+              </table>
               
               <h1 style="
                 color: white;
