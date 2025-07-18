@@ -38,28 +38,16 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                 ">
 
                     <!-- Contenedor del icono/logo -->
-                    <div style="
-                            width: 100%;
-                            height: 100%;
-                            margin-bottom: 24px;
-                            /* background: white;
-                            border-radius: 50%; */
-                            overflow: hidden;
-                            margin: 12px auto;
-                            display: flex;
-                            items: center;
-                            justify-content: center;
-                            
-                            /* box-shadow: 0 0 10px rgba(0,0,0,0.1); */
-                        ">
-                            <!-- Aquí va tu logo -->
-                            <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" alt="Full Reservas" style="
-                                width: 80%;
-                                height: 80%;
-                                object-fit: contain;
-                                display: block;
-                            ">
-                    </div>
+                    <tr>
+                        <td align="center" style="padding: 20px 0;">
+                            <img
+                            src="https://full-reservas-web.vercel.app/ico/logo_blanco.png"
+                            alt="Full Reservas"
+                            width="120"
+                            style="display: block;">
+                        </td>
+                    </tr>
+
 
 
                     <h1 style="
