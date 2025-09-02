@@ -8,22 +8,19 @@ interface Data {
 
 export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data): string => {
     return `
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reserva Confirmada</title>
 </head>
-
 <body style="
   margin: 0;
   padding: 20px;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  min-height: 100vh;
-">
+  min-height: 100vh;">
     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto;">
         <tr>
             <td>
@@ -36,31 +33,24 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                     position: relative;
                     overflow: hidden;
                 ">
-
-                    <!-- Contenedor del icono/logo -->
-                    <div style="
-                        width: 80px;
-                        height: 80px;
-                        background: rgba(255, 255, 255, 0.2);
-                        border: 3px solid rgba(255, 255, 255, 0.3);
-                        border-radius: 50%;
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                        position: relative;
-                        vertical-align: middle;
-                        backdrop-filter: blur(10px);
-                        overflow: hidden;
-                    ">
-                        <!-- Aquí va tu logo -->
-                        <img src="https://full-reservas-web.vercel.app/ico/logo_solo.png" alt="Logo" style="
-                            max-width: 40px;
-                            max-height: 40px;
-                            object-fit: contain;
-                        ">
-                    </div>
-
-
+                    <!-- Logo container - FIXED FOR EMAIL CLIENTS -->
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
+                        <tr>
+                            <td align="center" style="text-align: center;">
+                                <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" 
+                                     alt="Full Reservas" 
+                                     style="
+                                        width: 120px;
+                                        height: auto;
+                                        max-width: 120px;
+                                        display: block;
+                                        margin: 0 auto;
+                                        text-align: center;
+                                     ">
+                            </td>
+                        </tr>
+                    </table>
+                    
                     <h1 style="
                         font-size: 32px;
                         font-weight: 800;
@@ -72,7 +62,7 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                         z-index: 1;
                     ">¡Reserva Confirmada!</h1>
                 </div>
-
+                
                 <!-- Main content -->
                 <div style="
                     background: white;
@@ -87,36 +77,42 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                         margin: 0 0 12px 0;
                         line-height: 1.6;
                         text-align: center;
-                    ">Tu reserva en <strong style="color: #0369a1;">${place}</strong> ha sido confirmada
-                        exitosamente.</p>
-
+                    ">Tu reserva en <strong style="color: #0369a1;">${place}</strong> ha sido confirmada exitosamente.</p>
+                    
                     <!-- Date and time -->
                     <div style="text-align: center; margin-bottom: 20px;">
                         <div style="
-                            display: inline-flex;
-                            align-items: center;
+                            display: inline-block;
                             background: white;
                             padding: 12px 20px;
                             border-radius: 25px;
                             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                             border: 1px solid #e2e8f0;
                         ">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" style="margin-right: 10px;">
-                                <path d="M8 2v4"></path>
-                                <path d="M16 2v4"></path>
-                                <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                                <path d="M3 10h18"></path>
-                            </svg>
-                            <span style="
-                                color: #0284c7;
-                                font-weight: 700;
-                                font-size: 16px;
-                            ">${date}${hour ? ` - ${hour}` : ""}</span>
+                            <table cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="vertical-align: middle;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                            fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round"
+                                            strokeLinejoin="round" style="margin-right: 10px; vertical-align: middle;">
+                                            <path d="M8 2v4"></path>
+                                            <path d="M16 2v4"></path>
+                                            <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+                                            <path d="M3 10h18"></path>
+                                        </svg>
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <span style="
+                                            color: #0284c7;
+                                            font-weight: 700;
+                                            font-size: 16px;
+                                        ">${date}${hour ? ` - ${hour}` : ""}</span>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
-
+                    
                     <!-- Reservation details card -->
                     <div style="
                         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
@@ -127,45 +123,39 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                         position: relative;
                         overflow: hidden;
                     ">
-                        <!-- Decorative corner -->
-                        <div style="
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 0;
-                            height: 0;
-                            border-left: 40px solid transparent;
-                            border-top: 40px solid #0284c7;
-                        "></div>
-
                         <!-- Reservation code header -->
                         <div style="margin-bottom: 20px; text-align: center;">
                             <div style="
-                                display: inline-flex;
-                                align-items: center;
+                                display: inline-block;
                                 background: rgba(2, 132, 199, 0.1);
                                 padding: 8px 16px;
                                 border-radius: 20px;
                                 border: 1px solid rgba(2, 132, 199, 0.2);
                             ">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                    fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" style="margin-right: 8px;">
-                                    <path
-                                        d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z">
-                                    </path>
-                                    <path d="M13 5v2"></path>
-                                    <path d="M13 17v2"></path>
-                                    <path d="M13 11v2"></path>
-                                </svg>
-                                <span style="
-                                    font-weight: 600;
-                                    color: #0284c7;
-                                    font-size: 16px;
-                                ">Código de Reserva</span>
+                                <table cellpadding="0" cellspacing="0" border="0">
+                                    <tr>
+                                        <td style="vertical-align: middle;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                                fill="none" stroke="#0284c7" strokeWidth="2" strokeLinecap="round"
+                                                strokeLinejoin="round" style="margin-right: 8px; vertical-align: middle;">
+                                                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+                                                <path d="M13 5v2"></path>
+                                                <path d="M13 17v2"></path>
+                                                <path d="M13 11v2"></path>
+                                            </svg>
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            <span style="
+                                                font-weight: 600;
+                                                color: #0284c7;
+                                                font-size: 16px;
+                                            ">Código de Reserva</span>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
-
+                        
                         <!-- Reservation code -->
                         <div style="
                             background: white;
@@ -185,7 +175,6 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                                 text-shadow: 0 2px 4px rgba(2, 132, 199, 0.1);
                             ">${code}</div>
                         </div>
-
                         <p style="
                             font-size: 14px;
                             color: #64748b;
@@ -195,7 +184,7 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                             Copia este código manualmente para presentarlo en el comercio.
                         </p>
                     </div>
-
+                    
                     <!-- Instructions -->
                     <div style="
                         background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -205,21 +194,18 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                         border-left: 4px solid #0284c7;
                         position: relative;
                     ">
-
                         <p style="
                             font-weight: 600;
                             margin: 0 0 12px 0;
                             color: #334155;
                             font-size: 16px;
                             line-height: 1.5;
-                        ">📍 Preséntate al comercio a la hour de tu reserva y muestra este código.</p>
-
+                        ">📍 Preséntate al comercio a la hora de tu reserva y muestra este código.</p>
                         <p style="
                             font-size: 14px;
                             color: #64748b;
                             margin: 0;
                             line-height: 1.6;
-                            gap: 1rem;
                             text-align: start;
                         ">
                             💡 Puedes consultar tu código de reserva en cualquier momento en la web:
@@ -228,7 +214,7 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                             <strong>Mi Perfil > Mis Reservas</strong>
                         </p>
                     </div>
-
+                    
                     <!-- CTA Button -->
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
                         <tr>
@@ -253,40 +239,47 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                             </td>
                         </tr>
                     </table>
-
-                    <!-- Botón Agregar a Google Calendar -->
+                    
+                    <!-- Google Calendar Button - FIXED -->
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
                         <tr>
                             <td align="center">
-                                <a href="${googleCalendarUrl}"
-                                    style="
-                                        display: inline-block;
-                                        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-                                        min-width: 200px;
-                                        color: white;
-                                        text-decoration: none;
-                                        padding: 14px 28px;
-                                        border-radius: 12px;
-                                        font-weight: 600;
-                                        font-size: 16px;
-                                        box-shadow: 0 8px 20px rgba(39, 151, 202, 0.3);
-                                    ">
-                                    <div style="display: flex; gap: 1rem;">
-                                        <img src="https://full-reservas-web.vercel.app/img/Google.png" alt="Full Reservas" style="
-                                            width: 24px;
-                                            height: 24px;
-                                            object-fit: contain;
-                                            display: block;
-                                        ">
-                                        <span>
-                                            Agregar en el Calendar
-                                        </span>
-                                    </div>
+                                <a href="${googleCalendarUrl}" style="
+                                    display: inline-block;
+                                    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+                                    min-width: 200px;
+                                    color: white;
+                                    text-decoration: none;
+                                    padding: 14px 28px;
+                                    border-radius: 12px;
+                                    font-weight: 600;
+                                    font-size: 16px;
+                                    box-shadow: 0 8px 20px rgba(39, 151, 202, 0.3);
+                                    text-align: center;
+                                ">
+                                    <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
+                                        <tr>
+                                            <td style="vertical-align: middle;">
+                                                <img src="https://full-reservas-web.vercel.app/img/Google.png" 
+                                                     alt="Google Calendar" 
+                                                     style="
+                                                        width: 24px;
+                                                        height: 24px;
+                                                        margin-right: 8px;
+                                                        vertical-align: middle;
+                                                        display: inline-block;
+                                                     ">
+                                            </td>
+                                            <td style="vertical-align: middle;">
+                                                <span style="vertical-align: middle;">Agregar en el Calendar</span>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </a>
                             </td>
                         </tr>
                     </table>
-
+                    
                     <!-- Footer -->
                     <div style="
                         margin-top: 40px;
@@ -316,7 +309,6 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
         </tr>
     </table>
 </body>
-
 </html>
-  `;
-};
+  `
+}
