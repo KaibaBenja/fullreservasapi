@@ -101,3 +101,7 @@ export const userEmailSchema = userSchema.pick({
 export const userPasswordSchema = userSchema.pick({
   password: true
 })
+
+export const deleteSchema = editUserSchema.pick({
+  current_password: true
+})

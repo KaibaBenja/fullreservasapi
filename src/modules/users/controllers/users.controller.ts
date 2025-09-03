@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { handleErrorResponse } from "../../../utils/handleErrorResponse";
 import { validateUUID } from "../../../utils/uuidValidator";
-import * as usersServices from "../services";
-import * as shopsServices from "../../shops/services";
 import * as membershipsServices from "../../memberships/services";
+import * as shopsServices from "../../shops/services";
+import * as usersServices from "../services";
 
 
 const getAll = async (req: Request, res: Response): Promise<void> => {
@@ -141,6 +141,30 @@ const deleteById = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+const selfDelete = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { current_password } = req.body;
 
-export default { getAll, getById, editById, deleteById };
+    if (!validateUUID(id, res)) return;
+
+    const user = await usersServices.users.getById({ id });
+    if (!user) return handleErrorResponse(res, 404, `El usuario con el id: ${id} no existe.`);
+
+    if (!(await usersServices.users.verifyPassword({ id }, current_password))) {
+          return handleErrorResponse(res, 401, "La contraseña actual es incorrecta.");
+        }
+
+    if (!(await usersServices.users.deleteById({ id }))) {
+      return handleErrorResponse(res, 500, `Error al eliminar el usuario.`);
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    handleErrorResponse(res, 500, "Error interno del servidor.");
+  }
+};
+
+
+export default { getAll, getById, editById, deleteById, selfDelete };
 
