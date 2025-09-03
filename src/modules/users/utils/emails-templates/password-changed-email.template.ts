@@ -36,7 +36,7 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                             <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
                                 <tr>
                                     <td align="center" style="text-align: center;">
-                                        <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" 
+                                        <img src="https://fullreservas.com/ico/logo_blanco.png" 
                                              alt="Full Reservas" 
                                              style="
                                                 width: 120px;
@@ -205,7 +205,7 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                           border-radius: 12px;
                           box-shadow: 0 8px 20px rgba(3, 105, 161, 0.3);
                         ">
-                                                    <a href="https://full-reservas-web.vercel.app/perfil?section_active=perfil"
+                                                    <a href="https://fullreservas.com/perfil?section_active=perfil"
                                                         style="
                             display: inline-block;
                             color: white;
@@ -263,7 +263,7 @@ export function htmlPasswordChanged(mail: string, changeTime: string) {
                                 border-radius: 8px;
                                 box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
                               ">
-                                                                <a href="https://full-reservas-web.vercel.app/auth/forgot-password"
+                                                                <a href="https://fullreservas.com/auth/forgot-password"
                                                                     style="
                                   display: inline-block;
                                   color: white;

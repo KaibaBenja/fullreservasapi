@@ -1,7 +1,7 @@
 import express from "express";
-import { validateSchemaPartial } from "../../../middlewares/validateSchema";
+import { validateSchema, validateSchemaPartial } from "../../../middlewares/validateSchema";
 import usersController from "../controllers/users.controller";
-import { editUserSchema } from "../schemas/users.schema";
+import { deleteSchema, editUserSchema } from "../schemas/users.schema";
 
 export const userRoutes = express.Router();
 /**
@@ -197,3 +197,43 @@ userRoutes.patch("/:id", validateSchemaPartial(editUserSchema), usersController.
  *              description: Error interno del servidor.
  */
 userRoutes.delete("/:id", usersController.deleteById);
+/**
+ * @swagger
+ * /api/users/details/self-delete/{id}:
+ *  delete:
+ *      summary: Elimina el usuario autenticado
+ *      tags: [User]
+ *      parameters:
+ *        - in: path
+ *          name: id
+ *          schema:
+ *              type: string
+ *              format: uuid
+ *          required: true
+ *          description: El id del usuario
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      properties:
+ *                          password:
+ *                              type: string
+ *                              example: JohnDoe123$
+ *      responses:
+ *          200:
+ *              description: El usuario fue eliminada con éxito.
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          properties:
+ *                              success:
+ *                                  type: boolean
+ *                                  example: true
+ *          404:
+ *              description: Error al eliminar. El usuario con el ID no existe.
+ *          500:
+ *              description: Error interno del servidor.
+ */
+userRoutes.delete("/self-delete/:id", validateSchema(deleteSchema), usersController.selfDelete);
