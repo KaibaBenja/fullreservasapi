@@ -35,6 +35,9 @@ importers:
       '@types/uuid':
         specifier: ^10.0.0
         version: 10.0.0
+      '@vercel/node':
+        specifier: ^5.1.14
+        version: 5.1.14
       axios:
         specifier: ^1.8.4
         version: 1.8.4
@@ -102,9 +105,6 @@ importers:
       '@types/swagger-ui-express':
         specifier: ^4.1.8
         version: 4.1.8
-      '@vercel/node':
-        specifier: ^5.1.14
-        version: 5.1.14
       nodemon:
         specifier: ^3.1.9
         version: 3.1.9

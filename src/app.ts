@@ -4,7 +4,6 @@ import logger from "morgan";
 import path from "path";
 import swaggerUI from "swagger-ui-express";
 import { optionCors } from "./config/cors.config";
-import { HOST, PORT } from "./config/dotenv.config";
 import { sequelize } from "./config/sequelize/sequalize.config";
 import { initAssociations } from "./config/sequelize/initAssociations";
 import { mainRoutes } from "./routes/main.routes";
@@ -22,23 +21,17 @@ app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpecs, swaggerUiOpt
 initAssociations();
 
 sequelize.authenticate()
-  .then(() => {
-    console.log('Conexión a la base de datos exitosa');
-  })
-  .catch((error) => {
-    console.error('No se pudo conectar a la base de datos:', error);
-  });
+  .then(() => console.log('Conexión a la base de datos exitosa'))
+  .catch((error) => console.error('No se pudo conectar a la base de datos:', error));
 
 app.use("/api", mainRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Servidor funcionando correctamente')
-})
+  res.send('Servidor funcionando correctamente');
+});
 
 app.use((req, res) => {
-  res.status(404).send('Ruta no encontrada :/')
-})
-
-app.listen(PORT, HOST, () => {
-  console.log(`Server is running on http://${HOST}:${PORT}`);
+  res.status(404).send('Ruta no encontrada :/');
 });
+
+export default app; 
