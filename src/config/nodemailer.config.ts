@@ -10,14 +10,13 @@ interface sendEmailData {
 }
 
 const transporter = createTransport({
-  host: emailService.transporter.host,
-  port: emailService.transporter.port,
+  host: "smtp.envialosimple.email",
+  port: 587,
   secure: false,
   auth: {
-    user: emailService.transporter.auth.user,
-    pass: emailService.transporter.auth.pass
+    user: "BTc6Jm827vsHKZds72c6c54b@fullreservas.com",
+    pass: "RFSEZRUHfmK4Jw4W2QBzM3nTXgTKxcNW"
   },
-  
 });
 
 transporter.verify((error, success) => {
@@ -31,7 +30,7 @@ transporter.verify((error, success) => {
 export async function sendEmail(data: sendEmailData) {
   const { name, context, to, subject, htmlContent } = data;
   const mailOptions = {
-    from: `${name} <${context}@${emailService.options.from}>`,
+    from: `${name} <${context}@fullreservas.com>`,
     to,
     subject,
     html: htmlContent,
