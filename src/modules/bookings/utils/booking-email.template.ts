@@ -37,7 +37,7 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 24px;">
                         <tr>
                             <td align="center" style="text-align: center;">
-                                <img src="https://full-reservas-web.vercel.app/ico/logo_blanco.png" 
+                                <img src="https://fullreservas.com/ico/logo_blanco.png" 
                                      alt="Full Reservas" 
                                      style="
                                         width: 120px;
@@ -260,7 +260,7 @@ export const bookingMail = ({ code, date, place, googleCalendarUrl, hour }: Data
                                     <table cellpadding="0" cellspacing="0" border="0" style="margin: 0 auto;">
                                         <tr>
                                             <td style="vertical-align: middle;">
-                                                <img src="https://full-reservas-web.vercel.app/img/Google.png" 
+                                                <img src="https://fullreservas.com/img/Google.png" 
                                                      alt="Google Calendar" 
                                                      style="
                                                         width: 24px;

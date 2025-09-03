@@ -217,7 +217,7 @@ export const requestPasswordReset = async (req: Request, res: Response): Promise
     const result = await usersServices.resetToken.add({ user_id });
     if (!result) return handleErrorResponse(res, 409, "Error al crear el token.");
 
-    const url = `https://full-reservas-web.vercel.app/auth/reset-password?token=${result.token}`;
+    const url = `https://fullreservas.com/auth/reset-password?token=${result.token}`;
     const html = htmlResetPassword(url, user_mail);
 
     await sendEmail({

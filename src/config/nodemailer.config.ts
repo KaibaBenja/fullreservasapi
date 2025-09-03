@@ -12,11 +12,20 @@ interface sendEmailData {
 const transporter = createTransport({
   host: emailService.transporter.host,
   port: emailService.transporter.port,
+  secure: false,
   auth: {
     user: emailService.transporter.auth.user,
     pass: emailService.transporter.auth.pass
   },
-  secure: false,
+  
+});
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('Error de conexión SMTP:', error);
+  } else {
+    console.log('Conexión SMTP OK — servidor listo:', success);
+  }
 });
 
 export async function sendEmail(data: sendEmailData) {
